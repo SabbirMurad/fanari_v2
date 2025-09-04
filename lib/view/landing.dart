@@ -24,7 +24,11 @@ class _LandingScreenState extends State<LandingScreen> {
         child: Column(
           children: [
             SizedBox(height: 240.h),
-            Svg.asset('assets/icons/logo.svg', width: 80.w),
+            Svg.asset(
+              'assets/icons/logo.svg',
+              width: 80.w,
+              color: AppColors.primary,
+            ),
             SizedBox(height: 36.h),
             Text(
               'Welcome to Fanari',

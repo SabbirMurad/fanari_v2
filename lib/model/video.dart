@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/credential.dart';
 
-class PostVideoModel {
+class VideoModel {
   final String uuid;
   final String videoUrl;
   final String thumbnailUrl;
@@ -11,7 +11,7 @@ class PostVideoModel {
   final double height;
   final ImageProvider thumbnailImageProvider;
 
-  const PostVideoModel({
+  const VideoModel({
     required this.uuid,
     required this.videoUrl,
     required this.thumbnailUrl,
@@ -21,11 +21,12 @@ class PostVideoModel {
     required this.thumbnailImageProvider,
   });
 
-  factory PostVideoModel.fromJson(json) {
+  factory VideoModel.fromJson(json) {
     final String videoId = json['uuid'];
-    final thumbnailUrl = '${AppCredentials.domain}/image/$videoId';
+    final thumbnailUrl =
+        '${AppCredentials.domain}/upload/image/$videoId';
 
-    return PostVideoModel(
+    return VideoModel(
       uuid: videoId,
       videoUrl: '${AppCredentials.domain}/upload/video/$videoId/index.m3u8',
       thumbnailUrl: thumbnailUrl,

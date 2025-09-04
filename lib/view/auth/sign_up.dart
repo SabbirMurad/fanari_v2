@@ -443,8 +443,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             PrimaryButton(
               loading: _loading,
               text: 'Next',
-              onTap: () {
-              },
+              onTap: () {},
               width: 130.w,
             ),
           ],
@@ -468,8 +467,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         width: double.infinity,
         height: double.infinity,
         color: AppColors.surface,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -477,7 +476,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Svg.asset('assets/icons/logo.svg', width: 28.w),
+                  Svg.asset(
+                    'assets/icons/logo.svg',
+                    width: 28.w,
+                    color: AppColors.primary,
+                  ),
                   SizedBox(width: 12.h),
                   Text(
                     'Fanari',

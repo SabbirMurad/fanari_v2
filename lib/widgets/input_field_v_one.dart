@@ -96,9 +96,7 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
               },
               icon: Icon(
                 _obscureText ? Icons.remove_red_eye : Icons.visibility_off,
-                color: Theme.of(
-                  context,
-                ).colorScheme.tertiary.withValues(alpha: .8),
+                color: AppColors.text,
               ),
             ),
           ),

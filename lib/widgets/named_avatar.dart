@@ -1,21 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:flutter/material.dart';
 
 class NamedAvatar extends StatefulWidget {
-  final bool skeletonizer;
+  final bool loading;
   final String? imageUrl;
   final String name;
-  final double width;
+  final double size;
   final void Function()? onTap;
   final bool border;
   final Color? backgroundColor;
 
   const NamedAvatar({
     super.key,
-    required this.skeletonizer,
-    required this.imageUrl,
+    required this.loading,
+    this.imageUrl,
     required this.name,
-    required this.width,
+    required this.size,
     this.backgroundColor,
     this.onTap,
     this.border = false,
@@ -30,55 +32,50 @@ class _NamedAvatarState extends State<NamedAvatar> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: Container(
-        width: widget.width,
-        height: widget.width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(
-            widget.width / 2,
-          ),
-          color: widget.backgroundColor ??
-              Theme.of(context).colorScheme.primaryContainer,
-          border: widget.border
-              ? Border.all(
-                  color: Theme.of(context).colorScheme.tertiary,
-                  width: 1,
-                )
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            widget.width / 2,
-          ),
-          child: widget.imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: widget.imageUrl!,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) {
-                    return Container(
-                      color: Theme.of(context).colorScheme.secondary,
-                      width: widget.width,
-                      height: widget.width,
-                    );
-                  },
-                  errorWidget: (context, url, error) => Icon(
-                    Icons.broken_image_rounded,
-                    color: Colors.white,
-                    size: widget.width * 0.40,
-                  ),
-                )
-              : Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(widget.size / 2),
+        child: widget.loading
+            ? ColorFadeBox(
+                width: widget.size,
+                height: widget.size,
+                borderRadius: BorderRadius.circular(widget.size / 2),
+              )
+            : widget.imageUrl != null
+            ? CachedNetworkImage(
+                imageUrl: widget.imageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) {
+                  return ColorFadeBox(
+                    width: widget.size,
+                    height: widget.size,
+                    borderRadius: BorderRadius.circular(widget.size / 2),
+                  );
+                },
+                errorWidget: (context, url, error) => Icon(
+                  Icons.broken_image_rounded,
+                  color: Colors.white,
+                  size: widget.size * 0.40,
+                ),
+              )
+            : Container(
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  color: AppColors.containerBg,
+                  borderRadius: BorderRadius.circular(widget.size / 2),
+                ),
+                child: Center(
                   child: Text(
                     widget.name[0].toUpperCase(),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.tertiary,
                       fontWeight: FontWeight.w500,
-                      fontSize: widget.width * 0.48,
+                      fontSize: widget.size * 0.48,
                     ),
                   ),
                 ),
-        ),
+              ),
       ),
     );
   }
