@@ -69,7 +69,7 @@ class _NamedAvatarState extends State<NamedAvatar> {
                   child: Text(
                     widget.name[0].toUpperCase(),
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppColors.text,
                       fontWeight: FontWeight.w500,
                       fontSize: widget.size * 0.48,
                     ),

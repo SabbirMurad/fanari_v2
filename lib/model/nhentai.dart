@@ -6,6 +6,8 @@ class NhentaiBookModel {
   final int num_pages;
   final List<NhentaiBookTagModel> tags;
 
+  static final String base_url = 'https://i.nhentai.net';
+
   const NhentaiBookModel({
     required this.id,
     required this.media_id,
@@ -30,27 +32,22 @@ class NhentaiBookModel {
     );
   }
 
-  String? getPage({
-    required int index,
-    String baseURL = 'https://i.nhentai.net',
-  }) {
+  String? getPage({required int index, String? baseURL}) {
     if (index >= this.images.pages.length) return null;
     final page = this.images.pages[index];
-    return '${baseURL}/galleries/${this.media_id}/${index + 1}.${page.type}';
+    return '${baseURL ?? NhentaiBookModel.base_url}/galleries/${this.media_id}/${index + 1}.${page.type}';
   }
 
-  List<String> getAllPages({String baseURL = 'https://i.nhentai.net'}) {
+  List<String> getAllPages({String? baseURL}) {
     List<String> pages = [];
     this.images.pages.asMap().forEach((index, page) {
-      String url = baseURL;
+      String url = baseURL ?? NhentaiBookModel.base_url;
 
       if (page.type == 'webp') {
         url = 'https://i1.nhentai.net';
       }
 
-      pages.add(
-        '${url}/galleries/${this.media_id}/${index + 1}.${page.type}',
-      );
+      pages.add('${url}/galleries/${this.media_id}/${index + 1}.${page.type}');
     });
 
     return pages;
@@ -136,7 +133,7 @@ class NhentaiBookImageModel {
     "j": 'jpg',
     "p": 'png',
     "g": 'gif',
-    "w": 'webp'
+    "w": 'webp',
   };
 
   static List<NhentaiBookImageModel> fromJsonList(json) {

@@ -1,5 +1,6 @@
 import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
+import 'package:fanari_v2/view/home_navigator.dart';
 import 'package:fanari_v2/view/landing.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,8 @@ class AppRoutes {
   static final String sign_up = '/sign-up';
   static final String sign_in = '/sign-in';
 
+  static final String feed = '/feed';
+
   static void push(String route) => allRoutes.push(route);
   static void go(String route) => allRoutes.go(route);
 
@@ -31,12 +34,13 @@ class AppRoutes {
         path: landing,
         builder: (context, state) {
           return const LandingScreen();
+          // return const HomeNavigator(selectedPage: 0);
         },
       ),
       GoRoute(
         path: sign_up,
         redirect: (context, state) async {
-          return await isSingedIn() ? '/home/feed' : null;
+          return await isSingedIn() ? feed : null;
         },
         builder: (context, state) {
           return const SignUpScreen();
@@ -45,10 +49,19 @@ class AppRoutes {
       GoRoute(
         path: sign_in,
         redirect: (context, state) async {
-          return await isSingedIn() ? '/home/feed' : null;
+          return await isSingedIn() ? feed : null;
         },
         builder: (context, state) {
           return const SignInScreen();
+        },
+      ),
+      GoRoute(
+        path: feed,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          return const HomeNavigator(selectedPage: 0);
         },
       ),
       // GoRoute(

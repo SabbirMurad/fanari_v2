@@ -87,7 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
           PrimaryButton(
             loading: _loading,
             text: 'Confirm',
-            onTap: () {},
+            onTap: () => AppRoutes.push(AppRoutes.feed),
             width: 130.w,
           ),
         ],
