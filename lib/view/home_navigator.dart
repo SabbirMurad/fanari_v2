@@ -28,39 +28,37 @@ class _HomeNavigatorState extends State<HomeNavigator> {
         width: double.infinity,
         height: double.infinity,
         color: AppColors.surface,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                child: PageView(
-                  controller: _pageController,
-                  pageSnapping: true,
-                  onPageChanged: (value) async {
-                    setState(() {
-                      _selectedTab = value;
-                    });
-                  },
-                  children: _pages,
-                ),
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: PageView(
+                controller: _pageController,
+                pageSnapping: true,
+                onPageChanged: (value) async {
+                  setState(() {
+                    _selectedTab = value;
+                  });
+                },
+                children: _pages,
               ),
             ),
-            // CustomBottomNavigator(
-            //   selectedNavIndex: _selectedTab,
-            //   onNavChange: (index) async {
-            //     _pageController.animateToPage(
-            //       index,
-            //       duration: Duration(milliseconds: 372),
-            //       curve: Curves.easeInOut,
-            //     );
+            CustomBottomNavigator(
+              selectedNavIndex: _selectedTab,
+              onNavChange: (index) async {
+                _pageController.animateToPage(
+                  index,
+                  duration: Duration(milliseconds: 372),
+                  curve: Curves.easeInOut,
+                );
 
-            //     setState(() {
-            //       _selectedTab = index;
-            //     });
-            //   },
-            // ),
+                setState(() {
+                  _selectedTab = index;
+                });
+              },
+            ),
           ],
         ),
       ),

@@ -124,6 +124,7 @@ flutter:
   assets: 
     - assets/audios/
     - assets/icons/
+    - assets/icons/bottom_nav/
     - assets/images/
     - assets/images/temp/
 

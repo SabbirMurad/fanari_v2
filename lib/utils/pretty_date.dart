@@ -27,7 +27,7 @@ String prettyDate(int timestamp) {
     hour = 12;
   }
 
-  return '${hour < 10 ? '0${hour}' : hour} : ${date.minute < 10 ? '0${date.minute}' : date.minute} ${date.hour < 12 ? 'AM' : 'PM'}, ${date.day} ${months[date.month - 1]} ${date.year - 2000}';
+  return '${date.day} ${months[date.month - 1]} ${date.year - 2000}, ${hour < 10 ? '0${hour}' : hour} : ${date.minute < 10 ? '0${date.minute}' : date.minute} ${date.hour < 12 ? 'AM' : 'PM'}';
 }
 
 String timeAgo(DateTime timestamp, {bool showMinuteAndHour = false}) {

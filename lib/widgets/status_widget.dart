@@ -3,6 +3,7 @@ import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StatusWidget extends StatefulWidget {
@@ -44,7 +45,7 @@ class _StatusWidgetState extends State<StatusWidget> {
   void initState() {
     super.initState();
     if (widget.truncatedLines == null) {
-      _truncatedLines = 3.2;
+      _truncatedLines = 3;
     } else {
       _truncatedLines = widget.truncatedLines!;
     }
@@ -286,7 +287,7 @@ class _StatusWidgetState extends State<StatusWidget> {
   ) {
     final textStyle = TextStyle(
       color: widget.textColor ?? AppColors.text,
-      fontSize: widget.fontSize ?? 14,
+      fontSize: widget.fontSize ?? 13.sp,
       fontWeight: widget.fontWeight,
       height: 1.6,
       letterSpacing: .3,
