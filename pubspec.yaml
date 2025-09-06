@@ -53,7 +53,7 @@ dependencies:
   sqflite: ^2.3.3+1
   video_player: ^2.9.2
   package_info_plus: ^8.0.2
-  flutter_widget_from_html: ^0.15.3
+  flutter_widget_from_html: ^0.17.1
   # video_trimmer: ^3.0.1
   liquid_pull_to_refresh: ^3.0.1
   # video_thumbnail: ^0.5.3

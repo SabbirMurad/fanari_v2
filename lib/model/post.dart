@@ -75,7 +75,7 @@ class PostModel {
     return json.map((item) => PostModel.fromJson(item)).toList();
   }
 
-  load3rdPartyInfos() async {
+  Future<void> load3rdPartyInfos() async {
     // Must have a caption to work with
     if (caption == null) return;
 
@@ -100,7 +100,10 @@ class PostModel {
             arr[i].startsWith('http://') ||
             arr[i].startsWith('www.') ||
             arr[i].endsWith('.com')) {
-          this.link_preview = await getPreviewData(arr[i]);
+          final preview = await getPreviewData(arr[i]);
+          if (preview.title != null) {
+            this.link_preview = preview;
+          }
           return;
         }
       }

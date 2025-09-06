@@ -6,17 +6,42 @@ import 'package:http/http.dart' as http;
 class YoutubeModel {
   final String id;
   final String url;
-  final YoutubeModelSnippet snippet;
+  final String published_at;
+  final String title;
+  final String channel_title;
+  final YoutubeModelThumbnail thumbnail;
   final YoutubeModelContentDetails contentDetails;
   final YoutubeModelStatistics statistics;
 
   const YoutubeModel({
     required this.id,
     required this.url,
-    required this.snippet,
     required this.contentDetails,
     required this.statistics,
+    required this.published_at,
+    required this.title,
+    required this.channel_title,
+    required this.thumbnail,
   });
+
+  factory YoutubeModel.fromJson(json) {
+    return YoutubeModel(
+      id: json['id'],
+      url: 'https://www.youtube.com/watch?v=${json['id']}',
+      contentDetails: YoutubeModelContentDetails.fromJson(
+        json['contentDetails'],
+      ),
+      statistics: YoutubeModelStatistics.fromJson(json['statistics']),
+      published_at: json['snippet']['publishedAt'],
+      title: json['snippet']['title'],
+      channel_title: json['snippet']['channelTitle'],
+      thumbnail: YoutubeModelThumbnail(
+        url: json['snippet']['thumbnails']['standard']['url'],
+        width: json['snippet']['thumbnails']['standard']['width'],
+        height: json['snippet']['thumbnails']['standard']['height'],
+      ),
+    );
+  }
 
   static String getYoutubeBasicDataUrl(String videoId) =>
       "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&fields=items(id,snippet(publishedAt,title,channelTitle,thumbnails(standard)),contentDetails(duration),statistics)&id=$videoId&key=${AppCredentials.youtubeApiKey}";
@@ -62,61 +87,14 @@ class YoutubeModel {
     }
     return null;
   }
-
-  factory YoutubeModel.fromJson(json) {
-    return YoutubeModel(
-      id: json['id'],
-      url: 'https://www.youtube.com/watch?v=${json['id']}',
-      snippet: YoutubeModelSnippet.fromJson(json['snippet']),
-      contentDetails: YoutubeModelContentDetails.fromJson(
-        json['contentDetails'],
-      ),
-      statistics: YoutubeModelStatistics.fromJson(json['statistics']),
-    );
-  }
 }
 
-class YoutubeModelSnippet {
-  final String publishedAt;
-  final String title;
-  final String channelTitle;
-  final YoutubeModelThumbnails thumbnails;
-
-  const YoutubeModelSnippet({
-    required this.publishedAt,
-    required this.title,
-    required this.channelTitle,
-    required this.thumbnails,
-  });
-
-  factory YoutubeModelSnippet.fromJson(json) {
-    return YoutubeModelSnippet(
-      publishedAt: json['publishedAt'],
-      title: json['title'],
-      channelTitle: json['channelTitle'],
-      thumbnails: YoutubeModelThumbnails(
-        standard: YoutubeModelThumbnailType(
-          url: json['thumbnails']['standard']['url'],
-          width: json['thumbnails']['standard']['width'],
-          height: json['thumbnails']['standard']['height'],
-        ),
-      ),
-    );
-  }
-}
-
-class YoutubeModelThumbnails {
-  final YoutubeModelThumbnailType standard;
-
-  const YoutubeModelThumbnails({required this.standard});
-}
-
-class YoutubeModelThumbnailType {
+class YoutubeModelThumbnail {
   final String url;
   final int width;
   final int height;
 
-  const YoutubeModelThumbnailType({
+  const YoutubeModelThumbnail({
     required this.url,
     required this.width,
     required this.height,

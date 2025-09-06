@@ -4,8 +4,11 @@ import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/heart_beat_animation.dart';
+import 'package:fanari_v2/widgets/image_video_carousel.dart';
+import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:fanari_v2/widgets/status_widget.dart';
+import 'package:fanari_v2/widgets/youtube_attachment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
@@ -27,6 +30,7 @@ class _PostWidgetState extends State<PostWidget> {
   @override
   void initState() {
     super.initState();
+    _calculateCarouselHeight();
   }
 
   bool _bookMarked = false;
@@ -235,12 +239,49 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
+  double carouselWidth = 1.sw;
+  double carouselHeight = 0;
+  void _calculateCarouselHeight() {
+    for (var image in widget.model.images) {
+      double height = (1.sw * image.height) / image.width;
+
+      if (height > carouselHeight) {
+        carouselHeight = height;
+      }
+    }
+
+    for (var video in widget.model.videos) {
+      double height = (1.sw * video.height) / video.width;
+
+      if (height > carouselHeight) {
+        carouselHeight = height;
+      }
+    }
+
+    if (carouselHeight > 1.sw * 1.25) {
+      carouselHeight = 1.sw * 1.25;
+    }
+
+    if (widget.model.images.length + widget.model.videos.length == 1) {
+      if (widget.model.images.length == 1) {
+        final image = widget.model.images.first;
+        carouselHeight = (1.sw * image.height) / image.width;
+      } else {
+        final video = widget.model.videos.first;
+        carouselHeight = (1.sw * video.height) / video.width;
+      }
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _postTopBar(),
           if (widget.model.caption != null)
@@ -248,6 +289,39 @@ class _PostWidgetState extends State<PostWidget> {
               text: widget.model.caption!,
               width: 1.sw - 40.w,
               mentions: widget.model.mentions,
+              truncatedLines:
+                  (widget.model.images.isEmpty &&
+                      widget.model.videos.isEmpty &&
+                      widget.model.link_preview == null &&
+                      widget.model.youtube_attachment == null)
+                  ? 10
+                  : 3,
+            ),
+          if (widget.model.link_preview != null)
+            MyLinkPreview(
+              padding: EdgeInsets.only(top: 12.w),
+              image: widget.model.link_preview!.image != null
+                  ? widget.model.link_preview!.image!.url
+                  : null,
+              title: widget.model.link_preview!.title,
+              description: widget.model.link_preview!.description,
+            ),
+          if (widget.model.youtube_attachment != null)
+            YoutubeAttachmentWidget(
+              padding: const EdgeInsets.only(top: 12),
+              width: 1.sw - 40.w,
+              model: widget.model.youtube_attachment!,
+            ),
+          if (widget.model.images.isNotEmpty || widget.model.videos.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: ImageVideoCarousel(
+                borderRadius: BorderRadius.circular(10.r),
+                images: widget.model.images,
+                videos: widget.model.videos,
+                height: carouselHeight,
+                width: carouselWidth,
+              ),
             ),
           _postInteractions(),
         ],

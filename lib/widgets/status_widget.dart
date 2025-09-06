@@ -298,7 +298,6 @@ class _StatusWidgetState extends State<StatusWidget> {
       widget.mentions,
     );
 
-
     final textSpan = TextSpan(
       children: [
         ...textMap.map((item) {
@@ -400,8 +399,8 @@ class _StatusWidgetState extends State<StatusWidget> {
     );
 
     return widget.selectable
-        ? SelectableText.rich(textSpan)
-        : RichText(text: textSpan);
+        ? SelectableText.rich(textSpan, textAlign: TextAlign.start)
+        : RichText(text: textSpan, textAlign: TextAlign.start);
   }
 
   @override
