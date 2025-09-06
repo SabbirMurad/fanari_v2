@@ -8,6 +8,8 @@ class ColorFadeBox extends StatefulWidget {
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
 
   const ColorFadeBox({
     super.key,
@@ -17,6 +19,8 @@ class ColorFadeBox extends StatefulWidget {
     this.duration = const Duration(milliseconds: 1500),
     this.width,
     this.height,
+    this.padding,
+    this.margin,
   });
 
   @override
@@ -54,6 +58,8 @@ class _ColorFadeBoxState extends State<ColorFadeBox>
         return Container(
           width: widget.width ?? 40.w,
           height: widget.height ?? 40.w,
+          padding: widget.padding,
+          margin: widget.margin,
           decoration: BoxDecoration(
             color: _colorAnimation.value,
             borderRadius: widget.borderRadius ?? BorderRadius.circular(20.r),

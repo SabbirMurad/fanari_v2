@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomSvg extends StatelessWidget {
@@ -7,7 +8,7 @@ class CustomSvg extends StatelessWidget {
   final BoxFit fit;
   final double? width;
   final double? height;
-  final double size;
+  final double? size;
   final String path;
   const CustomSvg(
     this.path, {
@@ -17,19 +18,16 @@ class CustomSvg extends StatelessWidget {
     this.fit = BoxFit.contain,
     this.width,
     this.height,
-    this.size = 24,
+    this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       path,
-      colorFilter:
-          color == null
-              ? null
-              : ColorFilter.mode(color!, blendMode),
-      width: width ?? size,
-      height: height ?? size,
+      colorFilter: color == null ? null : ColorFilter.mode(color!, blendMode),
+      width: width ?? size ?? 24.w,
+      height: width ?? size ?? 24.w,
       fit: fit,
     );
   }

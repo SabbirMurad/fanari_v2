@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/widgets/video_player_widget.dart';
@@ -102,7 +103,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                     fit: BoxFit.cover,
                     placeholder: (context, url) {
                       return Container(
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: AppColors.secondary,
                         width: widget.width,
                         height: widget.height,
                       );
@@ -160,18 +161,16 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
           Align(
             alignment: Alignment.topRight,
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: EdgeInsets.symmetric(vertical: 4.w, horizontal: 16.w),
               margin: EdgeInsets.all(6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: .6),
+                color: AppColors.surface.withValues(alpha: .6),
               ),
               child: Text(
-                '${_selectedItemIndex + 1}/${_carouselItems.length}',
+                '${_selectedItemIndex + 1} / ${_carouselItems.length}',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.tertiary,
+                  color: AppColors.text,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -194,10 +193,8 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                     curve: Curves.easeInOut,
                   ),
                   effect: ExpandingDotsEffect(
-                    activeDotColor: Theme.of(context).colorScheme.primary,
-                    dotColor: Theme.of(
-                      context,
-                    ).colorScheme.tertiary.withValues(alpha: .3),
+                    activeDotColor: AppColors.primary,
+                    dotColor: AppColors.surface.withValues(alpha: .4),
                     dotWidth: 8,
                     dotHeight: 8,
                     spacing: 8,
@@ -218,13 +215,13 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
       fit: BoxFit.contain,
       placeholder: (context, url) {
         return Container(
-          color: Theme.of(context).colorScheme.secondary,
+          color: AppColors.secondary,
           width: widget.width,
           height: widget.height,
         );
       },
       errorWidget: (context, url, error) => Container(
-        color: Theme.of(context).colorScheme.secondary,
+        color: AppColors.secondary,
         child: Center(
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
@@ -369,13 +366,13 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
             fit: BoxFit.contain,
             placeholder: (context, url) {
               return Container(
-                color: Theme.of(context).colorScheme.secondary,
+                color: AppColors.secondary,
                 width: double.infinity,
                 height: widget.height,
               );
             },
             errorWidget: (context, url, error) => Container(
-              color: Theme.of(context).colorScheme.secondary,
+              color: AppColors.secondary,
               height: widget.height,
               width: double.infinity,
               child: Center(
@@ -418,9 +415,7 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.secondary.withValues(alpha: .2),
+                  color: AppColors.secondary.withValues(alpha: .2),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -434,7 +429,7 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
                 ),
                 child: Icon(
                   Icons.play_arrow_rounded,
-                  color: Theme.of(context).colorScheme.tertiary,
+                  color: AppColors.text,
                   size: 32,
                 ),
               ),
@@ -550,7 +545,7 @@ class _FullScreenCarouselState extends State<FullScreenCarousel> {
                   fit: BoxFit.contain,
                   placeholder: (context, url) {
                     return Container(
-                      color: Theme.of(context).colorScheme.secondary,
+                      color: AppColors.secondary,
                       width: double.infinity,
                       height: (1.sw / 4) * 5,
                     );

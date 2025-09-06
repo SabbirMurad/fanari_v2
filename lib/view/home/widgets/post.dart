@@ -2,7 +2,9 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
+import 'package:fanari_v2/widgets/glass_container.dart';
 import 'package:fanari_v2/widgets/heart_beat_animation.dart';
 import 'package:fanari_v2/widgets/image_video_carousel.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
@@ -65,12 +67,14 @@ class _PostWidgetState extends State<PostWidget> {
               'assets/icons/heart_fill.svg',
               color: AppColors.primary,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
             unselectedChild: CustomSvg(
               'assets/icons/heart.svg',
               color: AppColors.text,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
           ),
@@ -107,6 +111,7 @@ class _PostWidgetState extends State<PostWidget> {
                     'assets/icons/comment.svg',
                     color: AppColors.text,
                     height: 20.h,
+                    width: 20.h,
                     fit: BoxFit.fitHeight,
                   ),
                   const SizedBox(width: 8),
@@ -143,6 +148,7 @@ class _PostWidgetState extends State<PostWidget> {
               'assets/icons/share.svg',
               color: AppColors.text,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
           ),
@@ -160,12 +166,14 @@ class _PostWidgetState extends State<PostWidget> {
               'assets/icons/bookmark_fill.svg',
               color: AppColors.text,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
             unselectedChild: CustomSvg(
               'assets/icons/bookmark.svg',
               color: AppColors.text,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
           ),
@@ -212,7 +220,7 @@ class _PostWidgetState extends State<PostWidget> {
                         utils.prettyDate(widget.model.created_at),
                         style: TextStyle(
                           color: AppColors.text,
-                          fontSize: 13,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -224,7 +232,7 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           IconButton(
             onPressed: () {
-              // _openMoreOptions(ref);
+              _openMoreOptions();
             },
             icon: Container(
               child: Icon(
@@ -235,6 +243,142 @@ class _PostWidgetState extends State<PostWidget> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  _openMoreOptions() {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      elevation: 0,
+      // barrierColor: Colors.transparent,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.transparent,
+            child: GestureDetector(
+              onTap: () {
+                // Do nothing here, this prevents the gesture detector of the whole container
+              },
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: SafeArea(
+                  top: false,
+                  child: GlassContainer(
+                    blurStrength: 12,
+                    width: 1.sw - 40.w,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 35.w,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/share.svg',
+                          text: 'Share',
+                          onTap: () {},
+                          padding: EdgeInsets.only(bottom: 14.h),
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/copy.svg',
+                          text: 'Copy Post URL',
+                          onTap: () {},
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/bookmark.svg',
+                          text: 'Bookmark',
+                          onTap: () {},
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/dislike.svg',
+                          text: 'Not Interested',
+                          onTap: () {},
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/not_allowed.svg',
+                          text: 'Report',
+                          onTap: () {},
+                          color: Colors.red[400],
+                          padding: EdgeInsets.only(top: 14.h, bottom: 28.h),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          height: 1.h,
+                          color: AppColors.text.withValues(alpha: 0.5),
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/eye.svg',
+                          text: 'View Profile',
+                          onTap: () {},
+                          padding: EdgeInsets.only(bottom: 14.h, top: 28.h),
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/follow.svg',
+                          text: 'Follow Sabbir',
+                          onTap: () {},
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/not_allowed.svg',
+                          text: 'Block Sabbir',
+                          onTap: () {},
+                          color: Colors.red[400],
+                          padding: EdgeInsets.only(top: 14.h),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _moreOptionItem({
+    required String icon,
+    required String text,
+    required VoidCallback onTap,
+    Color? color,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pop();
+        onTap();
+      },
+      child: Padding(
+        padding: padding ?? EdgeInsets.symmetric(vertical: 14.h),
+        child: Row(
+          children: [
+            Container(
+              width: 20.w,
+              height: 20.w,
+              child: CustomSvg(
+                icon,
+                height: 20.w,
+                width: 20.w,
+                fit: BoxFit.contain,
+                color: color ?? AppColors.text,
+              ),
+            ),
+            SizedBox(width: 18.w),
+            Text(
+              text,
+              style: TextStyle(fontSize: 14.sp, color: color ?? AppColors.text),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -299,7 +443,7 @@ class _PostWidgetState extends State<PostWidget> {
             ),
           if (widget.model.link_preview != null)
             MyLinkPreview(
-              padding: EdgeInsets.only(top: 12.w),
+              padding: EdgeInsets.only(top: 12.h),
               image: widget.model.link_preview!.image != null
                   ? widget.model.link_preview!.image!.url
                   : null,
@@ -308,13 +452,13 @@ class _PostWidgetState extends State<PostWidget> {
             ),
           if (widget.model.youtube_attachment != null)
             YoutubeAttachmentWidget(
-              padding: const EdgeInsets.only(top: 12),
+              padding: EdgeInsets.only(top: 12.h),
               width: 1.sw - 40.w,
               model: widget.model.youtube_attachment!,
             ),
           if (widget.model.images.isNotEmpty || widget.model.videos.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 12),
+              padding: EdgeInsets.only(top: 12.h),
               child: ImageVideoCarousel(
                 borderRadius: BorderRadius.circular(10.r),
                 images: widget.model.images,
@@ -322,6 +466,11 @@ class _PostWidgetState extends State<PostWidget> {
                 height: carouselHeight,
                 width: carouselWidth,
               ),
+            ),
+          if (widget.model.poll != null)
+            PollWidget(
+              model: widget.model.poll!,
+              padding: EdgeInsets.only(top: 12.h),
             ),
           _postInteractions(),
         ],

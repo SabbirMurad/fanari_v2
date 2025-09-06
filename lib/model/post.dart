@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/nhentai.dart';
+import 'package:fanari_v2/model/poll.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/user.dart';
@@ -25,6 +26,8 @@ class PostModel {
   int like_count;
   int comment_count;
 
+  PollModel? poll;
+
   NhentaiBookModel? nhentai_book;
   YoutubeModel? youtube_attachment;
   PreviewData? link_preview;
@@ -37,6 +40,7 @@ class PostModel {
     required this.images,
     required this.videos,
     this.audio,
+    this.poll,
     required this.created_at,
     required this.owner,
     required this.liked,
@@ -60,6 +64,7 @@ class PostModel {
       audio: json['audio'] != null
           ? '${AppCredentials.domain}/upload/audio/${json['audio']}'
           : null,
+      poll: PollModel.fromJson(json['poll']),
       created_at: json['created_at'],
       owner: UserModel.fromJson(json['owner']),
       liked: json['liked'],
@@ -103,8 +108,8 @@ class PostModel {
           final preview = await getPreviewData(arr[i]);
           if (preview.title != null) {
             this.link_preview = preview;
+            return;
           }
-          return;
         }
       }
     }

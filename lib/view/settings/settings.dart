@@ -1,0 +1,171 @@
+import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/widgets/custom_svg.dart';
+import 'package:fanari_v2/widgets/named_avatar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  Widget _settingsOption({
+    required String icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.w),
+        child: Row(
+          children: [
+            Container(
+              width: 24.w,
+              height: 24.w,
+              child: Center(
+                child: CustomSvg(icon, width: 24.w, height: 24.w),
+              ),
+            ),
+            SizedBox(width: 18.w),
+            Text(
+              text,
+              style: TextStyle(color: AppColors.text, fontSize: 16.sp),
+            ),
+            Spacer(),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18.w,
+              color: AppColors.text,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SafeArea(bottom: false, child: SizedBox(height: 48.h)),
+            Row(
+              children: [
+                NamedAvatar(loading: false, name: 'Sabbir', size: 72.w),
+                SizedBox(width: 12.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sabbir Hassan',
+                      style: TextStyle(
+                        color: AppColors.text,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '@sabbir0087',
+                      style: TextStyle(
+                        color: AppColors.text,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 48.h),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 18.w, horizontal: 24.w),
+              child: Column(
+                children: [
+                  _settingsOption(
+                    icon: 'assets/icons/settings/user.svg',
+                    text: 'Edit Profile',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/payment.svg',
+                    text: 'Subscriptions',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/notification.svg',
+                    text: 'Notifications',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 36.h),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 18.w, horizontal: 24.w),
+              child: Column(
+                children: [
+                  _settingsOption(
+                    icon: 'assets/icons/settings/visible.svg',
+                    text: 'Color & Themes',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/language.svg',
+                    text: 'Language',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/lock.svg',
+                    text: 'Privacy Policy',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 36.h, horizontal: 24.w),
+              child: Row(
+                children: [
+                  Container(
+                    width: 24.w,
+                    height: 24.w,
+                    child: Center(
+                      child: CustomSvg(
+                        'assets/icons/settings/logout.svg',
+                        width: 24.w,
+                        height: 24.w,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 18.w),
+                  Text(
+                    'Logout',
+                    style: TextStyle(color: AppColors.text, fontSize: 16.sp),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

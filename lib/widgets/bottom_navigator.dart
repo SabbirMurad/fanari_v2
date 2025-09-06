@@ -23,15 +23,9 @@ class CustomBottomNavigator extends ConsumerStatefulWidget {
 }
 
 class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
-  late int? _selectedNavIndex = widget.selectedNavIndex;
-
   Widget _navItem(String name, int index) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedNavIndex = index;
-        });
-
         widget.onNavChange?.call(index);
       },
       child: Container(
@@ -40,9 +34,10 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomSvg(
-              'assets/icons/bottom_nav/${name.toLowerCase()}${_selectedNavIndex == index ? '_fill' : ''}.svg',
+              'assets/icons/bottom_nav/${name.toLowerCase()}${widget.selectedNavIndex == index ? '_fill' : ''}.svg',
               color: AppColors.text,
               height: 20.h,
+              width: 20.h,
               fit: BoxFit.fitHeight,
             ),
             SizedBox(height: 4),
@@ -120,8 +115,8 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 23.h,
-                      height: 23.h,
+                      width: 24.h,
+                      height: 24.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.text, width: 1.48),
@@ -143,11 +138,25 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
               _navItem('Market', 2),
               GestureDetector(
                 onTap: () {
-                  //TODO:
+                  // if (user != null) {
+                  // Scaffold.of(context).openDrawer();
+                  // widget.onProfileTap?.call();
+                  // setState(() {
+                  //   _selectedNavIndex = 3;
+                  // });
+
+                  widget.onNavChange?.call(3);
+                  // }
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    NamedAvatar(
+                      loading: false,
+                      name: 'Sabbir Hassan',
+                      size: 24.h,
+                      backgroundColor: AppColors.surface,
+                    ),
                     // user.when(
                     //   data: (user) {
                     //     return NamedAvatar(

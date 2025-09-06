@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class GlassContainer extends StatelessWidget {
   final double? width;
   final double? height;
+  final double? blurStrength;
   final BorderRadius? borderRadius;
   final Widget? child;
   final EdgeInsetsGeometry? padding;
@@ -15,6 +16,7 @@ class GlassContainer extends StatelessWidget {
     super.key,
     this.width,
     this.height,
+    this.blurStrength,
     this.borderRadius,
     this.child,
     this.padding,
@@ -27,14 +29,17 @@ class GlassContainer extends StatelessWidget {
       borderRadius:
           borderRadius ?? BorderRadius.circular(20.r), // Rounded corners
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6), // Glass blur
+        filter: ImageFilter.blur(
+          sigmaX: blurStrength ?? 6,
+          sigmaY: blurStrength ?? 6,
+        ), // Glass blur
         child: Container(
           width: width,
           height: height,
           padding: padding,
           margin: margin,
           decoration: BoxDecoration(
-            borderRadius: borderRadius ?? BorderRadius.circular(20),
+            borderRadius: borderRadius ?? BorderRadius.circular(20.r),
             gradient: LinearGradient(
               colors: [
                 const Color.fromARGB(255, 83, 83, 83).withValues(alpha: 0.4),

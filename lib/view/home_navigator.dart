@@ -2,6 +2,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';
 import 'package:fanari_v2/view/search/search.dart';
+import 'package:fanari_v2/view/settings/settings.dart';
 import 'package:fanari_v2/widgets/bottom_navigator.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,12 @@ class _HomeNavigatorState extends State<HomeNavigator> {
     initialPage: _selectedTab,
   );
 
-  List<Widget> _pages = [HomeScreen(), SearchScreen(), MarketScreen()];
+  List<Widget> _pages = [
+    HomeScreen(),
+    SearchScreen(),
+    MarketScreen(),
+    SettingsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +54,7 @@ class _HomeNavigatorState extends State<HomeNavigator> {
             CustomBottomNavigator(
               selectedNavIndex: _selectedTab,
               onNavChange: (index) async {
-                _pageController.animateToPage(
-                  index,
-                  duration: Duration(milliseconds: 372),
-                  curve: Curves.easeInOut,
-                );
+                _pageController.jumpToPage(index);
 
                 setState(() {
                   _selectedTab = index;
