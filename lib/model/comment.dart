@@ -19,7 +19,7 @@ class CommentModel {
   UserModel owner;
 
   bool liked;
-  int likeCount;
+  int like_count;
   int reply_count;
 
   YoutubeModel? youtube_attachment;
@@ -34,7 +34,7 @@ class CommentModel {
     required this.created_at,
     required this.owner,
     required this.liked,
-    required this.likeCount,
+    required this.like_count,
     required this.reply_count,
     this.youtube_attachment,
     this.link_preview,
@@ -54,7 +54,7 @@ class CommentModel {
       created_at: json['created_at'],
       owner: UserModel.fromJson(json['owner']),
       liked: json['liked'],
-      likeCount: json['like_count'],
+      like_count: json['like_count'],
       reply_count: json['reply_count'],
     );
   }

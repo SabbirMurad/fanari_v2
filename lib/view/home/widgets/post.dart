@@ -2,6 +2,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/glass_container.dart';
@@ -89,17 +90,13 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           GestureDetector(
             onTap: () {
-              // _openComments(context);
-              // Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (_) {
-              //       return PostDetailsPage(
-              //         postId: widget.postData.uuid,
-              //         model: widget.postData,
-              //       );
-              //     },
-              //   ),
-              // );
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) {
+                    return PostDetailsScreen(model: widget.model);
+                  },
+                ),
+              );
             },
             child: Container(
               color: Colors.transparent,
@@ -271,12 +268,16 @@ class _PostWidgetState extends State<PostWidget> {
                 alignment: Alignment.bottomCenter,
                 child: SafeArea(
                   top: false,
-                  child: GlassContainer(
-                    blurStrength: 12,
+                  child: Container(
+                    // blurStrength: 12,
                     width: 1.sw - 40.w,
                     padding: EdgeInsets.symmetric(
                       horizontal: 24.w,
                       vertical: 35.w,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.circular(8.r)
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -383,7 +384,7 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  double carouselWidth = 1.sw;
+  double carouselWidth = 1.sw - 40.w;
   double carouselHeight = 0;
   void _calculateCarouselHeight() {
     for (var image in widget.model.images) {
