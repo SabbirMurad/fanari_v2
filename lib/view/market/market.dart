@@ -103,6 +103,7 @@ class _MarketScreenState extends State<MarketScreen> {
               backgroundColor: AppColors.surface,
               shadowColor: AppColors.containerBg,
             ),
+            SliverToBoxAdapter(child: SizedBox(height: 24.h)),
             SliverToBoxAdapter(
               child: ColorFadeBox(
                 width: double.infinity,
@@ -149,7 +150,53 @@ class _MarketScreenState extends State<MarketScreen> {
               ),
             ),
             SliverToBoxAdapter(child: SizedBox(height: 36.h)),
-            
+            SliverToBoxAdapter(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Row(
+                  children: [
+                    Text(
+                      'Trending',
+                      style: TextStyle(
+                        color: AppColors.text,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                      'Show More',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+            SliverToBoxAdapter(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Wrap(
+                  spacing: 18.w,
+                  runSpacing: 18.w,
+                  children: List.generate(6, (index) {
+                    return Column(
+                      children: [
+                        ColorFadeBox(
+                          width: (1.sw - 40.w - 18.w) / 2,
+                          height: (1.sw - 40.w - 18.w) / 2,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
             SliverToBoxAdapter(child: SizedBox(height: 96.h)),
           ],
         ),

@@ -2,6 +2,8 @@ import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
 import 'package:fanari_v2/view/home_navigator.dart';
 import 'package:fanari_v2/view/landing.dart';
+import 'package:fanari_v2/view/settings/notification_setting.dart';
+import 'package:fanari_v2/view/settings/profile_settings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +26,14 @@ class AppRoutes {
   static final String sign_in = '/sign-in';
 
   static final String feed = '/feed';
+
+  //Market
+  static final String market = '/market';
+
+  //Settings
+  static final String settings = '/settings';
+  static final String profileSettings = '/profile-settings';
+  static final String notificationSettings = '/notification-settings';
 
   static void push(String route) => allRoutes.push(route);
   static void go(String route) => allRoutes.go(route);
@@ -64,63 +74,42 @@ class AppRoutes {
           return const HomeNavigator(selectedPage: 0);
         },
       ),
-      // GoRoute(
-      //   path: "/home/:tab",
-      //   redirect: (context, state) async {
-      //     return await isSingedIn() ? null : '/authentication';
-      //   },
-      //   builder: (context, state) {
-      //     final List<String> tabs = [
-      //       "home",
-      //       "search",
-      //       "notification",
-      //     ];
-
-      //     final tab = state.pathParameters['tab']!;
-      //     int selectedPage = 0;
-      //     if (tabs.contains(tab)) {
-      //       selectedPage = tabs.indexOf(tab);
-      //     }
-
-      //     return HomePage(
-      //       selectedPage: selectedPage,
-      //     );
-      //   },
-      // ),
-      // GoRoute(
-      //   path: "/profile/:myProfile/:userId",
-      //   redirect: (context, state) async {
-      //     return await isSingedIn() ? null : '/authentication';
-      //   },
-      //   builder: (context, state) {
-      //     final myProfile = state.pathParameters['myProfile']!;
-      //     final bool isMyProfile = myProfile == 'true';
-      //     return ProfilePage(
-      //       myProfile: isMyProfile,
-      //       userId: state.pathParameters['userId']!,
-      //     );
-      //   },
-      // ),
-      // GoRoute(
-      //   path: "/setting",
-      //   redirect: (context, state) async {
-      //     return await isSingedIn() ? null : '/authentication';
-      //   },
-      //   builder: (context, state) {
-      //     return const SettingPage();
-      //   },
-      // ),
-      // GoRoute(
-      //   path: "/post/:postId",
-      //   redirect: (context, state) async {
-      //     return await isSingedIn() ? null : '/authentication';
-      //   },
-      //   builder: (context, state) {
-      //     return PostDetailsPage(
-      //       postId: state.pathParameters['postId']!,
-      //     );
-      //   },
-      // ),
+      GoRoute(
+        path: market,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          return const HomeNavigator(selectedPage: 2);
+        },
+      ),
+      GoRoute(
+        path: settings,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          return const HomeNavigator(selectedPage: 3);
+        },
+      ),
+      GoRoute(
+        path: profileSettings,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          return const ProfileSettingScreen();
+        },
+      ),
+      GoRoute(
+        path: notificationSettings,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          return const NotificationSettingScreen();
+        },
+      ),
     ],
   );
 }

@@ -16,7 +16,7 @@ class ColorFadeBox extends StatefulWidget {
     this.color1 = const Color.fromARGB(255, 46, 48, 53),
     this.color2 = const Color.fromARGB(255, 55, 57, 61),
     this.borderRadius,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 2000),
     this.width,
     this.height,
     this.padding,
@@ -35,8 +35,11 @@ class _ColorFadeBoxState extends State<ColorFadeBox>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration)
-      ..repeat(reverse: true); // 👈 smoothly goes back and forth
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+      animationBehavior: AnimationBehavior.preserve,
+    )..repeat(reverse: true); // 👈 smoothly goes back and forth
 
     _colorAnimation = ColorTween(
       begin: widget.color1,

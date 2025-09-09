@@ -1,4 +1,5 @@
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
@@ -96,8 +97,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   _settingsOption(
                     icon: 'assets/icons/settings/user.svg',
-                    text: 'Edit Profile',
-                    onTap: () {},
+                    text: 'Profile',
+                    onTap: () {
+                      AppRoutes.push(AppRoutes.profileSettings);
+                    },
                   ),
                   _settingsOption(
                     icon: 'assets/icons/settings/payment.svg',
@@ -107,7 +110,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _settingsOption(
                     icon: 'assets/icons/settings/notification.svg',
                     text: 'Notifications',
-                    onTap: () {},
+                    onTap: () {
+                      AppRoutes.push(AppRoutes.notificationSettings);
+                    },
                   ),
                 ],
               ),
