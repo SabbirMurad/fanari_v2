@@ -20,7 +20,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
+      child: Container(
+        color: Colors.transparent,
         padding: EdgeInsets.symmetric(vertical: 12.w),
         child: Row(
           children: [
