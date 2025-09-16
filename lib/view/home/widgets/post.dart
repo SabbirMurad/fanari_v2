@@ -5,7 +5,6 @@ import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
-import 'package:fanari_v2/widgets/glass_container.dart';
 import 'package:fanari_v2/widgets/heart_beat_animation.dart';
 import 'package:fanari_v2/widgets/image_video_carousel.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
@@ -19,8 +18,9 @@ import 'package:fanari_v2/utils.dart' as utils;
 
 class PostWidget extends StatefulWidget {
   final PostModel model;
+  final bool detailsPage;
 
-  const PostWidget({super.key, required this.model});
+  const PostWidget({super.key, required this.model, this.detailsPage = false});
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -90,6 +90,8 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           GestureDetector(
             onTap: () {
+              if (widget.detailsPage) return;
+
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) {
@@ -217,7 +219,7 @@ class _PostWidgetState extends State<PostWidget> {
                         utils.prettyDate(widget.model.created_at),
                         style: TextStyle(
                           color: AppColors.text,
-                          fontSize: 13.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -275,9 +277,10 @@ class _PostWidgetState extends State<PostWidget> {
                       horizontal: 24.w,
                       vertical: 35.w,
                     ),
+                    margin: EdgeInsets.only(bottom: 20.w),
                     decoration: BoxDecoration(
                       color: AppColors.secondary,
-                      borderRadius: BorderRadius.circular(8.r)
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -428,6 +431,10 @@ class _PostWidgetState extends State<PostWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /*
+            The top section of the post, where post owner
+            image,name etc is shown
+          */
           _postTopBar(),
           if (widget.model.caption != null)
             StatusWidget(

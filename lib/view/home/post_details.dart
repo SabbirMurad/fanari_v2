@@ -161,7 +161,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       await item.load3rdPartyInfos();
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -180,8 +182,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SafeArea(bottom: false, child: SizedBox(height: 24.h)),
-                    PostWidget(model: widget.model),
+                    SafeArea(bottom: false, child: SizedBox(height: 12.h)),
+                    PostWidget(model: widget.model, detailsPage: true),
                     ..._comments.asMap().entries.map((entry) {
                       final comment = entry.value;
                       // final index = entry.key;

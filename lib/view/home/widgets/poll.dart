@@ -2,6 +2,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/poll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils.dart';
 
 class PollWidget extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
@@ -43,6 +44,8 @@ class _PollWidgetState extends State<PollWidget> {
     'Z',
   ];
 
+  late List<int> _selectedIndexes = widget.model.selected_options;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -70,26 +73,90 @@ class _PollWidgetState extends State<PollWidget> {
           ...widget.model.options.asMap().entries.map((entry) {
             final item = entry.value;
             final index = entry.key;
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.textDeemed),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              margin: EdgeInsets.only(top: 12.h),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.w),
-              child: Row(
-                children: [
-                  Text(
-                    '${_chars[index]}.',
-                    style: TextStyle(color: AppColors.text, fontSize: 14.sp),
+
+            final percent = ((item.vote * 100) / widget.model.total_vote)
+                .toStringAsFixed(2);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (_selectedIndexes.contains(index)) {
+                      setState(() {
+                        _selectedIndexes.remove(index);
+                      });
+                    } else {
+                      setState(() {
+                        _selectedIndexes.add(index);
+                      });
+                    }
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 12.h),
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Container(
+                          height: 48.h,
+                          width:
+                              double.tryParse(percent)! * ((1.sw - 40.w) / 100),
+                          decoration: BoxDecoration(
+                            color: _selectedIndexes.contains(index)
+                                ? AppColors.primary.withValues(alpha: 0.5)
+                                : _selectedIndexes.isNotEmpty
+                                ? AppColors.secondary.withValues(alpha: 0.8)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        Container(
+                          height: 48.h,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: _selectedIndexes.contains(index)
+                                  ? AppColors.primary
+                                  : AppColors.textDeemed,
+                            ),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Row(
+                            children: [
+                              Text(
+                                '${_chars[index]}.',
+                                style: TextStyle(
+                                  color: AppColors.text,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                item.text,
+                                style: TextStyle(
+                                  color: AppColors.text,
+                                  fontSize: 14.sp,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    item.text,
-                    style: TextStyle(color: AppColors.text, fontSize: 14.sp),
+                ),
+                if (_selectedIndexes.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(left: 8.w, top: 6.h),
+                    child: Text(
+                      '${percent}%',
+                      style: TextStyle(color: AppColors.text, fontSize: 13.sp),
+                    ),
                   ),
-                ],
-              ),
+              ],
             );
           }),
         ],

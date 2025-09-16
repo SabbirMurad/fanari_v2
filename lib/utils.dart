@@ -27,7 +27,6 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 part './utils/rich_text.dart';
 part './utils/data_types/string.dart';
 part './utils/data_types/int.dart';
-part './utils/data_types/double.dart';
 part './utils/short_name.dart';
 part './utils/custom_http.dart';
 part './utils/pretty_date.dart';
