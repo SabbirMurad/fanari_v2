@@ -1,4 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/product.dart';
+import 'package:fanari_v2/view/market/widgets/product_card.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +48,7 @@ class _MarketScreenState extends State<MarketScreen> {
           ),
           SizedBox(width: 18.w),
           CustomSvg(
-            'assets/icons/chat.svg',
+            'assets/icons/cart.svg',
             color: AppColors.text,
             height: 24.w,
           ),
@@ -73,6 +76,92 @@ class _MarketScreenState extends State<MarketScreen> {
     'Cosplay Items',
     'Custom Weapons',
     'T Shirts',
+  ];
+
+  List<ProductModel> _products = [
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url:
+            'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url: 'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url:
+            'https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url:
+            'https://images.pexels.com/photos/1468379/pexels-photo-1468379.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url:
+            'https://images.pexels.com/photos/1580271/pexels-photo-1580271.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
+    ProductModel(
+      title: 'Hatshune Miku both sided body pillow',
+      price: 24500,
+      rating: 46,
+      image: ImageModel(
+        uuid: 'asdasdasd',
+        url:
+            'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+        width: 400,
+        height: 400,
+        provider: AssetImage('assets/images/temp/user.jpg'),
+      ),
+      favorite: false,
+    ),
   ];
 
   @override
@@ -169,7 +258,7 @@ class _MarketScreenState extends State<MarketScreen> {
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -183,17 +272,11 @@ class _MarketScreenState extends State<MarketScreen> {
                 child: Wrap(
                   spacing: 18.w,
                   runSpacing: 18.w,
-                  children: List.generate(6, (index) {
-                    return Column(
-                      children: [
-                        ColorFadeBox(
-                          width: (1.sw - 40.w - 18.w) / 2,
-                          height: (1.sw - 40.w - 18.w) / 2,
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                      ],
-                    );
-                  }),
+                  children: _refreshing
+                      ? List.generate(6, (index) => ProductCard.skeleton())
+                      : _products
+                            .map((product) => ProductCard(model: product))
+                            .toList(),
                 ),
               ),
             ),
