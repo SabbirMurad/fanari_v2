@@ -23,7 +23,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:image/image.dart' as img;
 
+
+part './utils/image_blur_hash.dart';
 part './utils/rich_text.dart';
 part './utils/data_types/string.dart';
 part './utils/data_types/int.dart';

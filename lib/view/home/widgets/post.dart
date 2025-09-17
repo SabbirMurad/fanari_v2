@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/post.dart';
@@ -11,10 +13,12 @@ import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:fanari_v2/widgets/status_widget.dart';
 import 'package:fanari_v2/widgets/youtube_attachment.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:http/http.dart' as http;
 
 class PostWidget extends StatefulWidget {
   final PostModel model;

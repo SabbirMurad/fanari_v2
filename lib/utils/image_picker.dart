@@ -41,7 +41,7 @@ Future<Uint8List?> pickSingleImage({
   required BuildContext context,
   required ImageSource source,
   bool compress = true,
-  bool crop = true,
+  // bool crop = true,
 }) async {
   String filePath = '';
 
@@ -74,18 +74,18 @@ Future<Uint8List?> pickSingleImage({
     filePath = file.path;
   }
 
-  Uint8List? image;
-  if (crop) {
-    final Uint8List? croppedImage = await cropImage(filePath);
+  // Uint8List? image;
+  // if (crop) {
+  //   final Uint8List? croppedImage = await cropImage(filePath);
 
-    if (croppedImage == null) {
-      return null;
-    }
-    image = croppedImage;
-  } else {
-    image = await File(filePath).readAsBytes();
-  }
-
+  //   if (croppedImage == null) {
+  //     return null;
+  //   }
+  //   image = croppedImage;
+  // } else {
+  //   image = await File(filePath).readAsBytes();
+  // }
+  final image = await File(filePath).readAsBytes();
   if (compress) {
     final Uint8List compressedImage = await compressImage(image, 400);
     return compressedImage;

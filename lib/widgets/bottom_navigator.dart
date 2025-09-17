@@ -1,9 +1,12 @@
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils.dart' as utils;
+import 'package:image_picker/image_picker.dart';
 
 class CustomBottomNavigator extends ConsumerStatefulWidget {
   final int? selectedNavIndex;
@@ -55,6 +58,8 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
     );
   }
 
+  String? _hash;
+
   @override
   Widget build(BuildContext context) {
     // final user = ref.watch(userNotifierProvider);
@@ -98,7 +103,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
               _navItem('Home', 0),
               _navItem('Search', 1),
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   // Navigator.of(context).push(
                   //   MaterialPageRoute(
                   //     builder: (_) {

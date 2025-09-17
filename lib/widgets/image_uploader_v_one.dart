@@ -35,7 +35,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
     Uint8List? img = await utils.pickSingleImage(
       context: context,
       source: source,
-      crop: false,
+      // crop: false,
     );
 
     if (img != null) {
