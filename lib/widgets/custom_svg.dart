@@ -10,6 +10,8 @@ class CustomSvg extends StatelessWidget {
   final double? height;
   final double? size;
   final String path;
+  final VoidCallback? onTap;
+
   const CustomSvg(
     this.path, {
     super.key,
@@ -19,16 +21,19 @@ class CustomSvg extends StatelessWidget {
     this.width,
     this.height,
     this.size,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
+    final svg = SvgPicture.asset(
       path,
       colorFilter: color == null ? null : ColorFilter.mode(color!, blendMode),
       width: width ?? size ?? 24.w,
       height: width ?? size ?? 24.w,
       fit: fit,
     );
+
+    return onTap == null ? svg : InkWell(onTap: onTap, child: svg);
   }
 }

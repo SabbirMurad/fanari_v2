@@ -4,7 +4,7 @@ import 'package:fanari_v2/model/youtube.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
-enum MessageType { Text, Emoji, Image, Audio, Video, Attachment }
+enum TextType { Text, Emoji, Image, Audio, Video, Attachment }
 
 class TextModel {
   final String uuid;
@@ -14,7 +14,7 @@ class TextModel {
   final List<ImageModel> images;
   final List<VideoModel> videos;
   final String? audio;
-  final MessageType type;
+  final TextType type;
   final List<String> seen_by;
   final int created_at;
   final bool my_text;
@@ -45,19 +45,19 @@ class TextModel {
 
     String? audio = json['audio'];
 
-    late MessageType type;
+    late TextType type;
     if (json['type'] == 'Text') {
-      type = MessageType.Text;
+      type = TextType.Text;
     } else if (json['type'] == 'Emoji') {
-      type = MessageType.Emoji;
+      type = TextType.Emoji;
     } else if (json['type'] == 'Image') {
-      type = MessageType.Image;
+      type = TextType.Image;
     } else if (json['type'] == 'Audio') {
-      type = MessageType.Audio;
+      type = TextType.Audio;
     } else if (json['type'] == 'Video') {
-      type = MessageType.Video;
+      type = TextType.Video;
     } else {
-      type = MessageType.Attachment;
+      type = TextType.Attachment;
     }
 
     return TextModel(
@@ -99,8 +99,11 @@ class TextModel {
             arr[i].startsWith('http://') ||
             arr[i].startsWith('www.') ||
             arr[i].endsWith('.com')) {
-          this.link_preview = await getPreviewData(arr[i]);
-          return;
+          final preview = await getPreviewData(arr[i]);
+          if (preview.title != null) {
+            this.link_preview = preview;
+            return;
+          }
         }
       }
     }

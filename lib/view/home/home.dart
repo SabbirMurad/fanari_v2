@@ -4,6 +4,7 @@ import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/poll.dart';
 import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/model/user.dart';
+import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/widgets/post.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
       await item.load3rdPartyInfos();
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   List<PostModel> _dummyPosts = [
@@ -255,6 +258,9 @@ class _HomeScreenState extends State<HomeScreen> {
             'assets/icons/chat.svg',
             color: AppColors.text,
             height: 24.w,
+            onTap: () {
+              AppRoutes.push(AppRoutes.chats);
+            },
           ),
         ],
       ),

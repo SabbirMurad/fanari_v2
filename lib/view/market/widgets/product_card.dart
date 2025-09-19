@@ -41,23 +41,20 @@ class ProductCard extends StatefulWidget {
               borderRadius: BorderRadius.circular(4.r),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 6.w, right: 6.w),
-            child: Row(
-              children: [
-                ColorFadeBox(
-                  width: 36.w,
-                  height: 16.h,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                Spacer(),
-                ColorFadeBox(
-                  width: 72.w,
-                  height: 18.h,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              ColorFadeBox(
+                width: 36.w,
+                height: 16.h,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              Spacer(),
+              ColorFadeBox(
+                width: 72.w,
+                height: 18.h,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+            ],
           ),
         ],
       ),

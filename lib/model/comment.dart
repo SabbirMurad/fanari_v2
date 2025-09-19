@@ -85,8 +85,11 @@ class CommentModel {
             arr[i].startsWith('http://') ||
             arr[i].startsWith('www.') ||
             arr[i].endsWith('.com')) {
-          this.link_preview = await getPreviewData(arr[i]);
-          return;
+          final preview = await getPreviewData(arr[i]);
+          if (preview.title != null) {
+            this.link_preview = preview;
+            return;
+          }
         }
       }
     }

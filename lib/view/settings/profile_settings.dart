@@ -52,6 +52,12 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                 title: 'Gender',
                 subTitle: 'Male',
                 canEdit: true,
+                onEditClick: () async {},
+              ),
+              ProfileEditOption(
+                title: 'Date of birth',
+                subTitle: '19 Nov 2000',
+                canEdit: true,
                 onEditClick: () async {
                   final date = await showDatePicker(
                     context: context,
@@ -59,14 +65,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                     lastDate: DateTime.now(),
                     initialDate: DateTime(2000),
                   );
-                  
                 },
-              ),
-              ProfileEditOption(
-                title: 'Date of birth',
-                subTitle: '19 Nov 2000',
-                canEdit: true,
-                onEditClick: () {},
               ),
               ProfileEditOption(
                 title: 'Country',

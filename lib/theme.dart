@@ -36,8 +36,8 @@ final dark = ThemeData(
   ),
   shadowColor: const Color.fromRGBO(0, 0, 0, .3),
   datePickerTheme: const DatePickerThemeData(
-    backgroundColor: const Color(0xFF0F0F0F),
-    dividerColor: const Color.fromARGB(255, 33, 33, 33),
+    backgroundColor: AppColors.secondary,
+    dividerColor: AppColors.text,
     dayStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
     dayForegroundColor: WidgetStatePropertyAll(
       Color.fromARGB(255, 255, 255, 255),
@@ -50,18 +50,20 @@ final dark = ThemeData(
     rangePickerHeaderBackgroundColor: Colors.green,
     rangePickerHeaderForegroundColor: Colors.amber,
     dayOverlayColor: WidgetStatePropertyAll(Color.fromARGB(174, 255, 78, 78)),
-    yearOverlayColor: WidgetStatePropertyAll(Colors.blue),
-    headerBackgroundColor: Colors.purple,
+    yearOverlayColor: WidgetStatePropertyAll(AppColors.primary),
+    headerBackgroundColor: AppColors.secondary,
     weekdayStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
     yearStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+    rangePickerHeaderHeadlineStyle: TextStyle(color: AppColors.text),
     rangeSelectionOverlayColor: WidgetStatePropertyAll(
       Color.fromARGB(255, 255, 78, 78),
     ),
-    headerHeadlineStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-    headerHelpStyle: TextStyle(
-      // color: Color.fromARGB(255, 255, 255, 255),
-      color: Color.fromRGBO(30, 29, 29, 1),
+    headerHeadlineStyle: TextStyle(
+      color: AppColors.text,
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
     ),
+    headerHelpStyle: TextStyle(color: AppColors.text),
   ),
   useMaterial3: true,
 );

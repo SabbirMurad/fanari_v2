@@ -5,6 +5,8 @@ class AppColors {
 
   // static const Color primary = Color(0xFFc5172e);
   static const Color primary = Color(0xFF7D9FFE);
+  // static const Color primary = Color(0xFF776FD9);
+  static const Color url = Color(0xFF7D9FFE);
   static const Color secondary = Color(0xFF3A3A3A);
   static const Color surface = Color(0xFF252525);
   static const Color containerBg = Color.fromARGB(255, 55, 57, 61);

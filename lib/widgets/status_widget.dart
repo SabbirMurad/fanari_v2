@@ -337,7 +337,7 @@ class _StatusWidgetState extends State<StatusWidget> {
             style: textStyle.copyWith(
               color: item.type == StatusTextType.unsecureUrl
                   ? Colors.red[400]
-                  : AppColors.primary,
+                  : AppColors.url,
             ),
           );
 
