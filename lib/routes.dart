@@ -102,17 +102,17 @@ class AppRoutes {
           return const ChatScreen();
         },
       ),
-      GoRoute(
-        path: '$chatTexts/:conversation-id',
-        // redirect: (context, state) async {
-        //   return !(await isSingedIn()) ? sign_in : null;
-        // },
-        builder: (context, state) {
-          final id = state.pathParameters['conversation-id']!;
+      // GoRoute(
+      //   path: '$chatTexts/:conversation-id',
+      //   // redirect: (context, state) async {
+      //   //   return !(await isSingedIn()) ? sign_in : null;
+      //   // },
+      //   builder: (context, state) {
+      //     final id = state.pathParameters['conversation-id']!;
 
-          return ChatTextsScreen(conversationId: id);
-        },
-      ),
+      //     return ChatTextsScreen(conversationId: id);
+      //   },
+      // ),
 
       //! Settings
       GoRoute(

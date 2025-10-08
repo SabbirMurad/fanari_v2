@@ -1,23 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_link_previewer/flutter_link_previewer.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 
 class MyLinkPreview extends StatelessWidget {
-  final String? title;
-  final String? description;
-  final String? image;
   final double? imageWidth;
   final EdgeInsetsGeometry? padding;
   final Color? backgroundColor;
   final BorderRadius? borderRadius;
   final Color? textColor;
+  final PreviewData previewData;
 
   const MyLinkPreview({
     super.key,
-    this.title,
-    this.description,
-    this.image,
+    required this.previewData,
     this.imageWidth,
     this.padding,
     this.backgroundColor,
@@ -43,23 +42,21 @@ class MyLinkPreview extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (title != null)
+                  if (previewData.title != null)
                     Text(
-                      title!,
+                      previewData.title!,
                       style: TextStyle(
-                        color:
-                            textColor ?? AppColors.text,
+                        color: textColor ?? AppColors.text,
                         fontSize: 17.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   SizedBox(height: 8.h),
-                  if (description != null)
+                  if (previewData.description != null)
                     Text(
-                      description!,
+                      previewData.description!,
                       style: TextStyle(
-                        color:
-                            textColor ?? AppColors.text,
+                        color: textColor ?? AppColors.text,
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w400,
                       ),
@@ -68,13 +65,13 @@ class MyLinkPreview extends StatelessWidget {
               ),
             ),
           ),
-          if (image != null)
+          if (previewData.image != null)
             Container(
               margin: EdgeInsets.only(left: 8),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: CachedNetworkImage(
-                  imageUrl: image!,
+                  imageUrl: previewData.image!.url,
                   width: imageWidth ?? 96.w,
                   height: imageWidth ?? 96.w,
                   fit: BoxFit.cover,

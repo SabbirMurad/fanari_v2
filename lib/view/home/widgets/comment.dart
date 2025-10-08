@@ -223,11 +223,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                 if (widget.model.link_preview != null)
                   MyLinkPreview(
                     padding: EdgeInsets.only(top: 12.h),
-                    image: widget.model.link_preview!.image != null
-                        ? widget.model.link_preview!.image!.url
-                        : null,
-                    title: widget.model.link_preview!.title,
-                    description: widget.model.link_preview!.description,
+                    previewData: widget.model.link_preview!,
                   ),
                 if (widget.model.youtube_attachment != null)
                   YoutubeAttachmentWidget(

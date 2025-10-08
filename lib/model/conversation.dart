@@ -10,7 +10,6 @@ class ConversationModel {
   int last_seen;
   bool typing;
   List<TextModel> texts;
-  TextModel? last_message;
 
   ConversationModel({
     required this.uuid,
@@ -20,7 +19,6 @@ class ConversationModel {
     required this.online,
     required this.texts,
     required this.last_seen,
-    required this.last_message,
     this.typing = false,
   });
 
@@ -50,7 +48,6 @@ class ConversationModel {
       texts: texts,
       last_seen: json['last_seen'],
       user_id: json['user_id'],
-      last_message: lastMessage,
     );
   }
 
@@ -72,7 +69,6 @@ class ConversationModel {
       texts: texts ?? this.texts,
       last_seen: last_seen ?? this.last_seen,
       user_id: user_id ?? this.user_id,
-      last_message: last_message ?? this.last_message,
     );
   }
 

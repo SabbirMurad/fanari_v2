@@ -3,6 +3,7 @@ import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/view/chat/chat_texts.dart';
 import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/horizontal_options.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -84,7 +85,6 @@ class _ChatScreenState extends State<ChatScreen> {
       texts: [],
       last_seen: 0,
       user_id: '1',
-      last_message: null,
       typing: true,
     ),
     ConversationModel(
@@ -92,50 +92,52 @@ class _ChatScreenState extends State<ChatScreen> {
       name: 'Group 2',
       image: null,
       online: true,
-      texts: [],
+      texts: [
+        TextModel(
+          uuid: '1',
+          owner: '2',
+          conversation_id: '2',
+          my_text: true,
+          images: [],
+          seen_by: [],
+          created_at: DateTime.now().microsecondsSinceEpoch,
+          videos: [],
+          type: TextType.Text,
+          text: 'Hello, how are you?',
+        ),
+      ],
       last_seen: 0,
       user_id: '1',
-      last_message: TextModel(
-        uuid: '1',
-        owner: '2',
-        conversation_id: '2',
-        my_text: true,
-        images: [],
-        seen_by: [],
-        created_at: DateTime.now().microsecondsSinceEpoch,
-        videos: [],
-        type: TextType.Text,
-        text: 'Hello, how are you?',
-      ),
     ),
     ConversationModel(
       uuid: '3',
       name: 'Group 3',
       image: null,
       online: true,
-      texts: [],
+      texts: [
+        TextModel(
+          uuid: '1',
+          owner: '2',
+          conversation_id: '2',
+          my_text: true,
+          images: [
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+          ],
+          seen_by: [],
+          created_at: DateTime.now().microsecondsSinceEpoch,
+          videos: [],
+          type: TextType.Image,
+        ),
+      ],
       last_seen: 0,
       user_id: '1',
-      last_message: TextModel(
-        uuid: '1',
-        owner: '2',
-        conversation_id: '2',
-        my_text: true,
-        images: [
-          ImageModel(
-            uuid: 'asdasdasd',
-            url:
-                'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
-            width: 400,
-            height: 400,
-            provider: AssetImage('assets/images/temp/user.jpg'),
-          ),
-        ],
-        seen_by: [],
-        created_at: DateTime.now().microsecondsSinceEpoch,
-        videos: [],
-        type: TextType.Image,
-      ),
     ),
   ];
 
@@ -231,7 +233,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 final item = entry.value;
 
                 return ConversationItem(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) {
+                          return ChatTextsScreen(
+                            conversationId: item.uuid,
+                            model: item,
+                          );
+                        },
+                      ),
+                    );
+                  },
                   model: item,
                   bottomBorder: index != _conversations.length - 1,
                   onSelect: (id) {

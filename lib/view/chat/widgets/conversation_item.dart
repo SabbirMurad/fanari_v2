@@ -74,22 +74,22 @@ class ConversationItem extends StatefulWidget {
 class _ConversationItemState extends State<ConversationItem> {
   Color? _bgColor() {
     if (widget.selected) return AppColors.primary.withValues(alpha: 0.2);
-    if (widget.model.last_message == null) return null;
+    if (widget.model.texts.isEmpty) return null;
 
-    if (widget.model.last_message!.my_text) return null;
+    if (widget.model.texts.last.my_text) return null;
 
-    if (widget.model.last_message!.seen_by.contains(widget.model.user_id))
+    if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
       return null;
 
     return AppColors.text;
   }
 
   FontWeight _textWeight() {
-    if (widget.model.last_message == null) return FontWeight.w400;
+    if (widget.model.texts.isEmpty) return FontWeight.w400;
 
-    if (widget.model.last_message!.my_text) return FontWeight.w400;
+    if (widget.model.texts.last.my_text) return FontWeight.w400;
 
-    if (widget.model.last_message!.seen_by.contains(widget.model.user_id))
+    if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
       return FontWeight.w400;
 
     return FontWeight.w600;
@@ -194,7 +194,7 @@ class _ConversationItemState extends State<ConversationItem> {
                                   ],
                                 ),
                               if (!widget.model.typing) ...[
-                                if (widget.model.last_message == null)
+                                if (widget.model.texts.isEmpty)
                                   Text(
                                     'You can now start a conversation',
                                     style: TextStyle(
@@ -204,8 +204,8 @@ class _ConversationItemState extends State<ConversationItem> {
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                if (widget.model.last_message != null) ...[
-                                  // if (!widget.model.last_message!.my_text)
+                                if (widget.model.texts.isNotEmpty) ...[
+                                  // if (!widget.model.texts.last!.my_text)
                                   //   Container(
                                   //     padding: EdgeInsets.only(right: 4),
                                   //     child: Icon(
@@ -221,10 +221,10 @@ class _ConversationItemState extends State<ConversationItem> {
                                   //           : Theme.of(context).colorScheme.secondary,
                                   //     ),
                                   //   ),
-                                  if (widget.model.last_message!.type ==
+                                  if (widget.model.texts.last.type ==
                                       TextType.Text)
                                     Text(
-                                      widget.model.last_message!.text!,
+                                      widget.model.texts.last.text!,
                                       style: TextStyle(
                                         color: AppColors.text,
                                         fontSize: 13.sp,
@@ -232,7 +232,7 @@ class _ConversationItemState extends State<ConversationItem> {
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                  if (widget.model.last_message!.type ==
+                                  if (widget.model.texts.last.type ==
                                       TextType.Image)
                                     Row(
                                       children: [
@@ -244,7 +244,7 @@ class _ConversationItemState extends State<ConversationItem> {
                                         ),
                                         SizedBox(width: 6.w),
                                         Text(
-                                          '${widget.model.last_message!.images.length} image${widget.model.last_message!.images.length > 1 ? 's' : ''}',
+                                          '${widget.model.texts.last.images.length} image${widget.model.texts.last.images.length > 1 ? 's' : ''}',
                                           style: TextStyle(
                                             color: AppColors.text,
                                             fontSize: 13.sp,
@@ -257,7 +257,7 @@ class _ConversationItemState extends State<ConversationItem> {
                             ],
                           ),
                         ),
-                        if (widget.model.last_message != null)
+                        if (widget.model.texts.isNotEmpty)
                           Container(
                             margin: EdgeInsets.only(left: 6, right: 6),
                             width: 6.w,
@@ -267,11 +267,11 @@ class _ConversationItemState extends State<ConversationItem> {
                               color: AppColors.text.withValues(alpha: .8),
                             ),
                           ),
-                        if (widget.model.last_message != null)
+                        if (widget.model.texts.isNotEmpty)
                           Text(
                             utils.timeAgo(
                               DateTime.fromMillisecondsSinceEpoch(
-                                widget.model.last_message!.created_at,
+                                widget.model.texts.last.created_at,
                               ),
                             ),
                             style: TextStyle(
