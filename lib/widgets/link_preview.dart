@@ -1,24 +1,26 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fanari_v2/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MyLinkPreview extends StatelessWidget {
   final double? imageWidth;
   final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
   final Color? backgroundColor;
   final BorderRadius? borderRadius;
   final Color? textColor;
   final PreviewData previewData;
+  final double? width;
 
   const MyLinkPreview({
     super.key,
     required this.previewData,
     this.imageWidth,
     this.padding,
+    this.width,
+    this.margin,
     this.backgroundColor,
     this.borderRadius,
     this.textColor,
@@ -28,6 +30,8 @@ class MyLinkPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: padding,
+      width: width ?? double.infinity,
+      margin: margin,
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: borderRadius,

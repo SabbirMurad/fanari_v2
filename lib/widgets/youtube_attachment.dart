@@ -18,6 +18,7 @@ class YoutubeAttachmentWidget extends StatefulWidget {
   final double sidebarWidth;
   final Color? backgroundColor;
   final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
 
   static String openExternalIcon =
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g transform="translate(-3 -3)"><path d="M10.651,6a.875.875,0,0,0,0,1.749h4.858L8.256,15a.875.875,0,0,0,1.237,1.237l7.252-7.252v4.858a.875.875,0,1,0,1.749,0V6.875A.875.875,0,0,0,17.62,6Z" transform="translate(3.441 2.065)" fill="#f9f9f9"/><path d="M19.741,27a4.287,4.287,0,0,0,4.234-3.617A4.288,4.288,0,0,0,27,19.286v-12A4.286,4.286,0,0,0,22.714,3h-12A4.288,4.288,0,0,0,6.6,6.081,4.287,4.287,0,0,0,3,10.312V21a6,6,0,0,0,6,6ZM4.714,10.312A2.572,2.572,0,0,1,6.429,7.887v11.4a4.286,4.286,0,0,0,4.286,4.286H22.166a2.573,2.573,0,0,1-2.425,1.714H9A4.286,4.286,0,0,1,4.714,21Zm6-5.6h12a2.571,2.571,0,0,1,2.571,2.571v12a2.571,2.571,0,0,1-2.571,2.571h-12a2.571,2.571,0,0,1-2.571-2.571v-12A2.571,2.571,0,0,1,10.714,4.714Z" fill="#f9f9f9"/></g></svg>';
@@ -34,6 +35,7 @@ class YoutubeAttachmentWidget extends StatefulWidget {
     required this.model,
     this.textColor,
     this.padding,
+    this.margin,
     this.sidebarColor,
     this.sidebarBorderRadius,
     this.backgroundColor,
@@ -145,6 +147,7 @@ class _YoutubeAttachmentWidgetState extends State<YoutubeAttachmentWidget> {
     return Container(
       width: thumbnailWidth,
       padding: widget.padding,
+      margin: widget.margin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

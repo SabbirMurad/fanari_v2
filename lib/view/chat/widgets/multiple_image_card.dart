@@ -8,9 +8,14 @@ import 'package:fanari_v2/utils.dart' as utils;
 // import 'package:vector_math/vector_math.dart';
 
 class MultipleImageCard extends StatefulWidget {
+  final TextDirection decoration;
   final List<ImageModel> images;
 
-  const MultipleImageCard({super.key, required this.images});
+  const MultipleImageCard({
+    super.key,
+    required this.images,
+    this.decoration = TextDirection.ltr,
+  });
 
   @override
   State<MultipleImageCard> createState() => _MultipleImageCardState();
@@ -105,6 +110,22 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        if (widget.decoration == TextDirection.rtl)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (widget.images.length > 3)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8.w),
+                  child: Text(
+                    '+${widget.images.length - 3}',
+                    style: TextStyle(color: AppColors.text, fontSize: 36.sp),
+                  ),
+                ),
+              downloadBtn,
+            ],
+          ),
         GestureDetector(
           onTap: () {
             utils.openImageViewer(
@@ -116,6 +137,11 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             );
           },
           child: Container(
+            margin: EdgeInsets.only(
+              left: widget.decoration == TextDirection.rtl ? 24.w : 0,
+              right: widget.decoration == TextDirection.ltr ? 24.w : 0,
+            ),
+            // color: Colors.green,
             padding: EdgeInsets.only(top: 20.w, bottom: 16.w, right: 60.w),
             child: Stack(
               children: [
@@ -142,22 +168,22 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             ),
           ),
         ),
-        SizedBox(width: 24.w),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (widget.images.length > 3)
-              Padding(
-                padding: EdgeInsets.only(bottom: 8.w),
-                child: Text(
-                  '+${widget.images.length - 3}',
-                  style: TextStyle(color: AppColors.text, fontSize: 36.sp),
+        if (widget.decoration == TextDirection.ltr)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (widget.images.length > 3)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8.w),
+                  child: Text(
+                    '+${widget.images.length - 3}',
+                    style: TextStyle(color: AppColors.text, fontSize: 36.sp),
+                  ),
                 ),
-              ),
-            downloadBtn,
-          ],
-        ),
+              downloadBtn,
+            ],
+          ),
       ],
     );
   }

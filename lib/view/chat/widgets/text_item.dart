@@ -152,35 +152,49 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     return Container(
       transform: Matrix4.translationValues(_swipeOffset, 0, 0),
       constraints: BoxConstraints(maxWidth: _maxTextWidth),
-      decoration: BoxDecoration(
-        color: widget.model.my_text ? AppColors.primary : AppColors.secondary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.r),
-          topRight: Radius.circular(10.r),
-          bottomLeft: Radius.circular(widget.model.my_text ? 10.r : 4.r),
-          bottomRight: Radius.circular(widget.model.my_text ? 4.r : 10.r),
-        ),
-      ),
-      padding: EdgeInsets.all(widget.model.text != null ? 10.w : 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: widget.model.my_text
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
-          if (widget.model.text != null)
-            StatusWidget(
+          Container(
+            constraints: BoxConstraints(maxWidth: _maxTextWidth),
+            decoration: BoxDecoration(
+              color: widget.model.my_text
+                  ? const Color.fromARGB(255, 163, 186, 255)
+                  : AppColors.secondary,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10.r),
+                topRight: Radius.circular(10.r),
+                bottomLeft: Radius.circular(widget.model.my_text ? 10.r : 4.r),
+                bottomRight: Radius.circular(widget.model.my_text ? 4.r : 10.r),
+              ),
+            ),
+            padding: EdgeInsets.all(10.w),
+            child: StatusWidget(
               text: widget.model.text!,
               width: _maxTextWidth,
               mentions: [],
-              selectable: false,
+              // selectable: false,
               fontSize: 14.sp,
+              textColor: widget.model.my_text
+                  ? AppColors.surface
+                  : AppColors.text,
             ),
+          ),
           if (widget.model.youtube_attachment != null)
             YoutubeAttachmentWidget(
               width: _maxTextWidth,
               model: widget.model.youtube_attachment!,
+              margin: EdgeInsets.only(top: 12.h),
             ),
           if (widget.model.link_preview != null)
-            MyLinkPreview(previewData: widget.model.link_preview!),
+            MyLinkPreview(
+              width: _maxTextWidth,
+              previewData: widget.model.link_preview!,
+              imageWidth: 56.w,
+              margin: EdgeInsets.only(top: 12.h),
+            ),
         ],
       ),
     );
@@ -282,7 +296,10 @@ class _TextItemWidgetState extends State<TextItemWidget> {
   }
 
   Widget _multipleImagesWidget() {
-    return MultipleImageCard(images: widget.model.images);
+    return MultipleImageCard(
+      images: widget.model.images,
+      decoration: widget.model.my_text ? TextDirection.rtl : TextDirection.ltr,
+    );
   }
 
   Widget _typeHandler() {
@@ -335,9 +352,6 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                     margin: EdgeInsets.only(left: 8),
                     child: NamedAvatar(
                       loading: false,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer,
                       name: 'Sabbir',
                       size: 36.w,
                     ),

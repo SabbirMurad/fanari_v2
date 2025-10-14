@@ -74,6 +74,20 @@ class _ChatScreenState extends State<ChatScreen> {
         isLoading = false;
       });
     });
+
+    _loadPostExtras();
+  }
+
+  void _loadPostExtras() async {
+    for (final item in _conversations) {
+      for (final text in item.texts) {
+        await text.load3rdPartyInfos();
+      }
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   List<ConversationModel> _conversations = <ConversationModel>[
@@ -82,7 +96,33 @@ class _ChatScreenState extends State<ChatScreen> {
       name: 'Group 1',
       image: null,
       online: true,
-      texts: [],
+      texts: [
+        TextModel(
+          uuid: '1',
+          owner: '2',
+          conversation_id: '2',
+          my_text: true,
+          images: [],
+          seen_by: [],
+          created_at: DateTime.now().microsecondsSinceEpoch,
+          videos: [],
+          type: TextType.Text,
+          text:
+              'here is a preview for youtube attachment https://www.youtube.com/watch?v=bc7JKgki3l0',
+        ),
+        TextModel(
+          uuid: '1',
+          owner: '2',
+          conversation_id: '2',
+          my_text: false,
+          images: [],
+          seen_by: [],
+          created_at: DateTime.now().microsecondsSinceEpoch,
+          videos: [],
+          type: TextType.Text,
+          text: 'link preview https://instagram.com',
+        ),
+      ],
       last_seen: 0,
       user_id: '1',
       typing: true,
@@ -140,6 +180,58 @@ class _ChatScreenState extends State<ChatScreen> {
           owner: '2',
           conversation_id: '2',
           my_text: false,
+          images: [
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/1468379/pexels-photo-1468379.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+            ImageModel(
+              uuid: 'asdasdasd',
+              url:
+                  'https://images.pexels.com/photos/1580271/pexels-photo-1580271.jpeg',
+              width: 400,
+              height: 400,
+              provider: AssetImage('assets/images/temp/user.jpg'),
+            ),
+          ],
+          seen_by: [],
+          created_at: DateTime.now().microsecondsSinceEpoch,
+          videos: [],
+          type: TextType.Image,
+        ),
+        TextModel(
+          uuid: '1',
+          owner: '2',
+          conversation_id: '2',
+          my_text: true,
           images: [
             ImageModel(
               uuid: 'asdasdasd',

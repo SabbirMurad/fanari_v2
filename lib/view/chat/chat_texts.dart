@@ -69,9 +69,6 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                         imageUrl: widget.model.image?.url,
                         name: widget.model.name,
                         size: 40.w,
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer,
                       ),
                     ),
                   ),

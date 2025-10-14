@@ -82,7 +82,7 @@ class PostModel {
 
   Future<void> load3rdPartyInfos() async {
     // Must have a caption to work with
-    if (caption == null) return;
+    if (this.caption == null) return;
 
     // If contains these datas then not showing the 3rd party infos
     if (this.images.isNotEmpty || this.videos.isNotEmpty || this.audio != null)
