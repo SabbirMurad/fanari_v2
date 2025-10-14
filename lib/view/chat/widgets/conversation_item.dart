@@ -81,7 +81,7 @@ class _ConversationItemState extends State<ConversationItem> {
     if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
       return null;
 
-    return AppColors.text;
+    return AppColors.surface;
   }
 
   FontWeight _textWeight() {

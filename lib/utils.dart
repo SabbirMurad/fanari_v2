@@ -2,6 +2,7 @@ library utils;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:io';
 import 'package:fanari_v2/constants/colors.dart';
@@ -10,6 +11,7 @@ import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
@@ -23,7 +25,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:blurhash_dart/blurhash_dart.dart';
+// import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:blurhash_ffi/blurhash_ffi.dart';
 import 'package:image/image.dart' as img;
 
 

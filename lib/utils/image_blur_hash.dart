@@ -1,11 +1,12 @@
 part of '../utils.dart';
 
-Future<String> generateBlurHash(Uint8List bytes) async {
-  // Decode image using package:image
-  final decodedImage = img.decodeImage(bytes)!;
-
-  // Encode to blurhash (more components = more detail, but larger string)
-  final blurHash = BlurHash.encode(decodedImage, numCompX: 4, numCompY: 3);
-
-  return blurHash.hash; // Store this string in your DB
+Future<String> generateBlurHash(ImageProvider imageProvider) async {
+  return await Isolate.run(() async {
+    // Encode to blurhash (more components = more detail, but larger string)
+    return await BlurhashFFI.encode(
+      imageProvider,
+      componentX: 4,
+      componentY: 3,
+    );
+  });
 }

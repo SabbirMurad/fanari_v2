@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/text.dart';
+import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
@@ -20,6 +21,7 @@ class TextItemWidget extends StatefulWidget {
   final Function(String)? onDeSelect;
   final Function()? onReply;
   final bool showProfile;
+  final EdgeInsetsGeometry? margin;
 
   const TextItemWidget({
     super.key,
@@ -27,6 +29,7 @@ class TextItemWidget extends StatefulWidget {
     this.selectMode = false,
     this.selected = false,
     this.onSelect,
+    this.margin,
     this.onDeSelect,
     this.onReply,
     this.showProfile = true,
@@ -278,13 +281,17 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     );
   }
 
+  Widget _multipleImagesWidget() {
+    return MultipleImageCard(images: widget.model.images);
+  }
+
   Widget _typeHandler() {
     if (widget.model.type == TextType.Text) return _text();
     if (widget.model.type == TextType.Image) {
       if (widget.model.images.length == 1) {
         return _singleImage();
       }
-      return Container(width: 50, height: 50, color: Colors.amber);
+      return _multipleImagesWidget();
     }
 
     // : widget.model.type == TextType.Emoji
@@ -308,6 +315,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
         color: widget.selected
             ? Theme.of(context).colorScheme.primary.withValues(alpha: .3)
             : null,
+        margin: widget.margin ?? EdgeInsets.only(bottom: 24.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: widget.model.my_text
@@ -336,28 +344,26 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                   ),
                 if (!widget.model.my_text && !widget.showProfile)
                   SizedBox(width: 36.w + 8.w),
-                if (widget.model.type != TextType.Image ||
-                    widget.model.images.length == 1)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
-                    child: Stack(
-                      alignment: widget.model.my_text
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      children: [
-                        AnimatedOpacity(
-                          duration: Duration(milliseconds: 100),
-                          opacity: _replyButtonOpacity,
-                          child: SvgPicture.asset(
-                            "assets/icons/${widget.model.my_text ? 'enter' : 'enter_rotated'}.svg",
-                            width: 24.w,
-                            color: AppColors.text,
-                          ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Stack(
+                    alignment: widget.model.my_text
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    children: [
+                      AnimatedOpacity(
+                        duration: Duration(milliseconds: 100),
+                        opacity: _replyButtonOpacity,
+                        child: SvgPicture.asset(
+                          "assets/icons/${widget.model.my_text ? 'enter' : 'enter_rotated'}.svg",
+                          width: 24.w,
+                          color: AppColors.text,
                         ),
-                        _gestureHandler(child: _typeHandler()),
-                      ],
-                    ),
+                      ),
+                      _gestureHandler(child: _typeHandler()),
+                    ],
                   ),
+                ),
               ],
             ),
             // if (widget.model.type == MessageType.Image &&

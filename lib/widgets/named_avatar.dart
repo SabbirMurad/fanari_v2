@@ -62,7 +62,7 @@ class _NamedAvatarState extends State<NamedAvatar> {
                 width: widget.size,
                 height: widget.size,
                 decoration: BoxDecoration(
-                  color: widget.backgroundColor ?? AppColors.containerBg,
+                  color: widget.backgroundColor ?? AppColors.secondary,
                   borderRadius: BorderRadius.circular(widget.size / 2),
                 ),
                 child: Center(

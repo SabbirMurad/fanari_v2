@@ -75,7 +75,8 @@ dependencies:
   flutter_otp_text_field: ^1.5.1+1
   flutter_blurhash: ^0.9.1
   blurhash: ^1.2.0
-
+  blurhash_ffi: ^1.2.7
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
