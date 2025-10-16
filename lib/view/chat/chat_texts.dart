@@ -1,5 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
@@ -36,7 +37,7 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
           IconButton(
             padding: const EdgeInsets.all(0.0),
             onPressed: () {
-              Navigator.of(context).pop();
+              AppRoutes.pop();
             },
             icon: Icon(
               Icons.arrow_back_ios_rounded,

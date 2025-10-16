@@ -7,11 +7,14 @@ class InputFieldVOne extends StatefulWidget {
   final TextEditingController controller;
   final bool isPasswordField;
   final String? error;
+  final InputBorder? border;
+
   const InputFieldVOne({
     super.key,
     required this.hintText,
     required this.controller,
     this.isPasswordField = false,
+    this.border,
     this.error,
   });
 
@@ -70,17 +73,21 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
               vertical: 16,
             ),
             hintText: _hasFocus ? '' : widget.hintText,
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.text, width: 2),
-              gapPadding: 4.w,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
+            border:
+                widget.border ??
+                OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.text, width: 2),
+                  gapPadding: 4.w,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
             labelText: widget.hintText,
             floatingLabelBehavior: FloatingLabelBehavior.auto,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.text, width: 2),
-            ),
+            enabledBorder:
+                widget.border ??
+                OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppColors.text, width: 2),
+                ),
             labelStyle: TextStyle(color: AppColors.text, fontSize: 16.sp),
           ),
           style: TextStyle(color: AppColors.text, fontSize: 16),

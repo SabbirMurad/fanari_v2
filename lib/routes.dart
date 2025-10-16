@@ -42,7 +42,13 @@ class AppRoutes {
 
   static void push(String route) => allRoutes.push(route);
   static void go(String route) => allRoutes.go(route);
-  static void pop() => allRoutes.pop();
+  static void pop() {
+    if (allRoutes.canPop()) {
+      allRoutes.pop();
+    } else {
+      allRoutes.go(landing);
+    }
+  }
 
   static final allRoutes = GoRouter(
     routes: [

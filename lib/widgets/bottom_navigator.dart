@@ -1,3 +1,4 @@
+import 'package:fanari_v2/view/create_post/create_post.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -31,6 +32,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
       onTap: () {
         widget.onNavChange?.call(index);
       },
+      behavior: HitTestBehavior.translucent,
       child: Container(
         color: Colors.transparent,
         child: Column(
@@ -104,18 +106,15 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
               _navItem('Search', 1),
               GestureDetector(
                 onTap: () async {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (_) {
-                  //       return CreatePost(
-                  //         onPostCreated: () {
-                  //           //TODO:
-                  //         },
-                  //       );
-                  //     },
-                  //   ),
-                  // );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return CreatePostScreen();
+                      },
+                    ),
+                  );
                 },
+                behavior: HitTestBehavior.translucent,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

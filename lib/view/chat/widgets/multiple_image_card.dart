@@ -82,50 +82,44 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
     );
   }
 
-  final downloadBtn = GestureDetector(
-    onTap: () async {
-      // _downloadImage(
-      //   widget.model.images.first.url,
-      //   '${DateTime.now().toString()}.jpg',
-      // );
-    },
-    child: Container(
-      width: 36.w,
-      height: 36.w,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.secondary,
-      ),
-      child: Center(
-        child: CustomSvg(
-          'assets/icons/download.svg',
-          color: AppColors.text,
-          size: 14.w,
+  late final downloadBtn = Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      if (widget.images.length > 3)
+        Padding(
+          padding: EdgeInsets.only(bottom: 8.w),
+          child: Text(
+            '+${widget.images.length - 3}',
+            style: TextStyle(color: AppColors.text, fontSize: 36.sp),
+          ),
+        ),
+      GestureDetector(
+        onTap: () async {},
+        child: Container(
+          width: 36.w,
+          height: 36.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.secondary,
+          ),
+          child: Center(
+            child: CustomSvg(
+              'assets/icons/download.svg',
+              color: AppColors.text,
+              size: 14.w,
+            ),
+          ),
         ),
       ),
-    ),
+    ],
   );
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (widget.decoration == TextDirection.rtl)
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (widget.images.length > 3)
-                Padding(
-                  padding: EdgeInsets.only(bottom: 8.w),
-                  child: Text(
-                    '+${widget.images.length - 3}',
-                    style: TextStyle(color: AppColors.text, fontSize: 36.sp),
-                  ),
-                ),
-              downloadBtn,
-            ],
-          ),
+        if (widget.decoration == TextDirection.rtl) downloadBtn,
         GestureDetector(
           onTap: () {
             utils.openImageViewer(
@@ -168,22 +162,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             ),
           ),
         ),
-        if (widget.decoration == TextDirection.ltr)
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (widget.images.length > 3)
-                Padding(
-                  padding: EdgeInsets.only(bottom: 8.w),
-                  child: Text(
-                    '+${widget.images.length - 3}',
-                    style: TextStyle(color: AppColors.text, fontSize: 36.sp),
-                  ),
-                ),
-              downloadBtn,
-            ],
-          ),
+        if (widget.decoration == TextDirection.ltr) downloadBtn,
       ],
     );
   }

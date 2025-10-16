@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -104,7 +105,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
             if (images == null) return;
 
             setState(() {
-              _selectedImageDatas.addAll(images);
+              _selectedImages.addAll(images);
             });
           },
           child: Container(
@@ -182,21 +183,21 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
     );
   }
 
-  List<Uint8List> _selectedImageDatas = [];
+  List<File> _selectedImages = [];
 
   Widget _imageContainer() {
     return AnimatedContainer(
       duration: Duration(milliseconds: 372),
-      height: _selectedImageDatas.isEmpty ? 0 : 112.h,
+      height: _selectedImages.isEmpty ? 0 : 112.h,
       width: double.infinity,
-      margin: EdgeInsets.only(bottom: _selectedImageDatas.isEmpty ? 0 : 8.h),
+      margin: EdgeInsets.only(bottom: _selectedImages.isEmpty ? 0 : 8.h),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(width: 20.w),
-            ..._selectedImageDatas.asMap().entries.map((entry) {
+            ..._selectedImages.asMap().entries.map((entry) {
               int index = entry.key;
               final image = entry.value;
 
@@ -209,7 +210,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image(image: MemoryImage(image), height: 112.h + 12),
+                    child: Image(image: FileImage(image), height: 112.h + 12),
                   ),
                 ),
                 childWhenDragging: Opacity(
@@ -218,16 +219,15 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                     padding: const EdgeInsets.only(right: 12),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image(image: MemoryImage(image), height: 112.h),
+                      child: Image(image: FileImage(image), height: 112.h),
                     ),
                   ),
                 ),
                 child: DragTarget<int>(
                   onAcceptWithDetails: (details) {
-                    final item = _selectedImageDatas.removeAt(details.data);
-                    _selectedImageDatas.insert(index, item);
-                    // final itemFile = _selectedImageFiles.removeAt(details.data);
-                    // _selectedImageFiles.insert(index, itemFile);
+                    final item = _selectedImages.removeAt(details.data);
+                    _selectedImages.insert(index, item);
+
                     setState(() {});
                   },
                   builder: (context, candidateData, rejectedData) {
@@ -239,15 +239,14 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(6),
                             child: Image(
-                              image: MemoryImage(image),
+                              image: FileImage(image),
                               height: 112.h,
                             ),
                           ),
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                _selectedImageDatas.removeAt(index);
-                                // _selectedImageFiles.removeAt(index);
+                                _selectedImages.removeAt(index);
                               });
                             },
                             child: Container(
@@ -315,7 +314,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                   alignment: Alignment.centerRight,
                   children: [
                     _actionsAndInput(),
-                    if (!_hasInputText && _selectedImageDatas.isEmpty)
+                    if (!_hasInputText && _selectedImages.isEmpty)
                       SocialVoiceRecorder(
                         barWidth: 1.sw - 40.w - 40.w - 12.w,
                         barHeight: 40.w,

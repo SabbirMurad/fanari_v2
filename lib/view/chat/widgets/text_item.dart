@@ -158,7 +158,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             : CrossAxisAlignment.start,
         children: [
           Container(
-            constraints: BoxConstraints(maxWidth: _maxTextWidth),
+            constraints: BoxConstraints(maxWidth: _maxTextWidth), 
             decoration: BoxDecoration(
               color: widget.model.my_text
                   ? const Color.fromARGB(255, 163, 186, 255)

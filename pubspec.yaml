@@ -130,6 +130,7 @@ flutter:
     - assets/icons/
     - assets/icons/bottom_nav/
     - assets/icons/more_options/
+    - assets/icons/post/
     - assets/icons/settings/
     - assets/images/
     - assets/images/temp/
