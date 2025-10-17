@@ -13,8 +13,8 @@ class ColorFadeBox extends StatefulWidget {
 
   const ColorFadeBox({
     super.key,
-    this.color1 = const Color.fromARGB(255, 46, 48, 53),
-    this.color2 = const Color.fromARGB(255, 55, 57, 61),
+    this.color1 = const Color(0xffFF3A3A3A),
+    this.color2 = const Color.fromARGB(120, 58, 58, 58),
     this.borderRadius,
     this.duration = const Duration(milliseconds: 2000),
     this.width,

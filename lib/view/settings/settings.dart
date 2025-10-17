@@ -108,6 +108,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     text: 'Subscriptions',
                     onTap: () {},
                   ),
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 18.w, horizontal: 24.w),
+              child: Column(
+                children: [
                   _settingsOption(
                     icon: 'assets/icons/settings/notification.svg',
                     text: 'Notifications',
@@ -115,10 +128,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       AppRoutes.push(AppRoutes.notificationSettings);
                     },
                   ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/visible.svg',
+                    text: 'Color & Themes',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/language.svg',
+                    text: 'Language',
+                    onTap: () {},
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 36.h),
+            SizedBox(height: 24.h),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 18.w, horizontal: 24.w),
+              child: Column(
+                children: [
+                  _settingsOption(
+                    icon: 'assets/icons/settings/lock.svg',
+                    text: 'Privacy Policy',
+                    onTap: () {},
+                  ),
+                  _settingsOption(
+                    icon: 'assets/icons/settings/lock.svg',
+                    text: 'Terms of Service',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -130,17 +176,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   _settingsOption(
                     icon: 'assets/icons/settings/visible.svg',
-                    text: 'Color & Themes',
+                    text: 'Reports',
                     onTap: () {},
                   ),
                   _settingsOption(
                     icon: 'assets/icons/settings/language.svg',
-                    text: 'Language',
-                    onTap: () {},
-                  ),
-                  _settingsOption(
-                    icon: 'assets/icons/settings/lock.svg',
-                    text: 'Privacy Policy',
+                    text: 'Support',
                     onTap: () {},
                   ),
                 ],
@@ -169,6 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
+            SizedBox(height: 84.h),
           ],
         ),
       ),

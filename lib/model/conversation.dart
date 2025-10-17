@@ -35,11 +35,6 @@ class ConversationModel {
       }
     }
 
-    TextModel? lastMessage = null;
-    if (texts.isNotEmpty) {
-      lastMessage = texts.first;
-    }
-
     return ConversationModel(
       uuid: json['uuid'],
       name: json['name'],

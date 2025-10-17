@@ -296,9 +296,12 @@ class _TextItemWidgetState extends State<TextItemWidget> {
   }
 
   Widget _multipleImagesWidget() {
-    return MultipleImageCard(
-      images: widget.model.images,
-      decoration: widget.model.my_text ? TextDirection.rtl : TextDirection.ltr,
+    return Container(
+      transform: Matrix4.translationValues(_swipeOffset, 0, 0),
+      child: MultipleImageCard(
+        images: widget.model.images,
+        decoration: widget.model.my_text ? TextDirection.rtl : TextDirection.ltr,
+      ),
     );
   }
 

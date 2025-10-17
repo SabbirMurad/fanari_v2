@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:fanari_v2/model/mention.dart';
-import 'package:fanari_v2/model/nhentai.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';
@@ -79,7 +77,7 @@ class CommentModel {
     }
 
     if (this.link_preview == null && this.youtube_attachment == null) {
-      final arr = this.caption!.split(' ');
+      final arr = this.caption!.split(' '); 
       for (var i = 0; i < arr.length; i++) {
         if (arr[i].startsWith('https://') ||
             arr[i].startsWith('http://') ||
