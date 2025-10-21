@@ -1,6 +1,8 @@
+import 'package:fanari_v2/model/audio.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
+import 'package:fanari_v2/model/attachment.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
@@ -13,7 +15,8 @@ class TextModel {
   final String? text;
   final List<ImageModel> images;
   final List<VideoModel> videos;
-  final String? audio;
+  final AttachmentModel? attachment;
+  final AudioModel? audio;
   final TextType type;
   final List<String> seen_by;
   final int created_at;
@@ -32,6 +35,7 @@ class TextModel {
     required this.created_at,
     required this.videos,
     required this.type,
+    this.attachment,
     this.audio,
     this.youtube_attachment,
     this.link_preview,
@@ -42,8 +46,6 @@ class TextModel {
     for (var i = 0; i < json['seen_by'].length; i++) {
       seen_by.add(json['seen_by'][i]);
     }
-
-    String? audio = json['audio'];
 
     late TextType type;
     if (json['type'] == 'Text') {
@@ -71,7 +73,10 @@ class TextModel {
       seen_by: seen_by,
       created_at: json['created_at'],
       videos: [],
-      audio: audio,
+      attachment: json['attachment'] == null
+          ? null
+          : AttachmentModel.fromJson(json['attachment']),
+      audio: json['audio'] == null ? null : AudioModel.fromJson(json['audio']),
     );
   }
 

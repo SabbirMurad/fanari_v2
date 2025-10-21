@@ -205,22 +205,6 @@ class _ConversationItemState extends State<ConversationItem> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 if (widget.model.texts.isNotEmpty) ...[
-                                  // if (!widget.model.texts.last!.my_text)
-                                  //   Container(
-                                  //     padding: EdgeInsets.only(right: 4),
-                                  //     child: Icon(
-                                  //       // !widget.model.lastMessageSent
-                                  //       //     ? Icons.watch_later_outlined
-                                  //       //     :
-                                  //           !widget.model.lastMessageReceived
-                                  //           ? Icons.check
-                                  //           : Icons.done_all,
-                                  //       size: 18,
-                                  //       color: widget.model.lastMessageSeen
-                                  //           ? AppColors.primary
-                                  //           : Theme.of(context).colorScheme.secondary,
-                                  //     ),
-                                  //   ),
                                   if (widget.model.texts.last.type ==
                                       TextType.Text)
                                     Text(
@@ -245,6 +229,46 @@ class _ConversationItemState extends State<ConversationItem> {
                                         SizedBox(width: 6.w),
                                         Text(
                                           '${widget.model.texts.last.images.length} image${widget.model.texts.last.images.length > 1 ? 's' : ''}',
+                                          style: TextStyle(
+                                            color: AppColors.text,
+                                            fontSize: 13.sp,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  if (widget.model.texts.last.type ==
+                                      TextType.Audio)
+                                    Row(
+                                      children: [
+                                        CustomSvg(
+                                          'assets/icons/audio.svg',
+                                          size: 18.w,
+                                          fit: BoxFit.fitWidth,
+                                          color: AppColors.text,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          'Voice message',
+                                          style: TextStyle(
+                                            color: AppColors.text,
+                                            fontSize: 13.sp,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  if (widget.model.texts.last.type ==
+                                      TextType.Attachment)
+                                    Row(
+                                      children: [
+                                        CustomSvg(
+                                          'assets/icons/attachment.svg',
+                                          size: 14.w,
+                                          fit: BoxFit.fitWidth,
+                                          color: AppColors.text,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          'Attachment',
                                           style: TextStyle(
                                             color: AppColors.text,
                                             fontSize: 13.sp,

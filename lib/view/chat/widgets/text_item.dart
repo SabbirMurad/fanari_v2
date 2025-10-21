@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/attachment.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
+import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
@@ -158,7 +160,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             : CrossAxisAlignment.start,
         children: [
           Container(
-            constraints: BoxConstraints(maxWidth: _maxTextWidth), 
+            constraints: BoxConstraints(maxWidth: _maxTextWidth),
             decoration: BoxDecoration(
               color: widget.model.my_text
                   ? const Color.fromARGB(255, 163, 186, 255)
@@ -174,9 +176,16 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             child: StatusWidget(
               text: widget.model.text!,
               width: _maxTextWidth,
+              urlColor: widget.model.my_text
+                  ? Color(0xff007AFF)
+                  : AppColors.url,
+              fontWeight: widget.model.my_text
+                  ? FontWeight.w500
+                  : FontWeight.w400,
               mentions: [],
-              // selectable: false,
+              selectable: false,
               fontSize: 14.sp,
+
               textColor: widget.model.my_text
                   ? AppColors.surface
                   : AppColors.text,
@@ -300,8 +309,81 @@ class _TextItemWidgetState extends State<TextItemWidget> {
       transform: Matrix4.translationValues(_swipeOffset, 0, 0),
       child: MultipleImageCard(
         images: widget.model.images,
-        decoration: widget.model.my_text ? TextDirection.rtl : TextDirection.ltr,
+        decoration: widget.model.my_text
+            ? TextDirection.rtl
+            : TextDirection.ltr,
       ),
+    );
+  }
+
+  String _sizeFormatter(int size) {
+    if (size < 1024) return '${size} B';
+    if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(2)} KB';
+    return '${(size / 1024 / 1024).toStringAsFixed(2)} MB';
+  }
+
+  Widget _attachmentWidget(AttachmentModel attachment) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+      transform: Matrix4.translationValues(_swipeOffset, 0, 0),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.2),
+          width: 1.w,
+        ),
+      ),
+      constraints: BoxConstraints(maxWidth: 224.w),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomSvg('assets/icons/attachment.svg', width: 18.w, height: 18.w),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  attachment.name,
+                  style: TextStyle(color: AppColors.text, fontSize: 13.sp),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  _sizeFormatter(attachment.size),
+                  style: TextStyle(color: AppColors.text, fontSize: 10.sp),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 24.w),
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.surface, width: 1.w),
+            ),
+            child: Center(
+              child: CustomSvg(
+                'assets/icons/download.svg',
+                color: AppColors.text,
+                size: 14.w,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _audioWidget() {
+    return Container(
+      transform: Matrix4.translationValues(_swipeOffset, 0, 0),
+      constraints: BoxConstraints(maxWidth: _maxTextWidth),
+      child: SimpleAudioPlayer(width: 224.w, audio: widget.model.audio!),
     );
   }
 
@@ -313,6 +395,11 @@ class _TextItemWidgetState extends State<TextItemWidget> {
       }
       return _multipleImagesWidget();
     }
+
+    if (widget.model.type == TextType.Attachment)
+      return _attachmentWidget(widget.model.attachment!);
+
+    if (widget.model.type == TextType.Audio) return _audioWidget();
 
     // : widget.model.type == TextType.Emoji
     // ? emoji != null

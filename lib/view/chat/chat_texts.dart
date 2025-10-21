@@ -61,17 +61,11 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
               },
               child: Row(
                 children: [
-                  Hero(
-                    tag: widget.model.uuid + 'picture',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: NamedAvatar(
-                        loading: false,
-                        imageUrl: widget.model.image?.url,
-                        name: widget.model.name,
-                        size: 40.w,
-                      ),
-                    ),
+                  NamedAvatar(
+                    loading: false,
+                    imageUrl: widget.model.image?.url,
+                    name: widget.model.name,
+                    size: 40.w,
                   ),
                   SizedBox(width: 6.w),
                   Column(

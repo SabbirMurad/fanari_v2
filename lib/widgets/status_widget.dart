@@ -12,6 +12,7 @@ class StatusWidget extends StatefulWidget {
   final double? truncatedLines;
   final Color? textColor;
   final Color? moreButtonColor;
+  final Color? urlColor;
   final double? fontSize;
   final FontWeight fontWeight;
   final bool selectable;
@@ -26,6 +27,7 @@ class StatusWidget extends StatefulWidget {
     this.fontWeight = FontWeight.w400,
     this.truncatedLines,
     this.textColor,
+    this.urlColor,
     this.moreButtonColor,
     this.fontSize,
   });
@@ -337,7 +339,7 @@ class _StatusWidgetState extends State<StatusWidget> {
             style: textStyle.copyWith(
               color: item.type == StatusTextType.unsecureUrl
                   ? Colors.red[400]
-                  : AppColors.url,
+                  : widget.urlColor ?? AppColors.url,
             ),
           );
 

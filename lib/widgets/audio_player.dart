@@ -1,15 +1,19 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/audio.dart';
 import 'package:flutter/material.dart';
 
 class SimpleAudioPlayer extends StatefulWidget {
   final double width;
-  final Source audioSource;
+  final AudioModel audio;
+  // final Source audioSource;
   final Color? primaryColor;
 
   const SimpleAudioPlayer({
     super.key,
     required this.width,
-    required this.audioSource,
+    required this.audio,
+    // required this.audioSource,
     this.primaryColor,
   });
 
@@ -19,7 +23,7 @@ class SimpleAudioPlayer extends StatefulWidget {
 
 class _AudioPlayerState extends State<SimpleAudioPlayer> {
   final player = AudioPlayer();
-  bool _playerReady = false;
+  bool _loading = false;
   bool _playing = false;
   double _currentPosition = 0;
   double _totalDuration = 0;
@@ -30,27 +34,27 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
   void initState() {
     super.initState();
 
-    player.setSource(widget.audioSource).then((_) {
-      player.getDuration().then((value) {
-        setState(() {
-          _totalDuration = value!.inSeconds.toDouble();
-          _playerReady = true;
-        });
-      });
-    });
+    // player.setSource(widget.audioSource).then((_) {
+    //   player.getDuration().then((value) {
+    //     setState(() {
+    //       _totalDuration = value!.inSeconds.toDouble();
+    //       _playerReady = true;
+    //     });
+    //   });
+    // });
 
-    player.onPositionChanged.listen((value) {
-      setState(() {
-        _currentPosition = value.inSeconds.toDouble();
-        _completed = true;
-      });
-    });
+    // player.onPositionChanged.listen((value) {
+    //   setState(() {
+    //     _currentPosition = value.inSeconds.toDouble();
+    //     _completed = true;
+    //   });
+    // });
 
-    player.onPlayerComplete.listen((_) {
-      setState(() {
-        _playing = false;
-      });
-    });
+    // player.onPlayerComplete.listen((_) {
+    //   setState(() {
+    //     _playing = false;
+    //   });
+    // });
   }
 
   @override
@@ -60,7 +64,9 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
     super.dispose();
   }
 
-  String _secondsToTime(double seconds) {
+  String _secondsToTime(int sec) {
+    double seconds = sec.toDouble();
+
     return '${(seconds ~/ 60) < 10 ? '0' : ''}${seconds ~/ 60}:${int.parse((seconds % 60).toStringAsFixed(0)) < 10 ? '0' : ''}${(seconds % 60).toStringAsFixed(0)}';
   }
 
@@ -73,13 +79,13 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
         children: [
           GestureDetector(
             onTap: () {
-              if (!_playerReady) return;
+              if (_loading) return;
 
-              if (_playing) {
-                player.pause();
-              } else {
-                player.resume();
-              }
+              // if (_playing) {
+              //   player.pause();
+              // } else {
+              //   player.resume();
+              // }
 
               setState(() {
                 _playing = !_playing;
@@ -95,39 +101,35 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color:
-                    widget.primaryColor ??
-                    Theme.of(context).colorScheme.primary,
+                color: widget.primaryColor ?? AppColors.primary,
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child:
-                    !_playerReady
-                        ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            color: Colors.white,
-                          ),
-                        )
-                        : AnimatedCrossFade(
-                          firstChild: Icon(
-                            Icons.play_arrow_rounded,
-                            color: Theme.of(context).colorScheme.tertiary,
-                            size: 28,
-                          ),
-                          secondChild: Icon(
-                            Icons.pause,
-                            color: Theme.of(context).colorScheme.tertiary,
-                            size: 28,
-                          ),
-                          crossFadeState:
-                              _playing
-                                  ? CrossFadeState.showSecond
-                                  : CrossFadeState.showFirst,
-                          duration: const Duration(milliseconds: 300),
+                child: _loading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: Colors.white,
                         ),
+                      )
+                    : AnimatedCrossFade(
+                        firstChild: Icon(
+                          Icons.play_arrow_rounded,
+                          color: AppColors.text,
+                          size: 28,
+                        ),
+                        secondChild: Icon(
+                          Icons.pause,
+                          color: AppColors.text,
+                          size: 28,
+                        ),
+                        crossFadeState: _playing
+                            ? CrossFadeState.showSecond
+                            : CrossFadeState.showFirst,
+                        duration: const Duration(milliseconds: 300),
+                      ),
               ),
             ),
           ),
@@ -154,12 +156,8 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
                     value: _currentPosition,
                     min: 0,
                     max: _totalDuration,
-                    activeColor:
-                        widget.primaryColor ??
-                        Theme.of(context).colorScheme.primary,
-                    thumbColor:
-                        widget.primaryColor ??
-                        Theme.of(context).colorScheme.primary,
+                    activeColor: widget.primaryColor ?? AppColors.text,
+                    thumbColor: widget.primaryColor ?? AppColors.primary,
                     inactiveColor: Colors.white.withValues(alpha: .8),
                     onChanged: (value) {
                       player.seek(Duration(seconds: value.toInt()));
@@ -170,10 +168,10 @@ class _AudioPlayerState extends State<SimpleAudioPlayer> {
                   padding: EdgeInsets.only(top: 2, right: 2),
                   child: Text(
                     _started
-                        ? "${_secondsToTime(_currentPosition)}"
-                        : "${_secondsToTime(_totalDuration)}",
+                        ? "${_secondsToTime(_currentPosition.toInt())}"
+                        : "${_secondsToTime(widget.audio.duration)}",
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppColors.text,
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                     ),
