@@ -1,13 +1,10 @@
-import 'package:fanari_v2/view/create_post/create_post.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fanari_v2/utils.dart' as utils;
-import 'package:image_picker/image_picker.dart';
+import 'package:fanari_v2/view/create_post/create_post.dart';
 
 class CustomBottomNavigator extends ConsumerStatefulWidget {
   final int? selectedNavIndex;
@@ -60,22 +57,8 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
     );
   }
 
-  String? _hash;
-
   @override
   Widget build(BuildContext context) {
-    // final user = ref.watch(userNotifierProvider);
-
-    // final hasUnseenNotifications = ref
-    //     .watch(notificationsNotifierProvider)
-    //     .when(
-    //       data: (data) {
-    //         return data.any((element) => !element.seen);
-    //       },
-    //       error: (error, stackTrace) => false,
-    //       loading: () => false,
-    //     );
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(

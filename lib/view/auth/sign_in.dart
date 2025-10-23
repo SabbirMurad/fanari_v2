@@ -1,12 +1,13 @@
-import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/widgets/cross_fade_box.dart';
-import 'package:fanari_v2/widgets/input_field_v_one.dart';
-import 'package:fanari_v2/widgets/named_avatar.dart';
-import 'package:fanari_v2/widgets/primary_button.dart';
-import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/widgets/svg_handler.dart';
+import 'package:fanari_v2/widgets/named_avatar.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
+import 'package:fanari_v2/widgets/primary_button.dart';
+import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils.dart' as utils;
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -96,6 +97,43 @@ class _SignInScreenState extends State<SignInScreen> {
     ];
   }
 
+  void _getAccountInformation() async {
+    if (_emailController.text.isEmpty) {
+      utils.showCustomToast(text: 'Please enter your email or username.');
+      return;
+    }
+
+    final email = _emailController.text.trim().toLowerCase();
+
+    setState(() {
+      _loading = true;
+    });
+
+    final response = await utils.CustomHttp.get(
+      endpoint: '/auth/user/$email',
+      needAuth: false,
+    );
+
+    if (response.statusCode == 200) {
+      print('');
+      print(response.data);
+      print('');
+    }
+
+    print('');
+    print(response.error);
+    print('');
+
+    setState(() {
+      _loading = false;
+    });
+
+    // setState(() {
+    //   _emailEntered = true;
+    // });
+    // _goToNextPage();
+  }
+
   List<Widget> _enterEmailWidgets() {
     return [
       SizedBox(height: 72.h),
@@ -122,12 +160,7 @@ class _SignInScreenState extends State<SignInScreen> {
           PrimaryButton(
             loading: _loading,
             text: 'Next',
-            onTap: () {
-              setState(() {
-                _emailEntered = true;
-              });
-              // _goToNextPage();
-            },
+            onTap: _getAccountInformation,
             width: 130.w,
           ),
         ],
