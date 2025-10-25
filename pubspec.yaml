@@ -76,6 +76,7 @@ dependencies:
   flutter_blurhash: ^0.9.1
   blurhash: ^1.2.0
   blurhash_ffi: ^1.2.7
+  image: ^4.5.4
   
 dev_dependencies:
   flutter_test:
