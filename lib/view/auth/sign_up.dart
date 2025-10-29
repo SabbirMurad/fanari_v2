@@ -39,6 +39,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _lastNameController.addListener(() {
+    
+    });
+  }
+
   void _goToPreviousPage() {
     setState(() {
       _selectedIndex--;
@@ -61,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           controller: _firstNameController,
         ),
         SizedBox(height: 24.h),
-        InputFieldVOne(hintText: 'Last Name', controller: _firstNameController),
+        InputFieldVOne(hintText: 'Last Name', controller: _lastNameController),
         SizedBox(height: 56.h),
         PrimaryButton(
           loading: _loading,
@@ -78,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: (1.sw * 0.5) - 72,
+                width: (1.sw * 0.5) - 72.w,
                 height: 1,
                 color: Colors.grey,
               ),
@@ -94,7 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               Container(
-                width: (1.sw * 0.5) - 72,
+                width: (1.sw * 0.5) - 72.w,
                 height: 1,
                 color: Colors.grey,
               ),
@@ -109,7 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'Already have account?',
               style: TextStyle(
                 color: AppColors.text,
-                fontSize: 14,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -120,7 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'Sign In',
                 style: TextStyle(
                   color: AppColors.primary,
-                  fontSize: 17,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.w400,
                 ),
               ),

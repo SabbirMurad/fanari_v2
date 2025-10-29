@@ -56,41 +56,46 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
     return Stack(
       alignment: Alignment.topRight,
       children: [
-        TextField(
-          obscureText: _obscureText,
-          focusNode: _focusNode,
-          controller: widget.controller,
-          decoration: InputDecoration(
-            errorText: widget.error,
-            errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.error,
-                width: 2,
+        Container(
+          height: 56.h,
+          child: TextField(
+            obscureText: _obscureText,
+            focusNode: _focusNode,
+            controller: widget.controller,
+
+            decoration: InputDecoration(
+              isDense: true,
+              errorText: widget.error,
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
+                  width: 1,
+                ),
               ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 16,
+              ),
+              hintText: _hasFocus ? '' : widget.hintText,
+              border:
+                  widget.border ??
+                  OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.text, width: 1),
+                    gapPadding: 4.w,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+              labelText: widget.hintText,
+              floatingLabelBehavior: FloatingLabelBehavior.auto,
+              enabledBorder:
+                  widget.border ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: AppColors.text, width: 1),
+                  ),
+              labelStyle: TextStyle(color: AppColors.text, fontSize: 16.sp),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 16,
-            ),
-            hintText: _hasFocus ? '' : widget.hintText,
-            border:
-                widget.border ??
-                OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.text, width: 2),
-                  gapPadding: 4.w,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-            labelText: widget.hintText,
-            floatingLabelBehavior: FloatingLabelBehavior.auto,
-            enabledBorder:
-                widget.border ??
-                OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: AppColors.text, width: 2),
-                ),
-            labelStyle: TextStyle(color: AppColors.text, fontSize: 16.sp),
+            style: TextStyle(color: AppColors.text, fontSize: 16.sp),
           ),
-          style: TextStyle(color: AppColors.text, fontSize: 16),
         ),
         if (widget.isPasswordField)
           Padding(

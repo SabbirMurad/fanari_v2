@@ -80,7 +80,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     super.dispose();
   }
 
-  Future<void> uploadImages(List<File> images) async {
+  Future<<String>> uploadImages(List<File> images) async {
     var uri = Uri.parse('${AppCredentials.domain}/image');
     var request = http.MultipartRequest('POST', uri);
 
@@ -123,8 +123,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     if (response.statusCode == 200) {
       print('Upload successful');
+      print('Upload success: ${response.stream.toString()}');
     } else {
       print('Upload failed: ${response.statusCode}');
+      print('Upload failed: ${response.stream.toString()}');
     }
   }
 
@@ -628,11 +630,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
             Spacer(),
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 print('');
                 print('Uploading');
                 print('');
-                uploadImages(_selectedImages);
+                await uploadImages(_selectedImages);
                 print('');
                 print('Done');
                 print('');
