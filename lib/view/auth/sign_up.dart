@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/auth/reusable/input_message.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:fanari_v2/utils.dart' as utils;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -36,14 +39,65 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
+    _timer?.cancel();
+
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _lastNameController.addListener(() {
-    
+
+    _emailController.addListener(() {
+      if (_emailController.text.isEmpty) {
+        setState(() {
+          _emailUnique = false;
+          _validEmail = false;
+        });
+        return;
+      }
+      _validateEmail(_emailController.text);
+    });
+  }
+
+  _validateEmail(String value) {
+    setState(() {
+      _validEmail = utils.isValidEmail(value);
+    });
+
+    if (_validEmail) {
+      _checkEmailAvailability(value);
+    }
+  }
+
+  Timer? _timer;
+
+  _checkEmailAvailability(String value) {
+    _timer?.cancel();
+
+    _timer = Timer(const Duration(milliseconds: 500), () async {
+      setState(() {
+        _checkingEmailAvailability = true;
+      });
+
+      final response = await utils.CustomHttp.get(
+        endpoint: '/user/${value}',
+        needAuth: false,
+      );
+
+      if (response.statusCode != 200) {
+        setState(() {
+          _checkingEmailAvailability = false;
+          _emailUnique = true;
+        });
+        return;
+      }
+
+      setState(() {
+        _checkingEmailAvailability = false;
+        _emailUnique = false;
+      });
     });
   }
 
@@ -75,6 +129,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
           loading: _loading,
           text: 'Next',
           onTap: () {
+            if (_firstNameController.text.isEmpty) {
+              utils.showCustomToast(text: 'Please enter your first name.');
+              return;
+            }
+
+            if (_lastNameController.text.isEmpty) {
+              utils.showCustomToast(text: 'Please enter your last name.');
+              return;
+            }
+
             _goToNextPage();
           },
           width: 130.w,
@@ -150,13 +214,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         SizedBox(height: 72.h),
         InputFieldVOne(hintText: 'Email Address', controller: _emailController),
         Padding(
-          padding: const EdgeInsets.only(top: 12, left: 6),
+          padding: EdgeInsets.only(top: 12.h, left: 6.w),
           child: Column(
             children: [
               InputMessage(
-                type: _validEmail
-                    ? InputMessageType.ok
-                    : InputMessageType.error,
+                type: InputMessageType.ok,
                 text: 'Valid email address',
               ),
               InputMessage(

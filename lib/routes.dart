@@ -56,8 +56,8 @@ class AppRoutes {
       GoRoute(
         path: landing,
         builder: (context, state) {
-          // return const LandingScreen();
-          return const HomeNavigator(selectedPage: 0);
+          return const LandingScreen();
+          // return const HomeNavigator(selectedPage: 0);
         },
       ),
       //! Auth

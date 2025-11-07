@@ -80,7 +80,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     super.dispose();
   }
 
-  Future<<String>> uploadImages(List<File> images) async {
+  Future<List<String>?> uploadImages(List<File> images) async {
     var uri = Uri.parse('${AppCredentials.domain}/image');
     var request = http.MultipartRequest('POST', uri);
 
@@ -94,7 +94,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         debugPrint('');
         debugPrint('Error decoding image');
         debugPrint('');
-        return;
+        return null;
       }
 
       final blur_hash = await BlurhashFFI.encode(

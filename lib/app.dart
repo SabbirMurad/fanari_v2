@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp.router(
         title: 'Fanari',
         scaffoldMessengerKey: rootScaffoldMessengerKey,
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.light,
         theme: theme.light,
         darkTheme: theme.dark,
         routerConfig: AppRoutes.allRoutes,
