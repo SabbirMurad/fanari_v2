@@ -4,6 +4,7 @@ import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -13,6 +14,23 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    _initiateStartup();
+  }
+
+  void _initiateStartup() async {
+    final localStorage = await SharedPreferences.getInstance();
+    print('');
+    print(localStorage.getString('access_token'));
+    print('');
+    if (localStorage.containsKey('access_token')) {
+      AppRoutes.go(AppRoutes.feed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

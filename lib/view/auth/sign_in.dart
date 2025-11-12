@@ -1,3 +1,4 @@
+import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -8,6 +9,7 @@ import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -29,18 +31,64 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  Future<void> _signIn() async {
+    setState(() {
+      _loading = true;
+    });
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/auth/sign-in',
+      body: {
+        'email_or_username': _emailController.text.trim().toLowerCase(),
+        'password': _passwordController.text.trim(),
+      },
+      needAuth: false,
+    );
+    setState(() {
+      _loading = false;
+    });
+
+    if (response.statusCode != 200) return;
+
+    final data = response.data['auth_payload'];
+
+    final localStorage = await SharedPreferences.getInstance();
+    localStorage.setString('access_token', data['access_token']);
+    localStorage.setInt(
+      'access_token_valid_till',
+      data['access_token_valid_till'],
+    );
+    localStorage.setString('refresh_token', data['refresh_token']);
+    localStorage.setString('role', data['role']);
+    localStorage.setString('user_id', data['user_id']);
+
+    AppRoutes.go(AppRoutes.feed);
+  }
+
+  String _selectedFirstName = '';
+  String _selectedLastName = '';
+  String _selectedUsername = '';
+  String? _selectedProfileImage;
+
   List<Widget> _enterPasswordWidgets() {
     return [
       SizedBox(height: 48.h),
       Row(
         children: [
-          NamedAvatar(loading: false, name: 'Sabbir', size: 80.w),
+          NamedAvatar(
+            loading: false,
+            name: _selectedFirstName,
+            size: 80.w,
+            imageUrl: _selectedProfileImage != null
+                ? '${AppCredentials.domain}/image/webp/${_selectedProfileImage}'
+                : null,
+          ),
           SizedBox(width: 12.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Sabbir Hassan',
+                '${_selectedFirstName} ${_selectedLastName}',
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 20.sp,
@@ -48,7 +96,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
               Text(
-                '@sabbir0087',
+                '@${_selectedUsername}',
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 14.sp,
@@ -88,7 +136,7 @@ class _SignInScreenState extends State<SignInScreen> {
           PrimaryButton(
             loading: _loading,
             text: 'Confirm',
-            onTap: () => AppRoutes.push(AppRoutes.feed),
+            onTap: _signIn,
             width: 130.w,
           ),
         ],
@@ -114,24 +162,19 @@ class _SignInScreenState extends State<SignInScreen> {
       needAuth: false,
     );
 
-    if (response.statusCode == 200) {
-      print('');
-      print(response.data);
-      print('');
-    }
-
-    print('');
-    print(response.error);
-    print('');
-
     setState(() {
       _loading = false;
     });
 
-    // setState(() {
-    //   _emailEntered = true;
-    // });
-    // _goToNextPage();
+    if (response.statusCode == 200) {
+      setState(() {
+        _selectedFirstName = response.data['first_name'];
+        _selectedLastName = response.data['last_name'];
+        _selectedUsername = response.data['username'];
+        _selectedProfileImage = response.data['profile_picture'];
+        _emailEntered = true;
+      });
+    }
   }
 
   List<Widget> _enterEmailWidgets() {
@@ -168,7 +211,6 @@ class _SignInScreenState extends State<SignInScreen> {
     ];
   }
 
-  //TODO: this is temp
   bool _emailEntered = false;
 
   @override

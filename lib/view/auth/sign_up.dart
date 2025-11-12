@@ -8,6 +8,7 @@ import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:fanari_v2/utils.dart' as utils;
@@ -31,6 +32,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _loading = false;
   int _selectedIndex = 0;
 
+  final _pageController = PageController(initialPage: 0);
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -39,6 +42,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
+    _pageController.dispose();
 
     _timer?.cancel();
 
@@ -59,11 +64,108 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       _validateEmail(_emailController.text);
     });
+
+    _usernameController.addListener(() {
+      if (_usernameController.text.isEmpty) {
+        setState(() {
+          _usernameUnique = false;
+          _usernameValid = false;
+        });
+        return;
+      }
+
+      _validateUsername(_usernameController.text);
+    });
+
+    _passwordController.addListener(() {
+      if (_passwordController.text.isEmpty) {
+        setState(() {
+          _passwordValid = false;
+          _passwordEmpty = true;
+          _passwordStrength = 0;
+        });
+        return;
+      }
+
+      setState(() {
+        _passwordEmpty = false;
+        _passwordValid = _passwordController.text.length >= 6;
+        _passwordStrength = passwordStrength(_passwordController.text);
+      });
+
+      if (_passwordValid) {
+        setState(() {
+          _passwordMatch =
+              _passwordController.text == _confirmPasswordController.text;
+        });
+      }
+    });
+
+    _confirmPasswordController.addListener(() {
+      if (_confirmPasswordController.text.isEmpty) {
+        setState(() {
+          _passwordMatch = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _passwordMatch =
+            _passwordController.text == _confirmPasswordController.text;
+      });
+    });
+  }
+
+  _validateUsername(String value) {
+    setState(() {
+      _username6Char = value.length >= 6 && value.length <= 32;
+      _usernameValid = isLowercaseNumberOrUnderscore(value);
+      _usernameUnique = false;
+    });
+
+    if (_usernameValid) {
+      _checkUsernameAvailability(value);
+    }
+  }
+
+  _checkUsernameAvailability(String value) {
+    _timer?.cancel();
+
+    _timer = Timer(const Duration(milliseconds: 500), () async {
+      setState(() {
+        _checkingUsernameAvailability = true;
+      });
+
+      final response = await utils.CustomHttp.get(
+        endpoint: '/auth/user/${value}',
+        needAuth: false,
+        showFloatingError: false,
+      );
+
+      if (response.statusCode != 200) {
+        setState(() {
+          _checkingUsernameAvailability = false;
+          _usernameUnique = true;
+        });
+        return;
+      }
+
+      setState(() {
+        _checkingUsernameAvailability = false;
+        _usernameUnique = false;
+      });
+    });
+  }
+
+  bool isLowercaseNumberOrUnderscore(String input) {
+    final regex = RegExp(r'^[a-z0-9_]+$');
+    return regex.hasMatch(input);
   }
 
   _validateEmail(String value) {
     setState(() {
       _validEmail = utils.isValidEmail(value);
+      _emailUnique = false;
     });
 
     if (_validEmail) {
@@ -82,8 +184,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       final response = await utils.CustomHttp.get(
-        endpoint: '/user/${value}',
+        endpoint: '/auth/user/${value}',
         needAuth: false,
+        showFloatingError: false,
       );
 
       if (response.statusCode != 200) {
@@ -105,12 +208,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() {
       _selectedIndex--;
     });
+
+    _pageController.animateToPage(
+      _selectedIndex,
+      duration: const Duration(milliseconds: 272),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _goToNextPage() {
     setState(() {
       _selectedIndex++;
     });
+
+    _pageController.animateToPage(
+      _selectedIndex,
+      duration: const Duration(milliseconds: 272),
+      curve: Curves.easeInOut,
+    );
   }
 
   Widget _nameWidget() {
@@ -218,7 +333,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             children: [
               InputMessage(
-                type: InputMessageType.ok,
+                type: _validEmail
+                    ? InputMessageType.ok
+                    : InputMessageType.error,
                 text: 'Valid email address',
               ),
               InputMessage(
@@ -253,7 +370,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
             PrimaryButton(
               loading: _loading,
               text: 'Next',
+              enabled: _emailUnique && _validEmail,
               onTap: () {
+                setState(() {
+                  _selectedEmail = _emailController.text.trim();
+                });
+
                 _goToNextPage();
               },
               width: 130.w,
@@ -283,13 +405,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 type: _username6Char
                     ? InputMessageType.ok
                     : InputMessageType.error,
-                text: 'At least 6 char or more.',
+                text: 'Within 6 to 32 chars.',
               ),
               InputMessage(
                 type: _usernameValid
                     ? InputMessageType.ok
                     : InputMessageType.error,
-                text: 'Only lowercase char or number.',
+                text: 'Only a to z, 0 to 9 or _.',
               ),
               InputMessage(
                 type: _checkingUsernameAvailability
@@ -323,6 +445,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             PrimaryButton(
               loading: _loading,
               text: 'Next',
+              enabled: _usernameUnique && _usernameValid && _username6Char,
               onTap: () {
                 _goToNextPage();
               },
@@ -338,6 +461,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _passwordMatch = false;
   int _passwordStrength = 0;
   bool _passwordEmpty = true;
+
+  String _createdAccountId = '';
+  String _selectedEmail = '';
+
+  Future<void> _createAccount() async {
+    final body = {
+      'first_name': _firstNameController.text,
+      'last_name': _lastNameController.text,
+      'email_address': _emailController.text,
+      'username': _usernameController.text,
+      'password': _passwordController.text,
+      'confirm_password': _passwordController.text,
+    };
+
+    setState(() {
+      _loading = true;
+    });
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/auth/sign-up',
+      body: body,
+      needAuth: false,
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _createdAccountId = response.data['user_id'];
+      });
+
+      _goToNextPage();
+    }
+
+    setState(() {
+      _loading = false;
+    });
+  }
 
   Widget _enterPasswordWidget() {
     return Column(
@@ -430,15 +589,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
             PrimaryButton(
               loading: _loading,
               text: 'Next',
-              onTap: () {
-                _goToNextPage();
-              },
+              enabled: _passwordValid && _passwordMatch,
+              onTap: _createAccount,
               width: 130.w,
             ),
           ],
         ),
       ],
     );
+  }
+
+  String _otp = '';
+
+  Future<void> _verifyAccount() async {
+    setState(() {
+      _loading = true;
+    });
+
+    final body = {'user_id': _createdAccountId, 'verification_code': _otp};
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/auth/validate-email',
+      body: body,
+      needAuth: false,
+    );
+
+    setState(() {
+      _loading = false;
+    });
+
+    if (response.statusCode == 200) {
+      final localStorage = await SharedPreferences.getInstance();
+      localStorage.setString('access_token', response.data['access_token']);
+      localStorage.setInt(
+        'access_token_valid_till',
+        response.data['access_token_valid_till'],
+      );
+
+      AppRoutes.go(AppRoutes.feed);
+    }
   }
 
   Widget _verificationWidget() {
@@ -461,7 +650,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               WidgetSpan(child: SizedBox(width: 6.w)),
               TextSpan(
-                text: 'sabbir0087@gmail.com',
+                text: _selectedEmail,
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 14.sp,
@@ -492,9 +681,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           onCodeChanged: (String code) {},
           onSubmit: (String verificationCode) {
-            // setState(() {
-            //   otp = verificationCode;
-            // });
+            setState(() {
+              _otp = verificationCode;
+            });
           },
         ),
         SizedBox(height: 24.h),
@@ -513,7 +702,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             PrimaryButton(
               loading: _loading,
               text: 'Next',
-              onTap: () {},
+              enabled: _otp.length == 6,
+              onTap: _verifyAccount,
               width: 130.w,
             ),
           ],
@@ -521,14 +711,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ],
     );
   }
-
-  late List<Widget> _allScreens = [
-    _nameWidget(),
-    _enterEmailWidget(),
-    _enterUsernameWidget(),
-    _enterPasswordWidget(),
-    _verificationWidget(),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -579,7 +761,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              Container(height: 0.55.sh, child: _allScreens[_selectedIndex]),
+              Container(
+                height: 0.55.sh,
+                child: PageView(
+                  controller: _pageController,
+                  children: [
+                    _nameWidget(),
+                    _enterEmailWidget(),
+                    _enterUsernameWidget(),
+                    _enterPasswordWidget(),
+                    _verificationWidget(),
+                  ],
+                  physics: const NeverScrollableScrollPhysics(),
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

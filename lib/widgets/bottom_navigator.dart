@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -5,6 +7,7 @@ import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/view/create_post/create_post.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 class CustomBottomNavigator extends ConsumerStatefulWidget {
   final int? selectedNavIndex;
@@ -61,150 +64,170 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.secondary.withValues(alpha: 0.85),
-            AppColors.secondary,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     colors: [
+      //       AppColors.secondary.withValues(alpha: 0.85),
+      //       AppColors.secondary,
+      //     ],
+      //     begin: Alignment.topCenter,
+      //     end: Alignment.bottomCenter,
+      //   ),
+      // ),
       child: SafeArea(
         bottom: true,
         top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 20.w,
-            right: 20.w,
-            top: 12.w,
-            bottom: 8.w,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _navItem('Home', 0),
-              _navItem('Search', 1),
-              GestureDetector(
-                onTap: () async {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) {
-                        return CreatePostScreen();
-                      },
-                    ),
-                  );
-                },
-                behavior: HitTestBehavior.translucent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 24.h,
-                      height: 24.h,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.text, width: 1.48),
-                      ),
-                      child: Icon(Icons.add, color: AppColors.text, size: 16.w),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Post',
-                      style: TextStyle(
-                        color: AppColors.text,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ],
-                ),
+        child: Container(
+          margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12.w),
+          child: LiquidGlass(
+            settings: LiquidGlassSettings(
+              blur: 3,
+              ambientStrength: 0.5,
+              lightAngle: -0.2 * pi,
+              glassColor: Colors.white12,
+            ),
+            shape: LiquidRoundedRectangle(borderRadius: Radius.circular(12.r)),
+            glassContainsChild: false,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 20.w,
+                right: 20.w,
+                top: 12.w,
+                bottom: 12.w,
               ),
-              _navItem('Market', 2),
-              GestureDetector(
-                onTap: () {
-                  // if (user != null) {
-                  // Scaffold.of(context).openDrawer();
-                  // widget.onProfileTap?.call();
-                  // setState(() {
-                  //   _selectedNavIndex = 3;
-                  // });
-
-                  widget.onNavChange?.call(3);
-                  // }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    NamedAvatar(
-                      loading: false,
-                      name: 'Sabbir Hassan',
-                      size: 24.h,
-                      backgroundColor: AppColors.surface,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _navItem('Home', 0),
+                  _navItem('Search', 1),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) {
+                            return CreatePostScreen();
+                          },
+                        ),
+                      );
+                    },
+                    behavior: HitTestBehavior.translucent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 24.h,
+                          height: 24.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.text,
+                              width: 1.48,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: AppColors.text,
+                            size: 16.w,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Post',
+                          style: TextStyle(
+                            color: AppColors.text,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
                     ),
-                    // user.when(
-                    //   data: (user) {
-                    //     return NamedAvatar(
-                    //       loading: user == null,
-                    //       imageUrl: user?.profilePicture?.url,
-                    //       name: user?.fullName ?? 'Loading name',
-                    //       size: _profileSize.sh,
-                    //       onTap: () {
-                    //         if (user != null) {
-                    //           // Scaffold.of(context).openDrawer();
-                    //           // widget.onProfileTap?.call();
-                    //           setState(() {
-                    //             _selectedNavIndex = 3;
-                    //           });
+                  ),
+                  _navItem('Market', 2),
+                  GestureDetector(
+                    onTap: () {
+                      // if (user != null) {
+                      // Scaffold.of(context).openDrawer();
+                      // widget.onProfileTap?.call();
+                      // setState(() {
+                      //   _selectedNavIndex = 3;
+                      // });
 
-                    //           widget.onNavChange?.call(3);
-                    //         }
-                    //       },
-                    //     );
-                    //   },
-                    //   error: (object, stack) {
-                    //     return Container(
-                    //       width: _profileSize.sh,
-                    //       height: _profileSize.sh,
-                    //       decoration: BoxDecoration(
-                    //         shape: BoxShape.circle,
-                    //         color: Theme.of(context).colorScheme.secondary,
-                    //       ),
-                    //       child: Center(
-                    //         child: Icon(
-                    //           Icons.error_outline_rounded,
-                    //           color: Theme.of(context).colorScheme.error,
-                    //           size: 20,
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   loading: () {
-                    //     return Container(
-                    //       width: _profileSize.sh,
-                    //       height: _profileSize.sh,
-                    //       decoration: BoxDecoration(
-                    //         shape: BoxShape.circle,
-                    //         color: Theme.of(context).colorScheme.secondary,
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Profile',
-                      style: TextStyle(
-                        color: AppColors.text,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w300,
-                      ),
+                      widget.onNavChange?.call(3);
+                      // }
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        NamedAvatar(
+                          loading: false,
+                          name: 'Sabbir Hassan',
+                          size: 24.h,
+                          backgroundColor: AppColors.surface,
+                        ),
+                        // user.when(
+                        //   data: (user) {
+                        //     return NamedAvatar(
+                        //       loading: user == null,
+                        //       imageUrl: user?.profilePicture?.url,
+                        //       name: user?.fullName ?? 'Loading name',
+                        //       size: _profileSize.sh,
+                        //       onTap: () {
+                        //         if (user != null) {
+                        //           // Scaffold.of(context).openDrawer();
+                        //           // widget.onProfileTap?.call();
+                        //           setState(() {
+                        //             _selectedNavIndex = 3;
+                        //           });
+
+                        //           widget.onNavChange?.call(3);
+                        //         }
+                        //       },
+                        //     );
+                        //   },
+                        //   error: (object, stack) {
+                        //     return Container(
+                        //       width: _profileSize.sh,
+                        //       height: _profileSize.sh,
+                        //       decoration: BoxDecoration(
+                        //         shape: BoxShape.circle,
+                        //         color: Theme.of(context).colorScheme.secondary,
+                        //       ),
+                        //       child: Center(
+                        //         child: Icon(
+                        //           Icons.error_outline_rounded,
+                        //           color: Theme.of(context).colorScheme.error,
+                        //           size: 20,
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        //   loading: () {
+                        //     return Container(
+                        //       width: _profileSize.sh,
+                        //       height: _profileSize.sh,
+                        //       decoration: BoxDecoration(
+                        //         shape: BoxShape.circle,
+                        //         color: Theme.of(context).colorScheme.secondary,
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Profile',
+                          style: TextStyle(
+                            color: AppColors.text,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

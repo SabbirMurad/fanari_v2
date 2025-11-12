@@ -8,6 +8,7 @@ class PrimaryButton extends StatefulWidget {
   final String text;
   final void Function()? onTap;
   final bool shadow;
+  final bool enabled;
   final Color? backgroundColor;
   final TextStyle? textStyle;
   final double? height;
@@ -20,6 +21,7 @@ class PrimaryButton extends StatefulWidget {
     required this.text,
     this.height,
     this.width,
+    this.enabled = true,
     this.borderRadius,
     this.onTap,
     this.shadow = true,
@@ -36,14 +38,19 @@ class _PrimaryButtonState extends State<PrimaryButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (widget.loading) return;
+        if (!widget.enabled || widget.loading) return;
+
         widget.onTap?.call();
       },
       child: Container(
         width: widget.width ?? double.infinity,
         height: widget.height ?? 48.h,
         decoration: BoxDecoration(
-          color: widget.backgroundColor ?? AppColors.primary,
+          color: widget.enabled
+              ? (widget.backgroundColor ?? AppColors.primary)
+              : (widget.backgroundColor ?? AppColors.primary).withValues(
+                  alpha: 0.65,
+                ),
           borderRadius: widget.borderRadius ?? BorderRadius.circular(24.r),
           boxShadow: widget.shadow
               ? [

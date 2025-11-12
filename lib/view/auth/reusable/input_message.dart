@@ -5,12 +5,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 enum InputMessageType { error, loading, ok, info }
 
-class InputMessage extends StatelessWidget {
+class InputMessage extends StatefulWidget {
   final String text;
   final InputMessageType type;
 
   const InputMessage({super.key, required this.text, required this.type});
 
+  @override
+  State<InputMessage> createState() => _InputMessageState();
+}
+
+class _InputMessageState extends State<InputMessage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -19,11 +24,11 @@ class InputMessage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (type == InputMessageType.error)
+          if (widget.type == InputMessageType.error)
             Svg.asset('assets/icons/error.svg', width: 13.w),
-          if (type == InputMessageType.ok)
+          if (widget.type == InputMessageType.ok)
             Svg.asset('assets/icons/success.svg', width: 13.w),
-          if (type == InputMessageType.loading)
+          if (widget.type == InputMessageType.loading)
             Container(
               width: 13.w,
               height: 13.w,
@@ -33,7 +38,7 @@ class InputMessage extends StatelessWidget {
                 strokeWidth: 2,
               ),
             ),
-          if (type == InputMessageType.info)
+          if (widget.type == InputMessageType.info)
             Container(
               margin: EdgeInsets.only(top: 2),
               child: Icon(
@@ -45,7 +50,7 @@ class InputMessage extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              text,
+              widget.text,
               style: TextStyle(
                 color: AppColors.text.withValues(alpha: .8),
                 fontSize: 13.sp,
