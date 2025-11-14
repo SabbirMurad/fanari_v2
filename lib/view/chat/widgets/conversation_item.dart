@@ -132,7 +132,7 @@ class _ConversationItemState extends State<ConversationItem> {
                 children: [
                   NamedAvatar(
                     loading: false,
-                    imageUrl: widget.model.image?.url,
+                    image: widget.model.image,
                     name: widget.model.name,
                     size: 56.w,
                   ),

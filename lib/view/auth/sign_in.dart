@@ -1,4 +1,5 @@
 import 'package:fanari_v2/constants/credential.dart';
+import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -68,7 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
   String _selectedFirstName = '';
   String _selectedLastName = '';
   String _selectedUsername = '';
-  String? _selectedProfileImage;
+  ImageModel? _selectedProfileImage;
 
   List<Widget> _enterPasswordWidgets() {
     return [
@@ -79,9 +80,7 @@ class _SignInScreenState extends State<SignInScreen> {
             loading: false,
             name: _selectedFirstName,
             size: 80.w,
-            imageUrl: _selectedProfileImage != null
-                ? '${AppCredentials.domain}/image/webp/${_selectedProfileImage}'
-                : null,
+            image: _selectedProfileImage,
           ),
           SizedBox(width: 12.w),
           Column(
@@ -171,7 +170,10 @@ class _SignInScreenState extends State<SignInScreen> {
         _selectedFirstName = response.data['first_name'];
         _selectedLastName = response.data['last_name'];
         _selectedUsername = response.data['username'];
-        _selectedProfileImage = response.data['profile_picture'];
+        _selectedProfileImage = response.data['profile_picture'] != null ? ImageModel.fromJson(
+          response.data['profile_picture'],
+        ) : null;
+
         _emailEntered = true;
       });
     }

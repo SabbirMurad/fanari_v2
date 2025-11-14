@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 
 class NamedAvatar extends StatefulWidget {
   final bool loading;
-  final String? imageUrl;
+  final ImageModel? image;
   final String name;
   final double size;
   final void Function()? onTap;
@@ -15,7 +17,7 @@ class NamedAvatar extends StatefulWidget {
   const NamedAvatar({
     super.key,
     required this.loading,
-    this.imageUrl,
+    this.image,
     required this.name,
     required this.size,
     this.backgroundColor,
@@ -40,16 +42,19 @@ class _NamedAvatarState extends State<NamedAvatar> {
                 height: widget.size,
                 borderRadius: BorderRadius.circular(widget.size / 2),
               )
-            : widget.imageUrl != null
+            : widget.image != null
             ? CachedNetworkImage(
-                imageUrl: widget.imageUrl!,
+                imageUrl: widget.image!.webp_url,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 placeholder: (context, url) {
-                  return ColorFadeBox(
+                  return SizedBox(
                     width: widget.size,
                     height: widget.size,
-                    borderRadius: BorderRadius.circular(widget.size / 2),
+                    child: BlurHash(
+                      hash: "L5H2EC=PM+yV0g-mq.wG9c010J}I",
+                      optimizationMode: BlurHashOptimizationMode.standard,
+                    ),
                   );
                 },
                 errorWidget: (context, url, error) => Icon(

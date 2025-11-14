@@ -4,14 +4,16 @@ import 'package:fanari_v2/constants/credential.dart';
 
 class ImageModel {
   final String uuid;
-  final String url;
+  final String webp_url;
+  final String original_url;
   final double width;
   final double height;
   final ImageProvider provider;
 
   const ImageModel({
     required this.uuid,
-    required this.url,
+    required this.webp_url,
+    required this.original_url,
     required this.width,
     required this.height,
     required this.provider,
@@ -20,11 +22,12 @@ class ImageModel {
   factory ImageModel.fromJson(Map<String, dynamic> json) {
     return ImageModel(
       uuid: json['uuid'],
-      url: '${AppCredentials.domain}/upload/image/${json['uuid']}',
+      webp_url: '${AppCredentials.domain}/image/webp/${json['uuid']}',
+      original_url: '${AppCredentials.domain}/image/original/${json['uuid']}',
       width: json['width'].toDouble(),
       height: json['height'].toDouble(),
       provider: CachedNetworkImageProvider(
-        '${AppCredentials.domain}/image/${json['uuid']}',
+        '${AppCredentials.domain}/image/webp/${json['uuid']}',
       ),
     );
   }

@@ -4,21 +4,23 @@ import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/poll.dart';
 import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/model/user.dart';
+import 'package:fanari_v2/providers/posts.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/widgets/post.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   ScrollController _scrollController = ScrollController();
   bool _loadingMore = false;
   bool _crossedBottomBar = false;
@@ -45,18 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
       //   _crossedBottomBar = false;
       // }
     });
-
-    _loadPostExtras();
-  }
-
-  void _loadPostExtras() async {
-    for (final item in _dummyPosts) {
-      await item.load3rdPartyInfos();
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   List<PostModel> _dummyPosts = [
@@ -132,48 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
           end_index: 73,
         ),
       ],
-      images: [
-        ImageModel(
-          uuid: 'asdasdasd',
-          url:
-              'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
-          width: 400,
-          height: 400,
-          provider: AssetImage('assets/images/temp/user.jpg'),
-        ),
-        ImageModel(
-          uuid: 'asdasdasd',
-          url:
-              'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
-          width: 400,
-          height: 400,
-          provider: AssetImage('assets/images/temp/user.jpg'),
-        ),
-        ImageModel(
-          uuid: 'asdasdasd',
-          url:
-              'https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg',
-          width: 400,
-          height: 400,
-          provider: AssetImage('assets/images/temp/user.jpg'),
-        ),
-        ImageModel(
-          uuid: 'asdasdasd',
-          url:
-              'https://images.pexels.com/photos/1468379/pexels-photo-1468379.jpeg',
-          width: 400,
-          height: 400,
-          provider: AssetImage('assets/images/temp/user.jpg'),
-        ),
-        ImageModel(
-          uuid: 'asdasdasd',
-          url:
-              'https://images.pexels.com/photos/1580271/pexels-photo-1580271.jpeg',
-          width: 400,
-          height: 400,
-          provider: AssetImage('assets/images/temp/user.jpg'),
-        ),
-      ],
+      images: [],
       videos: [],
       created_at: DateTime.now().millisecondsSinceEpoch,
       owner: UserModel(
@@ -282,6 +231,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final posts = ref.watch(postsNotifierProvider);
+
     return LiquidPullToRefresh(
       onRefresh: _onRefresh,
       height: 172,
@@ -308,11 +259,36 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: AppColors.surface,
               shadowColor: AppColors.containerBg,
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                return PostWidget(model: _dummyPosts[index]);
-              }, childCount: _dummyPosts.length),
-            ),
+            if (!_refreshing)
+              SliverList(
+                delegate: posts.when(
+                  loading: () {
+                    return SliverChildBuilderDelegate((context, index) {
+                      return Container();
+                    }, childCount: 5);
+                  },
+                  error: (obj, stack) {
+                    return SliverChildBuilderDelegate((context, index) {
+                      return Container();
+                    }, childCount: 1);
+                  },
+                  data: (posts) {
+                    return SliverChildBuilderDelegate((context, index) {
+                      final post = posts[index];
+                      return PostWidget(model: post);
+                    }, childCount: posts.length);
+                  },
+                ),
+              ),
+            if (_loadingMore || _refreshing)
+              SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: index == 0 ? 36 : 0),
+                    child: Container(),
+                  );
+                }, childCount: 5),
+              ),
             SliverToBoxAdapter(child: SizedBox(height: 96.h)),
           ],
         ),

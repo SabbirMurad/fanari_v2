@@ -266,7 +266,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
           );
         },
         child: CachedNetworkImage(
-          imageUrl: widget.model.images.first.url,
+          imageUrl: widget.model.images.first.webp_url,
           width: imageWidth,
           height: carouselHeight,
           fit: BoxFit.cover,

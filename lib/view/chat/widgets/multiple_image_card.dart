@@ -39,7 +39,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
         child: CachedNetworkImage(
-          imageUrl: image.url,
+          imageUrl: image.webp_url,
           height: double.infinity,
           fit: BoxFit.cover,
           placeholder: (context, url) {
@@ -125,7 +125,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             utils.openImageViewer(
               context: context,
               images: widget.images
-                  .map((e) => CachedNetworkImageProvider(e.url))
+                  .map((e) => CachedNetworkImageProvider(e.webp_url))
                   .toList(),
               preLoad: 2,
             );

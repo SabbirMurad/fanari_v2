@@ -85,7 +85,9 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url:
+        webp_url:
+            'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+        original_url:
             'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
         width: 400,
         height: 400,
@@ -99,7 +101,8 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url: 'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
+        webp_url: 'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
+        original_url: 'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg',
         width: 400,
         height: 400,
         provider: AssetImage('assets/images/temp/user.jpg'),
@@ -112,7 +115,9 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url:
+        webp_url:
+            'https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg',
+        original_url:
             'https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg',
         width: 400,
         height: 400,
@@ -126,7 +131,9 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url:
+        webp_url:
+            'https://images.pexels.com/photos/1468379/pexels-photo-1468379.jpeg',
+        original_url:
             'https://images.pexels.com/photos/1468379/pexels-photo-1468379.jpeg',
         width: 400,
         height: 400,
@@ -140,7 +147,9 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url:
+        webp_url:
+            'https://images.pexels.com/photos/1580271/pexels-photo-1580271.jpeg',
+        original_url:
             'https://images.pexels.com/photos/1580271/pexels-photo-1580271.jpeg',
         width: 400,
         height: 400,
@@ -154,7 +163,9 @@ class _MarketScreenState extends State<MarketScreen> {
       rating: 46,
       image: ImageModel(
         uuid: 'asdasdasd',
-        url:
+        webp_url:
+            'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
+        original_url:
             'https://images.pexels.com/photos/1535051/pexels-photo-1535051.jpeg',
         width: 400,
         height: 400,

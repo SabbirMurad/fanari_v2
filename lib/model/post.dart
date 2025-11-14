@@ -52,24 +52,25 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    final core = json['core'];
+    final stat = json['stat'];
+
     return PostModel(
-      uuid: json['uuid'],
-      caption: json['caption'],
-      images: json['images'].map((item) => ImageModel.fromJson(item)).toList(),
-      videos: json['videos'].map((item) => ImageModel.fromJson(item)).toList(),
+      uuid: core['uuid'],
+      caption: core['caption'],
+      images: core['images'].map((item) => ImageModel.fromJson(item)),
+      videos: core['videos'].map((item) => ImageModel.fromJson(item)),
       bookmarked: json['bookmarked'],
-      mentions: json['mentions']
-          .map((item) => MentionModel.fromJson(item))
-          .toList(),
-      audio: json['audio'] != null
-          ? '${AppCredentials.domain}/upload/audio/${json['audio']}'
+      mentions: core['mentions'].map((item) => MentionModel.fromJson(item)),
+      audio: core['audio'] != null
+          ? '${AppCredentials.domain}/upload/audio/${core['audio']}'
           : null,
-      poll: PollModel.fromJson(json['poll']),
-      created_at: json['created_at'],
+      poll: core['poll'] != null ? PollModel.fromJson(core['poll']) : null,
+      created_at: core['created_at'],
       owner: UserModel.fromJson(json['owner']),
       liked: json['liked'],
-      like_count: json['like_count'],
-      comment_count: json['comment_count'],
+      like_count: stat['like_count'],
+      comment_count: stat['comment_count'],
       nhentai_book: json['nhentai_book'] != null
           ? NhentaiBookModel.fromJson(jsonDecode(json['nhentai_book']))
           : null,

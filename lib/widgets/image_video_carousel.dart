@@ -94,7 +94,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                     imageUrl:
                         _carouselItems[_selectedItemIndex].type ==
                             CarouselItemType.image
-                        ? _carouselItems[_selectedItemIndex].image!.url
+                        ? _carouselItems[_selectedItemIndex].image!.webp_url
                         : _carouselItems[_selectedItemIndex]
                               .video!
                               .thumbnailUrl,
@@ -210,7 +210,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
 
   Widget singleImageItem(CarouselItem item) {
     return CachedNetworkImage(
-      imageUrl: item.image!.url,
+      imageUrl: item.image!.webp_url,
       height: widget.height,
       fit: BoxFit.contain,
       placeholder: (context, url) {
@@ -540,7 +540,7 @@ class _FullScreenCarouselState extends State<FullScreenCarousel> {
                 minScale: 0.4,
                 transformationController: _transformationControllers[entry.key],
                 child: CachedNetworkImage(
-                  imageUrl: item.image!.url,
+                  imageUrl: item.image!.webp_url,
                   width: double.infinity,
                   fit: BoxFit.contain,
                   placeholder: (context, url) {

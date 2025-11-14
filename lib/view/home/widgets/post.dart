@@ -198,7 +198,7 @@ class _PostWidgetState extends State<PostWidget> {
                     margin: const EdgeInsets.only(right: 12),
                     child: NamedAvatar(
                       loading: false,
-                      imageUrl: widget.model.owner.image?.url,
+                      image: widget.model.owner.image,
                       name: widget.model.owner.name,
                       size: 40.w,
                     ),

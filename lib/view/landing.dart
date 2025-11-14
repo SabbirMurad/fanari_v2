@@ -23,9 +23,6 @@ class _LandingScreenState extends State<LandingScreen> {
 
   void _initiateStartup() async {
     final localStorage = await SharedPreferences.getInstance();
-    print('');
-    print(localStorage.getString('access_token'));
-    print('');
     if (localStorage.containsKey('access_token')) {
       AppRoutes.go(AppRoutes.feed);
     }

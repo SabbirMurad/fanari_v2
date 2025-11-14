@@ -63,7 +63,7 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                 children: [
                   NamedAvatar(
                     loading: false,
-                    imageUrl: widget.model.image?.url,
+                    image: widget.model.image,
                     name: widget.model.name,
                     size: 40.w,
                   ),

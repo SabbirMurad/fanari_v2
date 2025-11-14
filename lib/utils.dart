@@ -7,6 +7,7 @@ import 'dart:math';
 import 'dart:io';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/app.dart';
+import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +29,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 // import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:blurhash_ffi/blurhash_ffi.dart';
+import 'package:image/image.dart' as img;
 
 part './utils/image_blur_hash.dart';
+part './utils/image_uploader.dart';
 part './utils/validation.dart';
 part './utils/rich_text.dart';
 part './utils/data_types/string.dart';

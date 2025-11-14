@@ -72,7 +72,7 @@ class _ProductCardState extends State<ProductCard> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
             child: CachedNetworkImage(
-              imageUrl: widget.model.image.url,
+              imageUrl: widget.model.image.webp_url,
               width: (1.sw - 40.w - 18.w) / 2,
               height: (1.sw - 40.w - 18.w) / 2,
               fit: BoxFit.cover,

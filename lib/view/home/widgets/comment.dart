@@ -195,7 +195,7 @@ class _CommentWidgetState extends State<CommentWidget> {
         children: [
           NamedAvatar(
             loading: false,
-            imageUrl: widget.model.owner.image?.url,
+            image: widget.model.owner.image,
             name: widget.model.owner.name,
             size: 32.w,
           ),
