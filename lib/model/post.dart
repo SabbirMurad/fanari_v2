@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/nhentai.dart';
 import 'package:fanari_v2/model/poll.dart';
@@ -7,6 +6,7 @@ import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:fanari_v2/constants/credential.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
@@ -54,27 +54,46 @@ class PostModel {
   factory PostModel.fromJson(Map<String, dynamic> json) {
     final core = json['core'];
     final stat = json['stat'];
+    final owner = json['owner'];
+    final meta = json['meta'];
 
-    return PostModel(
+    List<ImageModel> images = [];
+    for (var i = 0; i < core['images'].length; i++) {
+      images.add(ImageModel.fromJson(core['images'][i]));
+    }
+
+    List<VideoModel> videos = [];
+    for (var i = 0; i < core['videos'].length; i++) {
+      videos.add(VideoModel.fromJson(core['videos'][i]));
+    }
+
+    List<MentionModel> mentions = [];
+    for (var i = 0; i < core['mentions'].length; i++) {
+      mentions.add(MentionModel.fromJson(core['mentions'][i]));
+    }
+
+    final post = PostModel(
       uuid: core['uuid'],
       caption: core['caption'],
-      images: core['images'].map((item) => ImageModel.fromJson(item)),
-      videos: core['videos'].map((item) => ImageModel.fromJson(item)),
-      bookmarked: json['bookmarked'],
-      mentions: core['mentions'].map((item) => MentionModel.fromJson(item)),
+      images: images,
+      videos: videos,
+      bookmarked: meta['bookmarked'],
+      mentions: mentions,
       audio: core['audio'] != null
           ? '${AppCredentials.domain}/upload/audio/${core['audio']}'
           : null,
       poll: core['poll'] != null ? PollModel.fromJson(core['poll']) : null,
       created_at: core['created_at'],
-      owner: UserModel.fromJson(json['owner']),
-      liked: json['liked'],
+      owner: UserModel.fromJson(owner),
+      liked: meta['liked'],
       like_count: stat['like_count'],
       comment_count: stat['comment_count'],
-      nhentai_book: json['nhentai_book'] != null
-          ? NhentaiBookModel.fromJson(jsonDecode(json['nhentai_book']))
-          : null,
+      // nhentai_book: json['nhentai_book'] != null
+      //     ? NhentaiBookModel.fromJson(jsonDecode(json['nhentai_book']))
+      //     : null,
     );
+
+    return post;
   }
 
   static List<PostModel> fromJsonList(List<dynamic> json) {

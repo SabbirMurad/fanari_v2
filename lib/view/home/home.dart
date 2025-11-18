@@ -1,14 +1,9 @@
-import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/model/mention.dart';
-import 'package:fanari_v2/model/poll.dart';
-import 'package:fanari_v2/model/post.dart';
-import 'package:fanari_v2/model/user.dart';
-import 'package:fanari_v2/providers/posts.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/view/home/widgets/post.dart';
-import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/providers/posts.dart';
+import 'package:fanari_v2/widgets/custom_svg.dart';
+import 'package:fanari_v2/view/home/widgets/post.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -48,135 +43,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // }
     });
   }
-
-  List<PostModel> _dummyPosts = [
-    PostModel(
-      uuid: 'asdf3434asd',
-      caption: 'This is an example of a poll inside a post',
-      bookmarked: false,
-      mentions: [],
-      images: [],
-      videos: [],
-      created_at: DateTime.now().millisecondsSinceEpoch,
-      owner: UserModel(
-        name: 'Sabbir Hassan',
-        username: 'sabbir0087',
-        is_me: false,
-        following: false,
-        friend: false,
-      ),
-      poll: PollModel(
-        question: 'Who is the strongest anime protagonist of all time?',
-        type: PollType.single,
-        can_add_option: false,
-        selected_options: [],
-        options: [
-          PollOption(text: 'Sun Goku', vote: 20),
-          PollOption(text: 'Gojo Satoru', vote: 25),
-          PollOption(text: 'Madara Uchiha', vote: 50),
-          PollOption(text: 'Sabbir Hassan', vote: 10),
-        ],
-        total_vote: 105,
-      ),
-      liked: false,
-      like_count: 1500000,
-      comment_count: 2000,
-    ),
-    PostModel(
-      uuid: 'asdf3434asd',
-      caption:
-          'simply dummy text of the printing and typesetting industry. Sabbir Hassan has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. http://pokiee.com It has survived not only five centuries, but also the leap into electronic typesetting, remaining www.fukku.com essentially unchanged. https://youtube.com It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      bookmarked: false,
-      mentions: [
-        MentionModel(
-          user_id: '01',
-          username: 'sabbir',
-          start_index: 60,
-          end_index: 73,
-        ),
-      ],
-      images: [],
-      videos: [],
-      created_at: DateTime.now().millisecondsSinceEpoch,
-      owner: UserModel(
-        name: 'Sabbir Hassan',
-        username: 'sabbir0087',
-        is_me: false,
-        following: false,
-        friend: false,
-      ),
-      liked: false,
-      like_count: 1500000,
-      comment_count: 2000,
-    ),
-    PostModel(
-      uuid: 'asdasdf3434asasdd',
-      caption:
-          'simply dummy text of the printing and typesetting industry. Sabbir Hassan has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. http://pokiee.com It has survived not only five centuries, but also the leap into electronic typesetting, remaining www.fukku.com essentially unchanged. https://youtube.com It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      bookmarked: false,
-      mentions: [
-        MentionModel(
-          user_id: '01',
-          username: 'sabbir',
-          start_index: 60,
-          end_index: 73,
-        ),
-      ],
-      images: [],
-      videos: [],
-      created_at: DateTime.now().millisecondsSinceEpoch,
-      owner: UserModel(
-        name: 'Sabbir Hassan',
-        username: 'sabbir0087',
-        is_me: false,
-        following: false,
-        friend: false,
-      ),
-      liked: false,
-      like_count: 1500000,
-      comment_count: 2000,
-    ),
-    PostModel(
-      uuid: 'asdf3asd434asd',
-      caption: 'link preview https://instagram.com',
-      bookmarked: false,
-      mentions: [],
-      images: [],
-      videos: [],
-      created_at: DateTime.now().millisecondsSinceEpoch,
-      owner: UserModel(
-        name: 'Sabbir Hassan',
-        username: 'sabbir0087',
-        is_me: false,
-        following: false,
-        friend: false,
-      ),
-      liked: false,
-      like_count: 1500000,
-      comment_count: 2000,
-    ),
-    PostModel(
-      uuid: 'asdf3434aasdwsd',
-      caption:
-          'here is a preview for youtube attachment https://www.youtube.com/watch?v=bc7JKgki3l0',
-      bookmarked: false,
-      mentions: [],
-      images: [],
-      videos: [],
-      created_at: DateTime.now().millisecondsSinceEpoch,
-      owner: UserModel(
-        name: 'Sabbir Hassan',
-        username: 'sabbir0087',
-        is_me: false,
-        following: false,
-        friend: false,
-      ),
-      liked: false,
-      like_count: 1500000,
-      comment_count: 2000,
-    ),
-  ];
-
   Widget _appBar() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w),

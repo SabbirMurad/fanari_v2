@@ -30,12 +30,11 @@ class CustomHttp {
 
       if (needAuth) {
         SharedPreferences localStorage = await SharedPreferences.getInstance();
-        int? accessTokenValidTill = localStorage.getInt(
+        int accessTokenValidTill = localStorage.getInt(
           'access_token_valid_till',
-        );
+        )!;
 
-        if (accessTokenValidTill == null ||
-            accessTokenValidTill < DateTime.now().millisecondsSinceEpoch) {
+        if (accessTokenValidTill < DateTime.now().millisecondsSinceEpoch) {
           if (!await setNewAccessToken()) {
             AppRoutes.go(AppRoutes.landing);
             return CustomHttpResult(
@@ -232,7 +231,7 @@ class CustomHttp {
   static Future<bool> setNewAccessToken() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     String? refreshToken = localStorage.getString('refresh_token');
-    int? userId = localStorage.getInt('user_id');
+    String? userId = localStorage.getString('user_id');
 
     if (refreshToken == null || userId == null) {
       await localStorage.clear();

@@ -1,6 +1,7 @@
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'posts.g.dart';
@@ -31,11 +32,11 @@ class PostsNotifier extends _$PostsNotifier {
       queries: {'page': offset, 'limit': limit},
     );
 
-    if (response.statusCode != 200) {
-      return null;
-    }
+    if (response.statusCode != 200) return null;
 
     final posts = PostModel.fromJsonList(response.data);
+
+    printLine(posts);
 
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
     Future.microtask(() async {

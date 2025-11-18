@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/app.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';

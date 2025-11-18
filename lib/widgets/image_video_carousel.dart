@@ -2,8 +2,10 @@ import 'dart:ui';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/video_player_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -78,39 +80,18 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
       height: widget.height,
       child: Stack(
         children: [
-          SizedBox(
-            width: widget.width,
-            height: widget.height,
-            child: ClipRRect(
-              borderRadius: widget.borderRadius ?? BorderRadius.circular(0),
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                child: ColorFiltered(
-                  colorFilter: const ColorFilter.mode(
-                    Color.fromRGBO(24, 24, 24, .3),
-                    BlendMode.darken,
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl:
-                        _carouselItems[_selectedItemIndex].type ==
-                            CarouselItemType.image
-                        ? _carouselItems[_selectedItemIndex].image!.webp_url
-                        : _carouselItems[_selectedItemIndex]
-                              .video!
-                              .thumbnailUrl,
-                    height: widget.height,
-                    width: widget.width,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) {
-                      return Container(
-                        color: AppColors.secondary,
-                        width: widget.width,
-                        height: widget.height,
-                      );
-                    },
-                    errorWidget: (context, url, error) => SizedBox(),
-                  ),
-                ),
+          ClipRRect(
+            borderRadius: widget.borderRadius ?? BorderRadius.circular(0),
+            child: SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child: BlurHash(
+                hash:
+                    _carouselItems[_selectedItemIndex].type ==
+                        CarouselItemType.image
+                    ? _carouselItems[_selectedItemIndex].image!.blur_hash
+                    //TODO:
+                    : 'Need Work Here',
               ),
             ),
           ),
@@ -208,46 +189,58 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
     );
   }
 
+  Widget _errorWidget(String blur_hash) {
+    return Container(
+      width: double.infinity,
+      height: widget.height,
+      child: Stack(
+        children: [
+          BlurHash(hash: blur_hash),
+          Center(
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(24, 24, 24, 0.8),
+                border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromRGBO(24, 24, 24, .2),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                'Couldn\'t load image',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget singleImageItem(CarouselItem item) {
     return CachedNetworkImage(
       imageUrl: item.image!.webp_url,
       height: widget.height,
       fit: BoxFit.contain,
       placeholder: (context, url) {
-        return Container(
-          color: AppColors.secondary,
+        return SizedBox(
           width: widget.width,
           height: widget.height,
+          child: BlurHash(hash: item.image!.blur_hash),
         );
       },
-      errorWidget: (context, url, error) => Container(
-        color: AppColors.secondary,
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(24, 24, 24, 0.8),
-              border: Border.all(color: Colors.white.withValues(alpha: .1)),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Color.fromRGBO(24, 24, 24, .2),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              'Couldn\'t load image',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ),
-      ),
+      errorWidget: (context, url, error) {
+        return _errorWidget(item.image!.blur_hash);
+      },
     );
   }
 
@@ -354,6 +347,37 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
               });
   }
 
+  Widget _errorWidget() {
+    return Container(
+      color: AppColors.secondary,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+          decoration: BoxDecoration(
+            color: Color.fromRGBO(24, 24, 24, 0.8),
+            border: Border.all(color: Colors.white.withValues(alpha: .1)),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Color.fromRGBO(24, 24, 24, .2),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            'Couldn\'t load image',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -365,44 +389,11 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
             width: double.infinity,
             fit: BoxFit.contain,
             placeholder: (context, url) {
-              return Container(
-                color: AppColors.secondary,
-                width: double.infinity,
-                height: widget.height,
-              );
+              return Container(width: double.infinity, height: widget.height);
             },
-            errorWidget: (context, url, error) => Container(
-              color: AppColors.secondary,
-              height: widget.height,
-              width: double.infinity,
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(24, 24, 24, 0.8),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: .2),
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: .15),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'Couldn\'t load thumbnail',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            errorWidget: (context, url, error) {
+              return _errorWidget();
+            },
           ),
         if (!_playClicked)
           GestureDetector(
