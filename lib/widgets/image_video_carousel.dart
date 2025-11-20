@@ -23,7 +23,7 @@ class CarouselItem {
 
 class ImageVideoCarousel extends StatefulWidget {
   final List<ImageModel> images;
-  final double height;
+  final double? height;
   final double width;
   final List<VideoModel> videos;
   final BorderRadius? borderRadius;
@@ -32,7 +32,7 @@ class ImageVideoCarousel extends StatefulWidget {
     super.key,
     required this.images,
     this.videos = const [],
-    required this.height,
+    this.height,
     required this.width,
     this.borderRadius,
     this.showIndicators = true,
@@ -68,6 +68,43 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
     setState(() {});
   }
 
+  late double carouselHeight = widget.height ?? _calculateCarouselHeight();
+
+  double _calculateCarouselHeight() {
+    double biggestHeight = 0;
+    for (var image in widget.images) {
+      double height = (widget.width * image.height) / image.width;
+
+      if (height > biggestHeight) {
+        biggestHeight = height;
+      }
+    }
+
+    for (var video in widget.videos) {
+      double height = (widget.width * video.height) / video.width;
+
+      if (height > biggestHeight) {
+        biggestHeight = height;
+      }
+    }
+
+    if (biggestHeight > widget.width * 1.25) {
+      biggestHeight = widget.width * 1.25;
+    }
+
+    if (widget.images.length + widget.videos.length == 1) {
+      if (widget.images.length == 1) {
+        final image = widget.images.first;
+        biggestHeight = (widget.width * image.height) / image.width;
+      } else {
+        final video = widget.videos.first;
+        biggestHeight = (widget.width * video.height) / video.width;
+      }
+    }
+
+    return biggestHeight;
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -77,14 +114,14 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
   Widget buildCarousel() {
     return SizedBox(
       width: widget.width,
-      height: widget.height,
+      height: carouselHeight,
       child: Stack(
         children: [
           ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.circular(0),
             child: SizedBox(
               width: widget.width,
-              height: widget.height,
+              height: carouselHeight,
               child: BlurHash(
                 hash:
                     _carouselItems[_selectedItemIndex].type ==
@@ -108,7 +145,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                 final index = entry.key;
                 final item = entry.value;
                 return SizedBox(
-                  height: widget.height,
+                  height: carouselHeight,
                   width: widget.width,
                   child: Center(
                     child: GestureDetector(
@@ -130,7 +167,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                       child: item.type == CarouselItemType.image
                           ? singleImageItem(item)
                           : CarouselSingleVideoItem(
-                              height: widget.height,
+                              height: carouselHeight,
                               item: item,
                             ),
                     ),
@@ -192,7 +229,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
   Widget _errorWidget(String blur_hash) {
     return Container(
       width: double.infinity,
-      height: widget.height,
+      height: carouselHeight,
       child: Stack(
         children: [
           BlurHash(hash: blur_hash),
@@ -229,12 +266,12 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
   Widget singleImageItem(CarouselItem item) {
     return CachedNetworkImage(
       imageUrl: item.image!.webp_url,
-      height: widget.height,
+      height: carouselHeight,
       fit: BoxFit.contain,
       placeholder: (context, url) {
         return SizedBox(
           width: widget.width,
-          height: widget.height,
+          height: carouselHeight,
           child: BlurHash(hash: item.image!.blur_hash),
         );
       },
@@ -266,7 +303,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
         child: _carouselItems[0].type == CarouselItemType.image
             ? singleImageItem(_carouselItems[0])
             : CarouselSingleVideoItem(
-                height: widget.height,
+                height: carouselHeight,
                 item: _carouselItems[0],
               ),
       ),

@@ -36,8 +36,6 @@ class PostsNotifier extends _$PostsNotifier {
 
     final posts = PostModel.fromJsonList(response.data);
 
-    printLine(posts);
-
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
     Future.microtask(() async {
       // Create a mutable copy

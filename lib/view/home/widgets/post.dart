@@ -33,7 +33,6 @@ class _PostWidgetState extends State<PostWidget> {
   @override
   void initState() {
     super.initState();
-    _calculateCarouselHeight();
   }
 
   bool _bookMarked = false;
@@ -388,40 +387,6 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   double carouselWidth = 1.sw - 40.w;
-  double carouselHeight = 0;
-  void _calculateCarouselHeight() {
-    for (var image in widget.model.images) {
-      double height = (1.sw * image.height) / image.width;
-
-      if (height > carouselHeight) {
-        carouselHeight = height;
-      }
-    }
-
-    for (var video in widget.model.videos) {
-      double height = (1.sw * video.height) / video.width;
-
-      if (height > carouselHeight) {
-        carouselHeight = height;
-      }
-    }
-
-    if (carouselHeight > 1.sw * 1.25) {
-      carouselHeight = 1.sw * 1.25;
-    }
-
-    if (widget.model.images.length + widget.model.videos.length == 1) {
-      if (widget.model.images.length == 1) {
-        final image = widget.model.images.first;
-        carouselHeight = (1.sw * image.height) / image.width;
-      } else {
-        final video = widget.model.videos.first;
-        carouselHeight = (1.sw * video.height) / video.width;
-      }
-    }
-
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +432,6 @@ class _PostWidgetState extends State<PostWidget> {
                 borderRadius: BorderRadius.circular(10.r),
                 images: widget.model.images,
                 videos: widget.model.videos,
-                height: carouselHeight,
                 width: carouselWidth,
               ),
             ),

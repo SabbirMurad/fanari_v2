@@ -173,15 +173,13 @@ class _YoutubeAttachmentWidgetState extends State<YoutubeAttachmentWidget> {
                     height: thumbnailHeight,
                     placeholder: (context, url) {
                       return Container(
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: AppColors.secondary,
                         width: thumbnailWidth,
                         height: thumbnailHeight,
                       );
                     },
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.error,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.error, color: AppColors.primary),
                   ),
                 ),
               if (!_isPlaying && !_loading) _iconAndDuration(),
