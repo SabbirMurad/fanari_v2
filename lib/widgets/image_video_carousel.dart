@@ -129,6 +129,8 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                     ? _carouselItems[_selectedItemIndex].image!.blur_hash
                     //TODO:
                     : 'Need Work Here',
+                color: AppColors.secondary,
+                optimizationMode: BlurHashOptimizationMode.approximation,
               ),
             ),
           ),
@@ -232,7 +234,11 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
       height: carouselHeight,
       child: Stack(
         children: [
-          BlurHash(hash: blur_hash),
+          BlurHash(
+            hash: blur_hash,
+            color: AppColors.secondary,
+            optimizationMode: BlurHashOptimizationMode.approximation,
+          ),
           Center(
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
@@ -268,11 +274,15 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
       imageUrl: item.image!.webp_url,
       height: carouselHeight,
       fit: BoxFit.contain,
-      placeholder: (context, url) {
+      placeholder: (context, url) { 
         return SizedBox(
           width: widget.width,
           height: carouselHeight,
-          child: BlurHash(hash: item.image!.blur_hash),
+          child: BlurHash(
+            hash: item.image!.blur_hash,
+            color: AppColors.secondary,
+            optimizationMode: BlurHashOptimizationMode.approximation,
+          ),
         );
       },
       errorWidget: (context, url, error) {

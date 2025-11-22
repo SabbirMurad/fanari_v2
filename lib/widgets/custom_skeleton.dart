@@ -1,3 +1,4 @@
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomSkeleton extends StatelessWidget {
@@ -22,7 +23,7 @@ class CustomSkeleton extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: color ?? Theme.of(context).colorScheme.secondary,
+        color: color ?? AppColors.secondary,
         borderRadius: borderRadius,
         shape: shape ?? BoxShape.rectangle,
       ),

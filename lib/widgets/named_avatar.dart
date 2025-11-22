@@ -52,8 +52,9 @@ class _NamedAvatarState extends State<NamedAvatar> {
                     width: widget.size,
                     height: widget.size,
                     child: BlurHash(
-                      hash: "L5H2EC=PM+yV0g-mq.wG9c010J}I",
-                      optimizationMode: BlurHashOptimizationMode.standard,
+                      hash: widget.image!.blur_hash,
+                      color: AppColors.secondary,
+                      optimizationMode: BlurHashOptimizationMode.approximation,
                     ),
                   );
                 },
