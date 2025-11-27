@@ -74,8 +74,11 @@ class _PollWidgetState extends State<PollWidget> {
             final item = entry.value;
             final index = entry.key;
 
-            final percent = ((item.vote * 100) / widget.model.total_vote)
-                .toStringAsFixed(2);
+            final percent =
+                (item.vote == 0
+                        ? 0
+                        : ((item.vote * 100) / widget.model.total_vote))
+                    .toStringAsFixed(2);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,

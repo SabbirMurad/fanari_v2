@@ -586,6 +586,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   imageIds.addAll(ids);
                 }
 
+                dynamic poll = null;
+                if (_hasPoll) {
+                  poll = {
+                    'question': _pollQuestionController.text.trim(),
+                    'options': _pollOptionsController
+                        .map((e) => e.text.trim())
+                        .toList()
+                        .where((e) => e.isNotEmpty)
+                        .toList(),
+                    'type': _selectedPollType,
+                  };
+                }
+
                 await ref
                     .read(postsNotifierProvider.notifier)
                     .createPost(
@@ -597,6 +610,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       caption: _textController.text.isEmpty
                           ? null
                           : _textController.text.trim(),
+                      poll: poll,
                     );
 
                 // AppRoutes.pop();

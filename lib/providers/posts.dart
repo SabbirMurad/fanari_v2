@@ -63,6 +63,7 @@ class PostsNotifier extends _$PostsNotifier {
     bool is_nsfw = false,
     String? content_warning,
     required String visibility,
+    dynamic poll,
   }) async {
     final response = await utils.CustomHttp.post(
       endpoint: '/post',
@@ -77,6 +78,7 @@ class PostsNotifier extends _$PostsNotifier {
         'content_warning': content_warning,
         'visibility': visibility,
         'tags': tags,
+        'poll': poll
       },
     );
 

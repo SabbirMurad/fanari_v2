@@ -70,10 +70,10 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
         child: LiquidGlass(
           settings: LiquidGlassSettings(
             blur: 4,
-            ambientStrength: 2,
+            ambientStrength: 3,
             lightAngle: -0.2 * pi,
             glassColor: Colors.white12,
-            thickness: 30,
+            thickness: 35,
           ),
           shape: LiquidRoundedRectangle(borderRadius: Radius.circular(12.r)),
           glassContainsChild: false,
@@ -141,7 +141,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                     // setState(() {
                     //   _selectedNavIndex = 3;
                     // });
-    
+
                     widget.onNavChange?.call(3);
                     // }
                   },
@@ -168,7 +168,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                       //           setState(() {
                       //             _selectedNavIndex = 3;
                       //           });
-    
+
                       //           widget.onNavChange?.call(3);
                       //         }
                       //       },
