@@ -78,6 +78,9 @@ dependencies:
   blurhash_ffi: ^1.2.7
   image: ^4.5.4
   liquid_glass_renderer: ^0.1.1-dev.26
+  google_maps_flutter: ^2.14.0
+  geolocator: ^14.0.2
+  extended_text_field: ^16.0.2
   
 dev_dependencies:
   flutter_test:
