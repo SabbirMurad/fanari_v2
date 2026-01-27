@@ -8,6 +8,14 @@ import 'package:fanari_v2/widgets/social_voice_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:extended_text_field/extended_text_field.dart';
+
+class Mention {
+  final String id;
+  final String display;
+
+  Mention(this.id, this.display);
+}
 
 class CommentInputWidget extends StatefulWidget {
   const CommentInputWidget({super.key});
@@ -18,6 +26,7 @@ class CommentInputWidget extends StatefulWidget {
 
 class _CommentInputWidgetState extends State<CommentInputWidget> {
   TextEditingController _inputController = TextEditingController();
+  final _spacialTextController = TextEditingController();
 
   @override
   void initState() {
@@ -37,12 +46,160 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
         }
       }
     });
+
+    _spacialTextController.addListener(() {
+      final text = _spacialTextController.text;
+      final cursor = _spacialTextController.selection.baseOffset;
+
+      print('');
+      print('Text: $text');
+      print('');
+      if (cursor <= 0) return;
+
+      final lastAt = text.lastIndexOf('@', cursor - 1);
+
+      print('');
+      print('Last At: $lastAt');
+      print('');
+      if (lastAt != -1) {
+        final query = text.substring(lastAt + 1, cursor);
+
+        print('');
+        print('Query: $query');
+        print('');
+        if (!query.contains(' ') && query.isNotEmpty) {
+          showMentionOverlay(query);
+          return;
+        }
+      }
+
+      removeOverlay();
+    });
   }
 
   @override
   void dispose() {
     _inputController.dispose();
+    _spacialTextController.dispose();
+
     super.dispose();
+  }
+
+  void insertMention(Mention user) {
+    final text = _spacialTextController.text;
+    final cursor = _spacialTextController.selection.baseOffset;
+
+    final lastAt = text.lastIndexOf('@', cursor - 1);
+
+    final before = text.substring(0, lastAt);
+    final after = text.substring(cursor);
+
+    final newText = '$before@${user.display} $after';
+
+    _spacialTextController.text = newText;
+    _spacialTextController.selection = TextSelection.collapsed(
+      offset: (before + ' @${user.display} ').length,
+    );
+  }
+
+  void showMentionOverlay(String query) async {
+    print('');
+    print('Overlay called');
+    print('');
+    // Fake search — replace with API / local search
+    final users = await searchUsers(query);
+
+    print('');
+    print('User count: ${users.length}');
+    print('');
+
+    removeOverlay();
+    if (users.isEmpty) return;
+
+    // if (_overlayEntry != null) {
+    //   _overlayEntry!.markNeedsBuild();
+    //   return;
+    // }
+
+    double negativeOffset = -10.w - (users.length * 40.w).toDouble();
+
+    print('');
+    print('Called here to');
+    print('');
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            offset: Offset(-32.w, negativeOffset),
+            showWhenUnlinked: false,
+            child: Material(
+              borderRadius: BorderRadius.circular(6.r),
+              child: Container(
+                width: 1.sw - 40.w - 24.w - 80.w - 24.w,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: users.map((user) {
+                    return GestureDetector(
+                      onTap: () {
+                        insertMention(user);
+                        removeOverlay();
+                      },
+                      behavior: HitTestBehavior.translucent,
+                      child: Container(
+                        height: 40.h,
+                        padding: EdgeInsets.all(8.w),
+                        child: Row(
+                          children: [
+                            Text(
+                              user.display,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.text,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+  }
+
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+
+  void removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  Future<List<Mention>> searchUsers(String query) async {
+    final all = [
+      Mention("1", "Sabbir"),
+      Mention("2", "Sabina"),
+      Mention("3", "Sabit"),
+    ];
+
+    return all
+        .where((u) => u.display.toLowerCase().contains(query.toLowerCase()))
+        .toList();
   }
 
   bool _hasInputText = false;
@@ -50,45 +207,53 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
   Widget _inputContainer() {
     return Container(
       width: double.infinity,
-      height: 40.w,
+      // height: 40.w,
       decoration: BoxDecoration(
         color: AppColors.secondary,
         borderRadius: BorderRadius.circular(20.r),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _showEmojis = !_showEmojis;
-              });
-            },
+          Padding(
+            padding: EdgeInsets.only(top: 4.w),
             child: CustomSvg(
               'assets/icons/emoji.svg',
               width: 20.w,
               height: 20.w,
+              onTap: () {
+                setState(() {
+                  _showEmojis = !_showEmojis;
+                });
+              },
             ),
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: TextField(
-              controller: _inputController,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                errorBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                hintText: 'Write here ...',
-                hintStyle: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14.sp,
+            child: CompositedTransformTarget(
+              link: _layerLink,
+              child: ExtendedTextField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  hintText: 'Write here ...',
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14.sp,
+                  ),
+                  isDense: true,
                 ),
-                isDense: true,
+                style: TextStyle(color: AppColors.text, fontSize: 14.sp),
+                controller: _spacialTextController,
+                specialTextSpanBuilder: MySpecialTextSpanBuilder(),
+                maxLines: 5,
+                minLines: 1,
               ),
-              style: TextStyle(color: AppColors.text, fontSize: 14.sp),
             ),
           ),
         ],
@@ -98,6 +263,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
 
   Widget _actionsAndInput() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         GestureDetector(
           onTap: () async {
@@ -311,7 +477,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
               Padding(
                 padding: EdgeInsets.only(left: 20.w, right: 20.w),
                 child: Stack(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.bottomRight,
                   children: [
                     _actionsAndInput(),
                     if (!_hasInputText && _selectedImages.isEmpty)
@@ -328,5 +494,48 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
         ),
       ),
     );
+  }
+}
+
+class AtText extends SpecialText {
+  static const String flag = "@";
+
+  AtText(
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap, {
+    required this.start,
+  }) : super(flag, ' ', textStyle, onTap: onTap);
+
+  final int start;
+
+  @override
+  InlineSpan finishText() {
+    final mentionText = getContent();
+
+    return SpecialTextSpan(
+      text: '@$mentionText',
+      actualText: '@$mentionText',
+      start: start,
+      style: const TextStyle(
+        color: AppColors.primary, // your app primary color
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}
+
+class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
+  @override
+  SpecialText? createSpecialText(
+    String flag, {
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap,
+    required int index,
+  }) {
+    if (flag == "@") {
+      return AtText(textStyle, onTap, start: index);
+    }
+
+    return null;
   }
 }

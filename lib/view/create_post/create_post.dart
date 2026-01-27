@@ -17,14 +17,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 import 'package:fanari_v2/utils.dart' as utils;
-import 'package:extended_text_field/extended_text_field.dart';
 
-class Mention {
-  final String id;
-  final String display;
-
-  Mention(this.id, this.display);
-}
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
@@ -58,7 +51,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   bool _videoError = false;
   Uint8List? _videoThumbnail;
 
-  final _spacialTextController = TextEditingController();
 
   @override
   void initState() {
@@ -71,35 +63,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       setState(() {
         _videoCompressProgress = progress;
       });
-    });
-
-    _spacialTextController.addListener(() {
-      final text = _spacialTextController.text;
-      final cursor = _spacialTextController.selection.baseOffset;
-
-      print('');
-      print('Text: $text');
-      print('');
-      if (cursor <= 0) return;
-
-      final lastAt = text.lastIndexOf('@', cursor - 1);
-
-      print('');
-      print('Last At: $lastAt');
-      print('');
-      if (lastAt != -1) {
-        final query = text.substring(lastAt + 1, cursor);
-
-        print('');
-        print('Query: $query');
-        print('');
-        if (!query.contains(' ') && query.isNotEmpty) {
-          showMentionOverlay(query);
-          return;
-        }
-      }
-
-      removeOverlay();
     });
   }
 
@@ -114,7 +77,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     _subscription?.unsubscribe();
     VideoCompress.deleteAllCache();
 
-    _spacialTextController.dispose();
 
     super.dispose();
   }
@@ -738,108 +700,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       });
   }
 
-  void insertMention(Mention user) {
-    final text = _spacialTextController.text;
-    final cursor = _spacialTextController.selection.baseOffset;
-
-    final lastAt = text.lastIndexOf('@', cursor - 1);
-
-    final newText = text.replaceRange(lastAt, cursor, '@${user.display} ');
-
-    _spacialTextController.text = newText;
-    _spacialTextController.selection = TextSelection.collapsed(
-      offset: lastAt + user.display.length + 2,
-    );
-  }
-
-  void showMentionOverlay(String query) async {
-    print('');
-    print('Overlay called');
-    print('');
-    // Fake search — replace with API / local search
-    final users = await searchUsers(query);
-
-    print('');
-    print('User count: ${users.length}');
-    print('');
-
-    removeOverlay();
-    // if (users.isEmpty) {
-    //   return;
-    // }
-
-    // if (_overlayEntry != null) {
-    //   _overlayEntry!.markNeedsBuild();
-    //   return;
-    // }
-
-    print('');
-    print('Called here to');
-    print('');
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: CompositedTransformFollower(
-            link: _layerLink,
-            offset: const Offset(0, 48),
-            showWhenUnlinked: false,
-            child: Material(
-              elevation: 4,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 240,
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: users.map((user) {
-                    return GestureDetector(
-                      onTap: () {
-                        insertMention(user);
-                        removeOverlay();
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(8.w),
-                        child: Text(
-                          user.display,
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
-  }
-
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _overlayEntry;
-
-  void removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-  }
-
-  Future<List<Mention>> searchUsers(String query) async {
-    final all = [
-      Mention("1", "Sabbir"),
-      Mention("2", "Sabina"),
-      Mention("3", "Sabit"),
-    ];
-
-    return all
-        .where((u) => u.display.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -854,15 +714,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               SizedBox(height: 24.h),
               _profileWidget(),
               SizedBox(height: 24.h),
-              CompositedTransformTarget(
-                link: _layerLink,
-                child: ExtendedTextField(
-                  style: TextStyle(color: Colors.white),
-                  controller: _spacialTextController,
-                  specialTextSpanBuilder: MySpecialTextSpanBuilder(),
-                  maxLines: null,
-                ),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.w),
                 child: _textBox(),
@@ -914,48 +765,5 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         ),
       ),
     );
-  }
-}
-
-class AtText extends SpecialText {
-  static const String flag = "@";
-
-  AtText(
-    TextStyle? textStyle,
-    SpecialTextGestureTapCallback? onTap, {
-    required this.start,
-  }) : super(flag, ' ', textStyle, onTap: onTap);
-
-  final int start;
-
-  @override
-  InlineSpan finishText() {
-    final mentionText = getContent();
-
-    return SpecialTextSpan(
-      text: '@$mentionText ',
-      actualText: '@$mentionText ',
-      start: start,
-      style: const TextStyle(
-        color: Color(0xff9A79F5), // your app primary color
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-}
-
-class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
-  @override
-  SpecialText? createSpecialText(
-    String flag, {
-    TextStyle? textStyle,
-    SpecialTextGestureTapCallback? onTap,
-    required int index,
-  }) {
-    if (flag == "@") {
-      return AtText(textStyle, onTap, start: index);
-    }
-
-    return null;
   }
 }
