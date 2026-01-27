@@ -393,6 +393,11 @@ class _TextItemWidgetState extends State<TextItemWidget> {
       if (widget.model.images.length == 1) {
         return _singleImage();
       }
+
+      print('');
+      print('Image length: ${widget.model.images.length}');
+      print('');
+
       return _multipleImagesWidget();
     }
 

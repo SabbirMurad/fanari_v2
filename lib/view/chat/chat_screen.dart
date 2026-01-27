@@ -252,47 +252,7 @@ class _ChatScreenState extends State<ChatScreen> {
       name: 'Group 3',
       image: null,
       online: true,
-      texts: [
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [
-
-          ],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Image,
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: false,
-          images: [
-
-          ],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Image,
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [
-
-          ],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Image,
-        ),
-      ],
+      texts: [],
       last_seen: 0,
       user_id: '1',
     ),
