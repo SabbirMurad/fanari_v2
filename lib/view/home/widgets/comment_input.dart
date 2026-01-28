@@ -2,10 +2,14 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/emoji.dart';
+import 'package:fanari_v2/providers/emoji.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/social_voice_recorder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:extended_text_field/extended_text_field.dart';
@@ -17,14 +21,14 @@ class Mention {
   Mention(this.id, this.display);
 }
 
-class CommentInputWidget extends StatefulWidget {
+class CommentInputWidget extends ConsumerStatefulWidget {
   const CommentInputWidget({super.key});
 
   @override
-  State<CommentInputWidget> createState() => _CommentInputWidgetState();
+  ConsumerState<CommentInputWidget> createState() => _CommentInputWidgetState();
 }
 
-class _CommentInputWidgetState extends State<CommentInputWidget> {
+class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   TextEditingController _inputController = TextEditingController();
   final _spacialTextController = TextEditingController();
 
@@ -121,7 +125,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
     //   return;
     // }
 
-    double negativeOffset = -10.w - (users.length * 40.w).toDouble();
+    double negativeOffset = -18.w - (users.length * 40.w).toDouble();
 
     print('');
     print('Called here to');
@@ -139,6 +143,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
               borderRadius: BorderRadius.circular(6.r),
               child: Container(
                 width: 1.sw - 40.w - 24.w - 80.w - 24.w,
+                padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(6.r),
@@ -146,7 +151,10 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: users.map((user) {
+                  children: users.asMap().entries.map((entry) {
+                    final user = entry.value;
+                    final index = entry.key;
+
                     return GestureDetector(
                       onTap: () {
                         insertMention(user);
@@ -156,6 +164,18 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                       child: Container(
                         height: 40.h,
                         padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          border: index == users.length - 1
+                              ? null
+                              : Border(
+                                  bottom: BorderSide(
+                                    color: AppColors.border.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    width: 1,
+                                  ),
+                                ),
+                        ),
                         child: Row(
                           children: [
                             Text(
@@ -205,6 +225,14 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
   bool _hasInputText = false;
 
   Widget _inputContainer() {
+    final emojis = ref
+        .watch(emojiNotifierProvider)
+        .when(
+          data: (data) => data,
+          error: (error, stackTrace) => <EmojiModel>[],
+          loading: () => <EmojiModel>[],
+        );
+
     return Container(
       width: double.infinity,
       // height: 40.w,
@@ -250,7 +278,9 @@ class _CommentInputWidgetState extends State<CommentInputWidget> {
                 ),
                 style: TextStyle(color: AppColors.text, fontSize: 14.sp),
                 controller: _spacialTextController,
-                specialTextSpanBuilder: MySpecialTextSpanBuilder(),
+                specialTextSpanBuilder: MySpecialTextSpanBuilder(
+                  emojis: emojis,
+                ),
                 maxLines: 5,
                 minLines: 1,
               ),
@@ -524,7 +554,52 @@ class AtText extends SpecialText {
   }
 }
 
+class EmojiText extends SpecialText {
+  static const String flag = ":";
+
+  final int start;
+  final List<EmojiModel> emojis;
+
+  EmojiText(
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap, {
+    required this.start,
+    required this.emojis,
+  }) : super(flag, ":", textStyle, onTap: onTap);
+
+  @override
+  InlineSpan finishText() {
+    final key = getContent(); // smile
+
+    EmojiModel? emojiModel;
+
+    for (final emoji in emojis) {
+      if (emoji.name == key) {
+        emojiModel = emoji;
+        break;
+      }
+    }
+
+    if (emojiModel == null) {
+      return TextSpan(text: ':$key:', style: super.textStyle);
+    }
+
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: CachedNetworkImage(
+        imageUrl: emojis.firstWhere((element) => element.name == key).webp_url,
+        width: 16.w,
+        height: 16.w,
+      ),
+    );
+  }
+}
+
 class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
+  final List<EmojiModel> emojis;
+
+  MySpecialTextSpanBuilder({required this.emojis});
+
   @override
   SpecialText? createSpecialText(
     String flag, {
@@ -534,6 +609,10 @@ class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
   }) {
     if (flag == "@") {
       return AtText(textStyle, onTap, start: index);
+    }
+
+    if (flag == ":") {
+      return EmojiText(textStyle, onTap, start: index, emojis: emojis);
     }
 
     return null;

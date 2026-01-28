@@ -234,7 +234,8 @@ class CustomHttp {
     String? userId = localStorage.getString('user_id');
 
     if (refreshToken == null || userId == null) {
-      await localStorage.clear();
+      printLine('refreshToken == null || userId == null');
+      // await localStorage.clear();
       return false;
     }
 
@@ -255,48 +256,9 @@ class CustomHttp {
       );
       return true;
     } else {
-      await localStorage.clear();
+      printLine('response.statusCode == 200');
+      // await localStorage.clear();
       return false;
-    }
-  }
-
-  static Future<String?> newAccessToken() async {
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    String? refreshToken = localStorage.getString('refresh_token');
-    String? role = localStorage.getString('role');
-    String? userId = localStorage.getString('user_id');
-
-    if (refreshToken == null || role == null || userId == null) {
-      localStorage.remove('access_token');
-      localStorage.remove('refresh_token');
-      localStorage.remove('role');
-      localStorage.remove('user_id');
-      return null;
-    }
-
-    final postData = {
-      'refresh_token': refreshToken,
-      'role': role,
-      'user_id': userId,
-    };
-
-    var response = await http.post(
-      Uri.parse('${AppCredentials.domain}/api/account/access-token/new'),
-      body: jsonEncode(postData),
-      headers: {'Content-Type': 'application/json'},
-      encoding: Encoding.getByName('utf-8'),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final String accessToken = data['access_token'];
-      return accessToken;
-    } else {
-      localStorage.remove('access_token');
-      localStorage.remove('refresh_token');
-      localStorage.remove('role');
-      localStorage.remove('user_id');
-      return null;
     }
   }
 

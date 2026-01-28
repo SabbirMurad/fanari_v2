@@ -1,5 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   void _initiateStartup() async {
     final localStorage = await SharedPreferences.getInstance();
+
     if (localStorage.containsKey('access_token')) {
       AppRoutes.go(AppRoutes.feed);
     }
