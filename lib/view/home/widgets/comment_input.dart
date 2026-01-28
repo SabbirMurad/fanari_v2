@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
@@ -14,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:extended_text_field/extended_text_field.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Mention {
   final String id;
@@ -30,21 +29,20 @@ class CommentInputWidget extends ConsumerStatefulWidget {
 }
 
 class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
-  TextEditingController _inputController = TextEditingController();
   final _spacialTextController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _inputController.addListener(() {
+    _spacialTextController.addListener(() {
       if (_hasInputText) {
-        if (_inputController.text.isEmpty) {
+        if (_spacialTextController.text.isEmpty) {
           setState(() {
             _hasInputText = false;
           });
         }
       } else {
-        if (_inputController.text.isNotEmpty) {
+        if (_spacialTextController.text.isNotEmpty) {
           setState(() {
             _hasInputText = true;
           });
@@ -84,7 +82,6 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
   @override
   void dispose() {
-    _inputController.dispose();
     _spacialTextController.dispose();
 
     super.dispose();
@@ -284,56 +281,116 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
-  Widget _actionsAndInput(List<EmojiModel> emojis) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        GestureDetector(
-          onTap: () async {
-            final images = await utils.pickImageFromGallery(context: context);
-            if (images == null) return;
+  bool _attachmentsOptionsVisible = false;
 
-            setState(() {
-              _selectedImages.addAll(images);
-            });
-          },
-          child: Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: CustomSvg(
-                'assets/icons/attachment.svg',
-                width: 18.w,
-                height: 18.w,
-                color: AppColors.text,
+  Widget _attachmentOptionsWidget() {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 272),
+      height: _attachmentsOptionsVisible
+          ? 40.w + 12.h + 40.w + 12.h + 40.h
+          : 40.w,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          AnimatedPositioned(
+            duration: Duration(milliseconds: 272),
+            bottom: _attachmentsOptionsVisible ? 40.w + 12.h + 40.w + 12.h : 0,
+            child: GestureDetector(
+              onTap: () async {
+                // final images = await utils.pickSingleImage(
+                //   context: context,
+                //   source: ImageSource.camera,
+                // );
+                // if (images == null) return;
+
+                // setState(() {
+                //   _selectedImages.add(images);
+                // });
+              },
+              child: Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: CustomSvg(
+                    'assets/icons/camera.svg',
+                    width: 20.w,
+                    height: 20.w,
+                    color: AppColors.text,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(child: _inputContainer(emojis)),
-        SizedBox(width: 12.w),
-        Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: CustomSvg(
-              'assets/icons/send.svg',
-              width: 18.w,
-              height: 18.w,
-              color: AppColors.text,
+          AnimatedPositioned(
+            duration: Duration(milliseconds: 272),
+            bottom: _attachmentsOptionsVisible ? 40.w + 12.h : 0,
+            child: GestureDetector(
+              onTap: () async {
+                final images = await utils.pickImageFromGallery(
+                  context: context,
+                );
+                if (images == null) return;
+
+                setState(() {
+                  _selectedImages.addAll(images);
+                });
+              },
+              child: Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: CustomSvg(
+                    'assets/icons/gallery.svg',
+                    width: 20.w,
+                    height: 20.w,
+                    color: AppColors.text,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _attachmentsOptionsVisible = !_attachmentsOptionsVisible;
+              });
+            },
+            child: AnimatedContainer(
+              width: 40.w,
+              height: 40.w,
+              duration: Duration(milliseconds: 272),
+              decoration: BoxDecoration(
+                color: _attachmentsOptionsVisible
+                    ? AppColors.secondary
+                    : AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: _attachmentsOptionsVisible
+                    ? Icon(
+                        Icons.close_rounded,
+                        size: 24.w,
+                        color: AppColors.text,
+                      )
+                    : CustomSvg(
+                        'assets/icons/attachment.svg',
+                        width: 18.w,
+                        height: 18.w,
+                        color: AppColors.text,
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -542,7 +599,31 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
-                    _actionsAndInput(emojis),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _attachmentOptionsWidget(),
+                        SizedBox(width: 12.w),
+                        Expanded(child: _inputContainer(emojis)),
+                        SizedBox(width: 12.w),
+                        Container(
+                          width: 40.w,
+                          height: 40.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: CustomSvg(
+                              'assets/icons/send.svg',
+                              width: 18.w,
+                              height: 18.w,
+                              color: AppColors.text,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     if (!_hasInputText && _selectedImages.isEmpty)
                       SocialVoiceRecorder(
                         barWidth: 1.sw - 40.w - 40.w - 12.w,
