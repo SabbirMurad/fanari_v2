@@ -1,22 +1,28 @@
+import 'package:fanari_v2/constants/credential.dart';
+
 class EmojiModel {
   String uuid;
   String name;
-  String url;
+  String original_url;
   String webp_url;
 
   EmojiModel({
     required this.name,
     required this.uuid,
-    required this.url,
+    required this.original_url,
     required this.webp_url,
   });
 
   factory EmojiModel.fromJson(Map<String, dynamic> json) {
+    final original_url =
+        '${AppCredentials.domain}/api/emoji/original/${json['uuid']}';
+    final webp_url = '${AppCredentials.domain}/api/emoji/webp/${json['uuid']}';
+
     return EmojiModel(
       name: json['name'],
       uuid: json['uuid'],
-      url: json['url'],
-      webp_url: json['webp_url'],
+      original_url: original_url,
+      webp_url: webp_url,
     );
   }
 

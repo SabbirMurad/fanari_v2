@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/providers/emoji.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/social_voice_recorder.dart';
 import 'package:flutter/material.dart';
@@ -224,15 +225,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
   bool _hasInputText = false;
 
-  Widget _inputContainer() {
-    final emojis = ref
-        .watch(emojiNotifierProvider)
-        .when(
-          data: (data) => data,
-          error: (error, stackTrace) => <EmojiModel>[],
-          loading: () => <EmojiModel>[],
-        );
-
+  Widget _inputContainer(List<EmojiModel> emojis) {
     return Container(
       width: double.infinity,
       // height: 40.w,
@@ -291,7 +284,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
-  Widget _actionsAndInput() {
+  Widget _actionsAndInput(List<EmojiModel> emojis) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -322,7 +315,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           ),
         ),
         SizedBox(width: 12.w),
-        Expanded(child: _inputContainer()),
+        Expanded(child: _inputContainer(emojis)),
         SizedBox(width: 12.w),
         Container(
           width: 40.w,
@@ -352,7 +345,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       (1.sw - 40.w - 24.w - (_spaceBetweenEmoji * (_emojiCountParRow - 1))) /
       _emojiCountParRow;
 
-  Widget _emojiContainer() {
+  Widget _emojiContainer(List<EmojiModel> emojis) {
     return AnimatedContainer(
       width: 1.sw - 40.w,
       height: _showEmojis ? ((1.sw - 40.w) * 9) / 16 : 0,
@@ -367,16 +360,48 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
         child: Wrap(
           spacing: _spaceBetweenEmoji,
           runSpacing: _spaceBetweenEmoji,
-          children: List.generate(50, (index) {
-            return Container(
-              width: _emojiWidth,
-              height: 40.w,
-              color: Colors.green,
+          children: emojis.map((emoji) {
+            return GestureDetector(
+              onTap: () {
+                insertEmoji(emoji.name);
+              },
+              child: Container(
+                width: _emojiWidth,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: CachedNetworkImage(
+                  imageUrl: emoji.webp_url,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) {
+                    return ColorFadeBox(width: _emojiWidth, height: 40.w);
+                  },
+                ),
+              ),
             );
-          }),
+          }).toList(),
         ),
       ),
     );
+  }
+
+  void insertEmoji(String key) {
+    final cursor = _spacialTextController.selection.baseOffset;
+
+    final text = _spacialTextController.text;
+    final newText = text.replaceRange(cursor, cursor, ':$key:');
+
+    _spacialTextController.text = newText;
+
+    _spacialTextController.selection = TextSelection.collapsed(
+      offset: cursor + key.length + 2,
+    );
+
+    setState(() {
+      _showEmojis = false;
+    });
   }
 
   List<File> _selectedImages = [];
@@ -483,6 +508,14 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final emojis = ref
+        .watch(emojiNotifierProvider)
+        .when(
+          data: (data) => data,
+          error: (error, stackTrace) => <EmojiModel>[],
+          loading: () => <EmojiModel>[],
+        );
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -503,13 +536,13 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _imageContainer(),
-              _emojiContainer(),
+              _emojiContainer(emojis),
               Padding(
                 padding: EdgeInsets.only(left: 20.w, right: 20.w),
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
-                    _actionsAndInput(),
+                    _actionsAndInput(emojis),
                     if (!_hasInputText && _selectedImages.isEmpty)
                       SocialVoiceRecorder(
                         barWidth: 1.sw - 40.w - 40.w - 12.w,
@@ -588,8 +621,8 @@ class EmojiText extends SpecialText {
       alignment: PlaceholderAlignment.middle,
       child: CachedNetworkImage(
         imageUrl: emojis.firstWhere((element) => element.name == key).webp_url,
-        width: 16.w,
-        height: 16.w,
+        width: 20.w,
+        height: 20.w,
       ),
     );
   }

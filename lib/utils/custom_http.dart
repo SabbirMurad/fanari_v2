@@ -232,31 +232,34 @@ class CustomHttp {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     String? refreshToken = localStorage.getString('refresh_token');
     String? userId = localStorage.getString('user_id');
+    String? role = localStorage.getString('role');
 
-    if (refreshToken == null || userId == null) {
+    if (refreshToken == null || userId == null || role == null) {
       printLine('refreshToken == null || userId == null');
       // await localStorage.clear();
       return false;
     }
 
-    var response = await http.get(
-      Uri.parse('${AppCredentials.domain}/api/auth/get-access-token'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $refreshToken',
-      },
+    var response = await http.post(
+      Uri.parse('${AppCredentials.domain}/api/auth/refresh'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'refresh_token': refreshToken,
+        'user_id': userId,
+        'role': role,
+      }),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      localStorage.setString('access_token', data['accessToken']);
-      localStorage.setString(
+      localStorage.setString('access_token', data['access_token']);
+      localStorage.setInt(
         'access_token_valid_till',
-        data['decodedData']['exp'],
+        data['access_token_valid_till'],
       );
       return true;
     } else {
-      printLine('response.statusCode == 200');
+      printLine('response.statusCode != 200');
       // await localStorage.clear();
       return false;
     }

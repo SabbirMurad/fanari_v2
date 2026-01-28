@@ -28,14 +28,14 @@ class EmojiNotifier extends _$EmojiNotifier {
   }
 
   Future<List<EmojiModel>?> getPostFromServer() async {
-    // final response = await utils.CustomHttp.get(
-    //   endpoint: '/post',
-    //   queries: {'page': offset, 'limit': limit},
-    // );
+    final response = await utils.CustomHttp.get(
+      endpoint: '/emoji/list',
+      // queries: {'page': offset, 'limit': limit},
+    );
 
-    // if (response.statusCode != 200) return null;
+    if (response.statusCode != 200) return null;
 
-    final posts = EmojiModel.fromJsonList([]);
+    final posts = EmojiModel.fromJsonList(response.data);
 
     return posts;
   }

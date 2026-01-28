@@ -1,9 +1,8 @@
-import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:flutter/material.dart';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,7 +46,7 @@ class _LandingScreenState extends State<LandingScreen> {
               color: AppColors.primary,
             ),
             SizedBox(height: 36.h),
-            Text(
+            Text( 
               'Welcome to Fanari',
               style: TextStyle(
                 fontSize: 31.sp,
