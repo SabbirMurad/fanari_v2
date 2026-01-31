@@ -33,7 +33,7 @@ class PostsNotifier extends _$PostsNotifier {
     );
 
     if (response.statusCode != 200) return null;
-    printLine(response.data);
+    
     final posts = PostModel.fromJsonList(response.data);
 
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI

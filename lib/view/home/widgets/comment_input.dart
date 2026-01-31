@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
