@@ -1,7 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/post.dart';
-import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -188,7 +187,7 @@ class _PostWidgetState extends State<PostWidget> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                AppRoutes.push(AppRoutes.landing);
+                // AppRoutes.push(AppRoutes.landing);
               },
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -390,58 +389,76 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /*
-            The top section of the post, where post owner
-            image,name etc is shown
-          */
-          _postTopBar(),
-          if (widget.model.caption != null)
-            StatusWidget(
-              text: widget.model.caption!,
-              width: 1.sw - 40.w,
-              mentions: widget.model.mentions,
-              truncatedLines:
-                  (widget.model.images.isEmpty &&
-                      widget.model.videos.isEmpty &&
-                      widget.model.link_preview == null &&
-                      widget.model.youtube_attachment == null)
-                  ? 10
-                  : 3,
-            ),
-          if (widget.model.link_preview != null)
-            MyLinkPreview(
-              padding: EdgeInsets.only(top: 12.h),
-              previewData: widget.model.link_preview!,
-            ),
-          if (widget.model.youtube_attachment != null)
-            YoutubeAttachmentWidget(
-              padding: EdgeInsets.only(top: 12.h),
-              width: 1.sw - 40.w,
-              model: widget.model.youtube_attachment!,
-            ),
-          if (widget.model.images.isNotEmpty || widget.model.videos.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(top: 12.h),
-              child: ImageVideoCarousel(
-                borderRadius: BorderRadius.circular(10.r),
-                images: widget.model.images,
-                videos: widget.model.videos,
-                width: carouselWidth,
+    return Hero(
+      tag: 'post_widget_' + widget.model.uuid,
+      flightShuttleBuilder:
+          (
+            flightContext,
+            animation,
+            flightDirection,
+            fromHeroContext,
+            toHeroContext,
+          ) {
+            return Material(
+              // VERY IMPORTANT
+              color: Colors.transparent,
+              child: toHeroContext.widget,
+            );
+          },
+      child: Container(
+        width: 1.sw - 20.w,
+        margin: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /*
+              The top section of the post, where post owner
+              image,name etc is shown
+            */
+            _postTopBar(),
+            if (widget.model.caption != null)
+              StatusWidget(
+                text: widget.model.caption!,
+                width: 1.sw - 40.w,
+                mentions: widget.model.mentions,
+                truncatedLines:
+                    (widget.model.images.isEmpty &&
+                        widget.model.videos.isEmpty &&
+                        widget.model.link_preview == null &&
+                        widget.model.youtube_attachment == null)
+                    ? 10
+                    : 3,
               ),
-            ),
-          if (widget.model.poll != null)
-            PollWidget(
-              model: widget.model.poll!,
-              padding: EdgeInsets.only(top: 12.h),
-            ),
-          _postInteractions(),
-        ],
+            if (widget.model.link_preview != null)
+              MyLinkPreview(
+                padding: EdgeInsets.only(top: 12.h),
+                previewData: widget.model.link_preview!,
+              ),
+            if (widget.model.youtube_attachment != null)
+              YoutubeAttachmentWidget(
+                padding: EdgeInsets.only(top: 12.h),
+                width: 1.sw - 40.w,
+                model: widget.model.youtube_attachment!,
+              ),
+            if (widget.model.images.isNotEmpty ||
+                widget.model.videos.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h),
+                child: ImageVideoCarousel(
+                  borderRadius: BorderRadius.circular(10.r),
+                  images: widget.model.images,
+                  videos: widget.model.videos,
+                  width: carouselWidth,
+                ),
+              ),
+            if (widget.model.poll != null)
+              PollWidget(
+                model: widget.model.poll!,
+                padding: EdgeInsets.only(top: 12.h),
+              ),
+            _postInteractions(),
+          ],
+        ),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/providers/emoji.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
@@ -20,8 +19,50 @@ class Mention {
   Mention(this.id, this.display);
 }
 
+class CommentInputColorTheme {
+  final Color primaryColor;
+  final Color textColor;
+  final Color secondaryColor;
+  final Color borderColor;
+  final Color hintTextColor;
+  final Color emojiBackgroundColor;
+  final Gradient bgGradient;
+
+  const CommentInputColorTheme({
+    this.primaryColor = const Color(0xff7D9FFE),
+    this.secondaryColor = const Color(0xff3A3A3A),
+    this.textColor = const Color(0xffF9F9F9),
+    this.borderColor = const Color(0xffF4F7E4),
+    this.hintTextColor = const Color(0xFFa3a3a3),
+    this.emojiBackgroundColor = const Color.fromRGBO(24, 24, 24, 0.2),
+    this.bgGradient = const LinearGradient(
+      colors: [
+        const Color.fromRGBO(24, 24, 24, 0.85),
+        const Color.fromRGBO(24, 24, 24, 0.2),
+      ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    ),
+  });
+}
+
+class CommentInputSubmitValue {
+  final String? text;
+  final String? audioPath;
+  final List<File>? images;
+
+  const CommentInputSubmitValue({this.text, this.audioPath, this.images});
+}
+
 class CommentInputWidget extends ConsumerStatefulWidget {
-  const CommentInputWidget({super.key});
+  final void Function(CommentInputSubmitValue)? onSend;
+  final CommentInputColorTheme colorTheme;
+
+  const CommentInputWidget({
+    super.key,
+    this.colorTheme = const CommentInputColorTheme(),
+    this.onSend,
+  });
 
   @override
   ConsumerState<CommentInputWidget> createState() => _CommentInputWidgetState();
@@ -33,6 +74,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   @override
   void initState() {
     super.initState();
+
     _spacialTextController.addListener(() {
       if (_hasInputText) {
         if (_spacialTextController.text.isEmpty) {
@@ -47,9 +89,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           });
         }
       }
-    });
 
-    _spacialTextController.addListener(() {
       final text = _spacialTextController.text;
       final cursor = _spacialTextController.selection.baseOffset;
 
@@ -92,14 +132,21 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
     final lastAt = text.lastIndexOf('@', cursor - 1);
 
-    final before = text.substring(0, lastAt);
+    final beforeRaw = text.substring(0, lastAt);
     final after = text.substring(cursor);
 
-    final newText = '$before@${user.display} $after';
+    // ensure space before @
+    final needsSpaceBefore = beforeRaw.isNotEmpty && !beforeRaw.endsWith(' ');
+
+    final before = needsSpaceBefore ? '$beforeRaw ' : beforeRaw;
+
+    final mentionText = '@${user.display} ';
+
+    final newText = '$before$mentionText$after';
 
     _spacialTextController.text = newText;
     _spacialTextController.selection = TextSelection.collapsed(
-      offset: (before + ' @${user.display} ').length,
+      offset: (before + mentionText).length,
     );
   }
 
@@ -142,7 +189,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 width: 1.sw - 40.w - 24.w - 80.w - 24.w,
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary,
+                  color: widget.colorTheme.secondaryColor,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Column(
@@ -166,9 +213,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                               ? null
                               : Border(
                                   bottom: BorderSide(
-                                    color: AppColors.border.withValues(
-                                      alpha: 0.2,
-                                    ),
+                                    color: widget.colorTheme.borderColor
+                                        .withValues(alpha: 0.2),
                                     width: 1,
                                   ),
                                 ),
@@ -179,7 +225,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                               user.display,
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: AppColors.text,
+                                color: widget.colorTheme.textColor,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -226,7 +272,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       width: double.infinity,
       // height: 40.w,
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: widget.colorTheme.secondaryColor,
         borderRadius: BorderRadius.circular(20.r),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
@@ -260,15 +306,19 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   focusedErrorBorder: InputBorder.none,
                   hintText: 'Write here ...',
                   hintStyle: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: widget.colorTheme.hintTextColor,
                     fontSize: 14.sp,
                   ),
                   isDense: true,
                 ),
-                style: TextStyle(color: AppColors.text, fontSize: 14.sp),
+                style: TextStyle(
+                  color: widget.colorTheme.textColor,
+                  fontSize: 14.sp,
+                ),
                 controller: _spacialTextController,
                 specialTextSpanBuilder: MySpecialTextSpanBuilder(
                   emojis: emojis,
+                  mentionColor: widget.colorTheme.primaryColor,
                 ),
                 maxLines: 5,
                 minLines: 1,
@@ -310,7 +360,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 width: 40.w,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: widget.colorTheme.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -318,7 +368,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     'assets/icons/camera.svg',
                     width: 20.w,
                     height: 20.w,
-                    color: AppColors.text,
+                    color: widget.colorTheme.textColor,
                   ),
                 ),
               ),
@@ -342,7 +392,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 width: 40.w,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: widget.colorTheme.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -350,7 +400,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     'assets/icons/gallery.svg',
                     width: 20.w,
                     height: 20.w,
-                    color: AppColors.text,
+                    color: widget.colorTheme.textColor,
                   ),
                 ),
               ),
@@ -368,8 +418,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
               duration: Duration(milliseconds: 272),
               decoration: BoxDecoration(
                 color: _attachmentsOptionsVisible
-                    ? AppColors.secondary
-                    : AppColors.primary,
+                    ? widget.colorTheme.secondaryColor
+                    : widget.colorTheme.primaryColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -377,13 +427,13 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     ? Icon(
                         Icons.close_rounded,
                         size: 24.w,
-                        color: AppColors.text,
+                        color: widget.colorTheme.textColor,
                       )
                     : CustomSvg(
                         'assets/icons/attachment.svg',
                         width: 18.w,
                         height: 18.w,
-                        color: AppColors.text,
+                        color: widget.colorTheme.textColor,
                       ),
               ),
             ),
@@ -409,7 +459,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       duration: Duration(milliseconds: 272),
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: widget.colorTheme.secondaryColor,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: SingleChildScrollView(
@@ -425,7 +475,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 width: _emojiWidth,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withValues(alpha: 0.2),
+                  color: widget.colorTheme.emojiBackgroundColor,
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: CachedNetworkImage(
@@ -483,7 +533,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                 feedback: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.text),
+                    border: Border.all(color: widget.colorTheme.textColor),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
@@ -574,16 +624,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.surface.withValues(alpha: 0.85),
-            AppColors.surface,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      decoration: BoxDecoration(gradient: widget.colorTheme.bgGradient),
       child: SafeArea(
         top: false,
         child: Padding(
@@ -609,7 +650,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                           width: 40.w,
                           height: 40.w,
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: widget.colorTheme.primaryColor,
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -617,7 +658,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                               'assets/icons/send.svg',
                               width: 18.w,
                               height: 18.w,
-                              color: AppColors.text,
+                              color: widget.colorTheme.textColor,
                             ),
                           ),
                         ),
@@ -642,11 +683,13 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
 class AtText extends SpecialText {
   static const String flag = "@";
+  final Color mentionColor;
 
   AtText(
     TextStyle? textStyle,
     SpecialTextGestureTapCallback? onTap, {
     required this.start,
+    required this.mentionColor,
   }) : super(flag, ' ', textStyle, onTap: onTap);
 
   final int start;
@@ -659,8 +702,8 @@ class AtText extends SpecialText {
       text: '@$mentionText',
       actualText: '@$mentionText',
       start: start,
-      style: const TextStyle(
-        color: AppColors.primary, // your app primary color
+      style: TextStyle(
+        color: mentionColor, // your app primary color
         fontWeight: FontWeight.bold,
       ),
     );
@@ -668,7 +711,8 @@ class AtText extends SpecialText {
 }
 
 class EmojiText extends SpecialText {
-  static const String flag = ":";
+  static const String beginFlag = " :";
+  static const String finishFlag = ":";
 
   final int start;
   final List<EmojiModel> emojis;
@@ -678,7 +722,7 @@ class EmojiText extends SpecialText {
     SpecialTextGestureTapCallback? onTap, {
     required this.start,
     required this.emojis,
-  }) : super(flag, ":", textStyle, onTap: onTap);
+  }) : super(beginFlag, finishFlag, textStyle, onTap: onTap);
 
   @override
   InlineSpan finishText() {
@@ -710,8 +754,9 @@ class EmojiText extends SpecialText {
 
 class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
   final List<EmojiModel> emojis;
+  final Color mentionColor;
 
-  MySpecialTextSpanBuilder({required this.emojis});
+  MySpecialTextSpanBuilder({required this.emojis, required this.mentionColor});
 
   @override
   SpecialText? createSpecialText(
@@ -721,7 +766,7 @@ class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
     required int index,
   }) {
     if (flag == "@") {
-      return AtText(textStyle, onTap, start: index);
+      return AtText(textStyle, onTap, start: index, mentionColor: mentionColor);
     }
 
     if (flag == ":") {
