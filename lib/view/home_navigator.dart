@@ -1,20 +1,24 @@
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/providers/myself.dart';
+import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';
 import 'package:fanari_v2/view/search/search.dart';
 import 'package:fanari_v2/view/settings/settings.dart';
 import 'package:fanari_v2/widgets/bottom_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeNavigator extends StatefulWidget {
+class HomeNavigator extends ConsumerStatefulWidget {
   final int selectedPage;
   const HomeNavigator({super.key, required this.selectedPage});
 
   @override
-  State<HomeNavigator> createState() => _HomeNavigatorState();
+  ConsumerState<HomeNavigator> createState() => _HomeNavigatorState();
 }
 
-class _HomeNavigatorState extends State<HomeNavigator> {
+class _HomeNavigatorState extends ConsumerState<HomeNavigator> {
   late int _selectedTab = widget.selectedPage;
   late PageController _pageController = PageController(
     initialPage: _selectedTab,
@@ -26,6 +30,22 @@ class _HomeNavigatorState extends State<HomeNavigator> {
     MarketScreen(),
     SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadUserAndConnectSocket();
+  }
+
+  void _loadUserAndConnectSocket() async {
+    await ref.read(myselfNotifierProvider.notifier).loadUserData();
+
+    final local_storage = await SharedPreferences.getInstance();
+    final access_token = local_storage.getString('access_token');
+
+    CustomSocket.instance.connect(ref, access_token: access_token!);
+  }
 
   @override
   Widget build(BuildContext context) {

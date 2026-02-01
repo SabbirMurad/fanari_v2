@@ -11,6 +11,8 @@ class CustomHttpResult {
 enum CommonCustomMethods { POST, PUT, PATCH }
 
 class CustomHttp {
+  CustomHttp._();
+
   static Future<CustomHttpResult> get({
     required String endpoint,
     bool showFloatingError = true,
