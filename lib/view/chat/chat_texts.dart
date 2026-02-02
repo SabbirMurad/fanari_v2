@@ -1,7 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
@@ -63,8 +62,12 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                 children: [
                   NamedAvatar(
                     loading: false,
-                    image: widget.model.image,
-                    name: widget.model.name,
+                    image: widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.image
+                        : widget.model.single_metadata!.image,
+                    name: widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.name
+                        : widget.model.single_metadata!.first_name,
                     size: 40.w,
                   ),
                   SizedBox(width: 6.w),
@@ -73,11 +76,15 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Hero(
-                        tag: widget.model.uuid + 'name',
+                        tag: 'conversation_name_' + widget.model.core.uuid,
                         child: Material(
                           color: Colors.transparent,
                           child: Text(
-                            widget.model.name,
+                            widget.model.core.type == ConversationType.Group
+                                ? widget.model.group_metadata!.name
+                                : widget.model.single_metadata!.first_name +
+                                      ' ' +
+                                      widget.model.single_metadata!.last_name,
                             style: TextStyle(
                               color: AppColors.text,
                               fontWeight: FontWeight.w600,
@@ -89,28 +96,29 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                       ),
                       Row(
                         children: [
-                          if (widget.model.online)
+                          if (widget.model.core.type == ConversationType.Single)
                             Container(
                               width: 10.w,
                               height: 10.w,
                               margin: EdgeInsets.only(right: 6.w),
                               decoration: BoxDecoration(
-                                color: widget.model.online
+                                color: widget.model.single_metadata!.online
                                     ? Colors.green[400]
                                     : Color.fromARGB(255, 102, 105, 103),
                                 shape: BoxShape.circle,
                               ),
                             ),
-                          Text(
-                            widget.model.online
-                                ? 'Online'
-                                : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(widget.model.last_seen))}',
-                            style: TextStyle(
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12.sp,
+                          if (widget.model.core.type == ConversationType.Single)
+                            Text(
+                              widget.model.single_metadata!.online
+                                  ? 'Online'
+                                  : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(widget.model.single_metadata!.last_seen))}',
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 12.sp,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],

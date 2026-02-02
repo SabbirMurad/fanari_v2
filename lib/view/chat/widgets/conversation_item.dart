@@ -78,7 +78,8 @@ class _ConversationItemState extends State<ConversationItem> {
 
     if (widget.model.texts.last.my_text) return null;
 
-    if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
+    // TODO: Fix
+    // if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
       return null;
 
     return AppColors.surface;
@@ -89,7 +90,8 @@ class _ConversationItemState extends State<ConversationItem> {
 
     if (widget.model.texts.last.my_text) return FontWeight.w400;
 
-    if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
+    // TODO: Fix
+    // if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
       return FontWeight.w400;
 
     return FontWeight.w600;
@@ -101,9 +103,9 @@ class _ConversationItemState extends State<ConversationItem> {
       onTap: () {
         if (widget.selectMode) {
           if (widget.selected) {
-            widget.onDeSelect?.call(widget.model.uuid);
+            widget.onDeSelect?.call(widget.model.core.uuid);
           } else {
-            widget.onSelect?.call(widget.model.uuid);
+            widget.onSelect?.call(widget.model.core.uuid);
           }
           return;
         }
@@ -112,7 +114,7 @@ class _ConversationItemState extends State<ConversationItem> {
       },
       onLongPress: () {
         if (widget.selected) return;
-        widget.onSelect?.call(widget.model.uuid);
+        widget.onSelect?.call(widget.model.core.uuid);
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -132,20 +134,26 @@ class _ConversationItemState extends State<ConversationItem> {
                 children: [
                   NamedAvatar(
                     loading: false,
-                    image: widget.model.image,
-                    name: widget.model.name,
+                    image: widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.image
+                        : widget.model.single_metadata!.image,
+                    name: widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.name
+                        : widget.model.single_metadata!.first_name,
                     size: 56.w,
                   ),
-                  Container(
-                    width: 12.w,
-                    height: 12.w,
-                    decoration: BoxDecoration(
-                      color: widget.model.online
-                          ? Colors.green[400]
-                          : Color.fromARGB(255, 102, 105, 103),
-                      shape: BoxShape.circle,
+                  if (widget.model.core.type == ConversationType.Single)
+                    Container(
+                      width: 10.w,
+                      height: 10.w,
+                      margin: EdgeInsets.only(right: 6.w),
+                      decoration: BoxDecoration(
+                        color: widget.model.single_metadata!.online
+                            ? Colors.green[400]
+                            : Color.fromARGB(255, 102, 105, 103),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
                 ],
               ),
               SizedBox(width: 12.w),
@@ -155,11 +163,15 @@ class _ConversationItemState extends State<ConversationItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Hero(
-                      tag: (widget.model.uuid + 'name'),
+                      tag: 'conversation_name_' + widget.model.core.uuid,
                       child: Material(
                         color: Colors.transparent,
                         child: Text(
-                          widget.model.name,
+                          widget.model.core.type == ConversationType.Group
+                              ? widget.model.group_metadata!.name
+                              : widget.model.single_metadata!.first_name +
+                                    ' ' +
+                                    widget.model.single_metadata!.last_name,
                           style: TextStyle(
                             color: AppColors.text,
                             fontSize: 16.sp,

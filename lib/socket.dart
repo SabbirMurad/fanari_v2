@@ -107,9 +107,17 @@ class CustomSocket {
       }
       // When someone is typing
       else if (data[0] == "%typing%") {
-        final String conversationId = data[1];
-        final String userId = data[2];
-        handleIncomingTyping(conversationId, userId);
+        final String conversation_id = data[1];
+        final String user_id = data[2];
+        final String name = data[3];
+
+        _ref!
+            .read(conversationNotifierProvider.notifier)
+            .updateTyping(
+              conversation_id: conversation_id,
+              user_id: user_id,
+              name: name,
+            );
       }
     });
 
@@ -122,12 +130,6 @@ class CustomSocket {
         });
   }
 
-  handleIncomingTyping(String conversationId, String userId) {
-    _ref!
-        .read(conversationNotifierProvider.notifier)
-        .updateTyping(conversationId, userId);
-  }
-
   void handleIncomingText(dynamic json) async {
     final localStorage = await SharedPreferences.getInstance();
     final userId = localStorage.getString('user_id');
@@ -135,7 +137,11 @@ class CustomSocket {
 
     _ref!
         .read(conversationNotifierProvider.notifier)
-        .addMessage(textModel.conversation_id, textModel);
+        .addMessage(
+          conversation_id: textModel.conversation_id,
+          message: textModel,
+        );
+
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
     textModel.load3rdPartyInfos();
 

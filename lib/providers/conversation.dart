@@ -30,10 +30,13 @@ class ConversationNotifier extends _$ConversationNotifier {
     return ConversationModel.fromJsonList(response.data, userId!);
   }
 
-  Future<void> addMessage(String conversationId, TextModel message) async {
+  Future<void> addMessage({
+    required String conversation_id,
+    required TextModel message,
+  }) async {
     List<ConversationModel> conversations = state.value ?? [];
     for (var i = 0; i < conversations.length; i++) {
-      if (conversations[i].uuid == conversationId) {
+      if (conversations[i].core.uuid == conversation_id) {
         conversations[i].texts = [message, ...conversations[i].texts];
         break;
       }
@@ -45,20 +48,38 @@ class ConversationNotifier extends _$ConversationNotifier {
   Timer? _timer;
   String? previousConversationIdForRemovingTypingTimer;
 
-  Future<void> updateTyping(String conversationId, String userId) async {
+  Future<void> updateTyping({
+    required String conversation_id,
+    required String user_id,
+    required String name,
+  }) async {
     List<ConversationModel> conversations = state.value ?? [];
+
     for (var i = 0; i < conversations.length; i++) {
-      if (conversations[i].uuid == conversationId) {
-        if (userId == conversations[i].user_id) {
-          if (previousConversationIdForRemovingTypingTimer == conversationId) {
+      if (conversations[i].core.uuid == conversation_id) {
+        if (conversations[i].core.type == ConversationType.Group) {
+          if (previousConversationIdForRemovingTypingTimer == conversation_id) {
             _timer?.cancel();
           }
 
-          previousConversationIdForRemovingTypingTimer = conversationId;
+          previousConversationIdForRemovingTypingTimer = conversation_id;
 
           conversations[i].typing = true;
-          break;
+        } else {
+          if (user_id == conversations[i].single_metadata!.user_id) {
+            if (previousConversationIdForRemovingTypingTimer ==
+                conversation_id) {
+              _timer?.cancel();
+            }
+
+            previousConversationIdForRemovingTypingTimer = conversation_id;
+
+            conversations[i].typing = true;
+          } else {
+            // Means the user is typing in a 1:1 conversation is me, not the other person, need to fix backend so this doesn't even come here
+          }
         }
+        break;
       }
     }
 
@@ -66,7 +87,7 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     _timer = Timer(Duration(seconds: 4), () {
       for (var i = 0; i < conversations.length; i++) {
-        if (conversations[i].uuid == conversationId) {
+        if (conversations[i].core.uuid == conversation_id) {
           conversations[i].typing = false;
           break;
         }
@@ -82,10 +103,14 @@ class ConversationNotifier extends _$ConversationNotifier {
   }) async {
     List<ConversationModel> conversations = state.value ?? [];
     for (var i = 0; i < conversations.length; i++) {
-      if (conversations[i].user_id == user_id) {
-        conversations[i].online = is_online;
+      if (conversations[i].core.type == ConversationType.Group) continue;
+
+      if (conversations[i].single_metadata!.user_id == user_id) {
+        conversations[i].single_metadata!.online = is_online;
+
         if (!is_online) {
-          conversations[i].last_seen = DateTime.now().millisecondsSinceEpoch;
+          conversations[i].single_metadata!.last_seen =
+              DateTime.now().millisecondsSinceEpoch;
         }
         break;
       }

@@ -1,25 +1,22 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/attachment.dart';
-import 'package:fanari_v2/model/audio.dart';
-import 'package:fanari_v2/model/conversation.dart';
-import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/model/text.dart';
+import 'package:fanari_v2/providers/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/chat/chat_texts.dart';
 import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/horizontal_options.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _searchWidget() {
     return GestureDetector(
       onTap: () {},
@@ -76,187 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
         isLoading = false;
       });
     });
-
-    _loadPostExtras();
   }
-
-  void _loadPostExtras() async {
-    for (final item in _conversations) {
-      for (final text in item.texts) {
-        await text.load3rdPartyInfos();
-      }
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  List<ConversationModel> _conversations = <ConversationModel>[
-    ConversationModel(
-      uuid: '1',
-      name: 'Group 1',
-      image: null,
-      online: true,
-      texts: [
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: false,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Attachment,
-          attachment: AttachmentModel(
-            name: 'file with a very very big name image.jpg',
-            size: 123234,
-            type: 'image/jpeg',
-            uuid: 'asd',
-          ),
-        ),
-      ],
-      last_seen: 0,
-      user_id: '1',
-      typing: false,
-    ),
-    ConversationModel(
-      uuid: '1',
-      name: 'Group 1',
-      image: null,
-      online: true,
-      texts: [
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Text,
-          text:
-              'here is a preview for youtube attachment https://www.youtube.com/watch?v=bc7JKgki3l0',
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: false,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Text,
-          text: 'link preview https://instagram.com',
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Attachment,
-          attachment: AttachmentModel(
-            name: 'image.jpg',
-            size: 123234,
-            type: 'image/jpeg',
-            uuid: 'asd',
-          ),
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: false,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Attachment,
-          attachment: AttachmentModel(
-            name: 'file with a very very big name image.jpg',
-            size: 123234,
-            type: 'image/jpeg',
-            uuid: 'asd',
-          ),
-        ),
-      ],
-      last_seen: 0,
-      user_id: '1',
-      typing: true,
-    ),
-    ConversationModel(
-      uuid: '2',
-      name: 'Group 2',
-      image: null,
-      online: true,
-      texts: [
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Text,
-          text: 'Hello, how are you?',
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: false,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Audio,
-          audio: AudioModel(
-            uuid: 'asd',
-            duration: 324,
-            size: 3242,
-            type: 'audio/mpeg',
-          ),
-        ),
-        TextModel(
-          uuid: '1',
-          owner: '2',
-          conversation_id: '2',
-          my_text: true,
-          images: [],
-          seen_by: [],
-          created_at: DateTime.now().microsecondsSinceEpoch,
-          videos: [],
-          type: TextType.Audio,
-          audio: AudioModel(
-            uuid: 'asd',
-            duration: 324,
-            size: 3242,
-            type: 'audio/mpeg',
-          ),
-        ),
-      ],
-      last_seen: 0,
-      user_id: '1',
-    ),
-    ConversationModel(
-      uuid: '3',
-      name: 'Group 3',
-      image: null,
-      online: true,
-      texts: [],
-      last_seen: 0,
-      user_id: '1',
-    ),
-  ];
 
   final List<String> _chatOptions = ["All", "Unread", "Group", "Favorites"];
 
@@ -322,6 +139,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final conversationsProvider = ref.watch(conversationNotifierProvider);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -343,52 +162,60 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
             SizedBox(height: 12.h),
-            if (isLoading) ..._skeletons(),
-            if (!isLoading)
-              ..._conversations.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
+            ...conversationsProvider.when(
+              data: (conversations) {
+                return conversations.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
 
-                return ConversationItem(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) {
-                          return ChatTextsScreen(
-                            conversationId: item.uuid,
-                            model: item,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  model: item,
-                  bottomBorder: index != _conversations.length - 1,
-                  onSelect: (id) {
-                    if (_selectedConversations.isEmpty) {
+                  return ConversationItem(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) {
+                            return ChatTextsScreen(
+                              conversationId: item.core.uuid,
+                              model: item,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    model: item,
+                    bottomBorder: index != conversations.length - 1,
+                    onSelect: (id) {
+                      if (_selectedConversations.isEmpty) {
+                        setState(() {
+                          _selectMode = true;
+                        });
+                      }
                       setState(() {
-                        _selectMode = true;
+                        _selectedConversations.add(id);
                       });
-                    }
-                    setState(() {
-                      _selectedConversations.add(id);
-                    });
-                  },
-                  onDeSelect: (id) {
-                    setState(() {
-                      _selectedConversations.remove(id);
-                    });
+                    },
+                    onDeSelect: (id) {
+                      setState(() {
+                        _selectedConversations.remove(id);
+                      });
 
-                    if (_selectedConversations.isEmpty) {
-                      setState(() {
-                        _selectMode = false;
-                      });
-                    }
-                  },
-                  selectMode: _selectMode,
-                  selected: _selectedConversations.contains(item.uuid),
-                );
-              }),
+                      if (_selectedConversations.isEmpty) {
+                        setState(() {
+                          _selectMode = false;
+                        });
+                      }
+                    },
+                    selectMode: _selectMode,
+                    selected: _selectedConversations.contains(item.core.uuid),
+                  );
+                }).toList();
+              },
+              error: (error, stackTrace) {
+                return _skeletons();
+              },
+              loading: () {
+                return _skeletons();
+              },
+            ),
           ],
         ),
       ),
