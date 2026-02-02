@@ -1,7 +1,6 @@
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/my_profile.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 
 part 'myself.g.dart';
@@ -21,19 +20,11 @@ class MyselfNotifier extends _$MyselfNotifier {
       return null;
     }
 
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    String userId = localStorage.getString('user_id')!;
-
-    final response = await utils.CustomHttp.post(
-      endpoint: '/account/short-details',
-      body: {'user_id': userId},
-    );
+    final response = await utils.CustomHttp.get(endpoint: '/profile');
 
     if (response.statusCode != 200) return null;
 
-    final userFromServer = MyselfModel.fromJson(response.data);
-
-    return userFromServer;
+    return MyselfModel.fromJson(response.data);
   }
 
   // Future<bool> _updateUserCache(UserModel serverUser) async {

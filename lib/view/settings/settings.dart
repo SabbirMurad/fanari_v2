@@ -1,18 +1,20 @@
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _settingsOption({
     required String icon,
     required String text,
@@ -51,6 +53,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final myself = ref
+        .watch(myselfNotifierProvider)
+        .when(
+          data: (data) => data,
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -61,13 +71,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SafeArea(bottom: false, child: SizedBox(height: 48.h)),
             Row(
               children: [
-                NamedAvatar(loading: false, name: 'Sabbir', size: 72.w),
+                NamedAvatar(
+                  loading: myself == null,
+                  name: myself == null ? 'Loading' : myself.profile.first_name,
+                  size: 72.w,
+                ),
                 SizedBox(width: 12.w),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sabbir Hassan',
+                      myself == null
+                          ? 'Loading'
+                          : myself.profile.first_name +
+                                ' ' +
+                                myself.profile.last_name,
                       style: TextStyle(
                         color: AppColors.text,
                         fontSize: 20.sp,
@@ -75,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      '@sabbir0087',
+                      '@${myself == null ? 'Loading' : myself.core.username}',
                       style: TextStyle(
                         color: AppColors.text,
                         fontSize: 14.sp,
