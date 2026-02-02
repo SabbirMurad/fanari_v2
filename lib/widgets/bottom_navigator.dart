@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fanari_v2/providers/myself.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -62,6 +63,8 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
 
   @override
   Widget build(BuildContext context) {
+    final myself = ref.watch(myselfNotifierProvider);
+
     return SafeArea(
       bottom: true,
       top: false,
@@ -148,60 +151,55 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      NamedAvatar(
-                        loading: false,
-                        name: 'Sabbir Hassan',
-                        size: 24.h,
-                        backgroundColor: AppColors.surface,
-                      ),
-                      // user.when(
-                      //   data: (user) {
-                      //     return NamedAvatar(
-                      //       loading: user == null,
-                      //       imageUrl: user?.profilePicture?.url,
-                      //       name: user?.fullName ?? 'Loading name',
-                      //       size: _profileSize.sh,
-                      //       onTap: () {
-                      //         if (user != null) {
-                      //           // Scaffold.of(context).openDrawer();
-                      //           // widget.onProfileTap?.call();
-                      //           setState(() {
-                      //             _selectedNavIndex = 3;
-                      //           });
+                      myself.when(
+                        data: (user) {
+                          return NamedAvatar(
+                            loading: user == null,
+                            image: user?.profile.profile_picture,
+                            name: user?.profile.first_name ?? 'Loading name',
+                            size: 24.h,
+                            backgroundColor: AppColors.surface,
+                            onTap: () {
+                              if (user != null) {
+                                // Scaffold.of(context).openDrawer();
+                                // widget.onProfileTap?.call();
+                                // setState(() {
+                                //   _selectedNavIndex = 3;
+                                // });
 
-                      //           widget.onNavChange?.call(3);
-                      //         }
-                      //       },
-                      //     );
-                      //   },
-                      //   error: (object, stack) {
-                      //     return Container(
-                      //       width: _profileSize.sh,
-                      //       height: _profileSize.sh,
-                      //       decoration: BoxDecoration(
-                      //         shape: BoxShape.circle,
-                      //         color: Theme.of(context).colorScheme.secondary,
-                      //       ),
-                      //       child: Center(
-                      //         child: Icon(
-                      //           Icons.error_outline_rounded,
-                      //           color: Theme.of(context).colorScheme.error,
-                      //           size: 20,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      //   loading: () {
-                      //     return Container(
-                      //       width: _profileSize.sh,
-                      //       height: _profileSize.sh,
-                      //       decoration: BoxDecoration(
-                      //         shape: BoxShape.circle,
-                      //         color: Theme.of(context).colorScheme.secondary,
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+                                widget.onNavChange?.call(3);
+                              }
+                            },
+                          );
+                        },
+                        error: (object, stack) {
+                          return Container(
+                            width: 24.h,
+                            height: 24.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.error_outline_rounded,
+                                color: Theme.of(context).colorScheme.error,
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        },
+                        loading: () {
+                          return Container(
+                            width: 24.h,
+                            height: 24.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          );
+                        },
+                      ),
                       SizedBox(height: 4),
                       Text(
                         'Profile',

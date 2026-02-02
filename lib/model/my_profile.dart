@@ -4,7 +4,7 @@ class MyselfCore {
   String uuid;
   String username;
   String role;
-  String two_a_factor_auth_enabled;
+  bool two_a_factor_auth_enabled;
   int? two_a_factor_auth_updated;
 
   MyselfCore({
@@ -19,7 +19,7 @@ class MyselfCore {
     String? uuid,
     String? username,
     String? role,
-    String? two_a_factor_auth_enabled,
+    bool? two_a_factor_auth_enabled,
     int? two_a_factor_auth_updated,
   }) {
     return MyselfCore(
