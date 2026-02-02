@@ -21,7 +21,8 @@ class ConversationNotifier extends _$ConversationNotifier {
   Future<List<ConversationModel>?> load() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     String? userId = localStorage.getString('user_id');
-    final response = await utils.CustomHttp.get(endpoint: '/chat/list');
+    
+    final response = await utils.CustomHttp.get(endpoint: '/conversation/list');
 
     if (response.statusCode != 200) {
       printLine('Failed to load conversations');

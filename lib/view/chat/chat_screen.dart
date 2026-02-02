@@ -137,6 +137,41 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  List<Widget> _emptyChatWidget() {
+    return [
+      SizedBox(height: 96.w),
+      CustomSvg(
+        'assets/icons/chat.svg',
+        color: AppColors.text.withValues(alpha: 0.7),
+        width: 96.w,
+        height: 96.w,
+      ),
+      SizedBox(height: 36.w),
+      Text(
+        'No Previous Conversations',
+        style: TextStyle(
+          color: AppColors.text,
+          fontSize: 22.sp,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      SizedBox(height: 12.w),
+      SizedBox(
+        width: .55.sw,
+        child: Text(
+          'Text a friend or create a group to get started.',
+          style: TextStyle(
+            color: AppColors.text,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final conversationsProvider = ref.watch(conversationNotifierProvider);
@@ -146,75 +181,117 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         width: double.infinity,
         height: double.infinity,
         color: AppColors.surface,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            SafeArea(bottom: false, child: SizedBox(height: 12.h)),
-            _header(),
-            _searchWidget(),
-            HorizontalOptions(
-              options: _chatOptions,
-              selectedOption: _selectedOption,
-              onChange: (option) {
-                setState(() {
-                  _selectedOption = option;
-                });
-              },
-            ),
-            SizedBox(height: 12.h),
-            ...conversationsProvider.when(
-              data: (conversations) {
-                return conversations.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final item = entry.value;
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SafeArea(bottom: false, child: SizedBox(height: 12.h)),
+                _header(),
+                _searchWidget(),
+                HorizontalOptions(
+                  options: _chatOptions,
+                  selectedOption: _selectedOption,
+                  onChange: (option) {
+                    setState(() {
+                      _selectedOption = option;
+                    });
+                  },
+                ),
+                SizedBox(height: 12.h),
+                ...conversationsProvider.when(
+                  data: (conversations) {
+                    if (conversations.isEmpty) return _emptyChatWidget();
 
-                  return ConversationItem(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) {
-                            return ChatTextsScreen(
-                              conversationId: item.core.uuid,
-                              model: item,
-                            );
-                          },
+                    return conversations.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final item = entry.value;
+
+                      return ConversationItem(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return ChatTextsScreen(
+                                  conversationId: item.core.uuid,
+                                  model: item,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        model: item,
+                        bottomBorder: index != conversations.length - 1,
+                        onSelect: (id) {
+                          if (_selectedConversations.isEmpty) {
+                            setState(() {
+                              _selectMode = true;
+                            });
+                          }
+                          setState(() {
+                            _selectedConversations.add(id);
+                          });
+                        },
+                        onDeSelect: (id) {
+                          setState(() {
+                            _selectedConversations.remove(id);
+                          });
+
+                          if (_selectedConversations.isEmpty) {
+                            setState(() {
+                              _selectMode = false;
+                            });
+                          }
+                        },
+                        selectMode: _selectMode,
+                        selected: _selectedConversations.contains(
+                          item.core.uuid,
                         ),
                       );
-                    },
-                    model: item,
-                    bottomBorder: index != conversations.length - 1,
-                    onSelect: (id) {
-                      if (_selectedConversations.isEmpty) {
-                        setState(() {
-                          _selectMode = true;
-                        });
-                      }
-                      setState(() {
-                        _selectedConversations.add(id);
-                      });
-                    },
-                    onDeSelect: (id) {
-                      setState(() {
-                        _selectedConversations.remove(id);
-                      });
+                    }).toList();
+                  },
+                  error: (error, stackTrace) {
+                    return _skeletons();
+                  },
+                  loading: () {
+                    return _skeletons();
+                  },
+                ),
+              ],
+            ),
 
-                      if (_selectedConversations.isEmpty) {
-                        setState(() {
-                          _selectMode = false;
-                        });
-                      }
-                    },
-                    selectMode: _selectMode,
-                    selected: _selectedConversations.contains(item.core.uuid),
-                  );
-                }).toList();
-              },
-              error: (error, stackTrace) {
-                return _skeletons();
-              },
-              loading: () {
-                return _skeletons();
-              },
+            SafeArea(
+              top: false,
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () {
+                    // TODO:
+                  },
+                  child: Container(
+                    width: 48.w,
+                    height: 48.w,
+                    margin: EdgeInsets.only(right: 24.w, bottom: 20.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24.r),
+                        topRight: Radius.circular(24.r),
+                        bottomLeft: Radius.circular(24.r),
+                        bottomRight: Radius.circular(6.r),
+                      ),
+                    ),
+                    child: Center(
+                      child: CustomSvg(
+                        'assets/icons/chat_add.svg',
+                        color: AppColors.text,
+                        width: 24.w,
+                        height: 24.w,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

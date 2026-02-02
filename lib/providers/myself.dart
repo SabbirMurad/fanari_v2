@@ -20,7 +20,9 @@ class MyselfNotifier extends _$MyselfNotifier {
       return null;
     }
 
-    final response = await utils.CustomHttp.get(endpoint: '/profile');
+    final response = await utils.CustomHttp.get(
+      endpoint: '/profile/myself/details',
+    );
 
     if (response.statusCode != 200) return null;
 
