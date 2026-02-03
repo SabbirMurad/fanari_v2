@@ -60,7 +60,7 @@ class _NamedAvatarState extends State<NamedAvatar> {
                 },
                 errorWidget: (context, url, error) => Icon(
                   Icons.broken_image_rounded,
-                  color: Colors.white,
+                  color: AppColors.secondary,
                   size: widget.size * 0.40,
                 ),
               )

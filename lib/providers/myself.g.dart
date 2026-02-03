@@ -6,7 +6,7 @@ part of 'myself.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$myselfNotifierHash() => r'511d66921259468c8cbd1835a2f39eb74a4dc2d6';
+String _$myselfNotifierHash() => r'2da9c14dce86b4b50eaf33dd00149c6fb83fc851';
 
 /// See also [MyselfNotifier].
 @ProviderFor(MyselfNotifier)
