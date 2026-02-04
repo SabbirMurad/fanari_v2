@@ -197,8 +197,8 @@ class _PostWidgetState extends State<PostWidget> {
                     margin: const EdgeInsets.only(right: 12),
                     child: NamedAvatar(
                       loading: false,
-                      image: widget.model.owner.image,
-                      name: widget.model.owner.name,
+                      image: widget.model.owner.profile.profile_picture,
+                      name: widget.model.owner.profile.first_name,
                       size: 40.w,
                     ),
                   ),
@@ -206,7 +206,9 @@ class _PostWidgetState extends State<PostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.model.owner.name,
+                        widget.model.owner.profile.first_name +
+                            ' ' +
+                            widget.model.owner.profile.last_name,
                         style: TextStyle(
                           color: AppColors.text,
                           fontSize: 16.sp,
