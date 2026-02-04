@@ -4,6 +4,7 @@ import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
+import 'package:fanari_v2/view/profile/profile.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/heart_beat_animation.dart';
 import 'package:fanari_v2/widgets/image_video_carousel.dart';
@@ -80,7 +81,9 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           const SizedBox(width: 8),
           Text(
-            utils.formatNumberMagnitude(widget.model.like_count.toDouble()),
+            utils.formatNumberMagnitude(
+              widget.model.stat.like_count.toDouble(),
+            ),
             style: TextStyle(
               color: AppColors.text,
               fontSize: 15.sp,
@@ -115,7 +118,7 @@ class _PostWidgetState extends State<PostWidget> {
                   const SizedBox(width: 8),
                   Text(
                     utils.formatNumberMagnitude(
-                      widget.model.comment_count.toDouble(),
+                      widget.model.stat.comment_count.toDouble(),
                     ),
                     style: TextStyle(
                       color: AppColors.text,
@@ -135,7 +138,7 @@ class _PostWidgetState extends State<PostWidget> {
               final box = context.findRenderObject() as RenderBox?;
 
               await Share.share(
-                "${AppCredentials.domain}/post/${widget.model.uuid}",
+                "${AppCredentials.domain}/post/${widget.model.core.uuid}",
                 subject: 'this is the subject',
                 sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
               );
@@ -188,7 +191,16 @@ class _PostWidgetState extends State<PostWidget> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                AppRoutes.push('/profile/${widget.model.owner.core.uuid}');
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) {
+                      return ProfileScreen(
+                        user_id: widget.model.owner!.core.uuid,
+                        user: widget.model.owner,
+                      );
+                    },
+                  ),
+                );
               },
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -197,8 +209,8 @@ class _PostWidgetState extends State<PostWidget> {
                     margin: const EdgeInsets.only(right: 12),
                     child: NamedAvatar(
                       loading: false,
-                      image: widget.model.owner.profile.profile_picture,
-                      name: widget.model.owner.profile.first_name,
+                      image: widget.model.owner!.profile.profile_picture,
+                      name: widget.model.owner!.profile.first_name,
                       size: 40.w,
                     ),
                   ),
@@ -206,9 +218,9 @@ class _PostWidgetState extends State<PostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.model.owner.profile.first_name +
+                        widget.model.owner!.profile.first_name +
                             ' ' +
-                            widget.model.owner.profile.last_name,
+                            widget.model.owner!.profile.last_name,
                         style: TextStyle(
                           color: AppColors.text,
                           fontSize: 16.sp,
@@ -217,7 +229,7 @@ class _PostWidgetState extends State<PostWidget> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        utils.prettyDate(widget.model.created_at),
+                        utils.prettyDate(widget.model.core.created_at),
                         style: TextStyle(
                           color: AppColors.text,
                           fontSize: 12.sp,
@@ -393,7 +405,7 @@ class _PostWidgetState extends State<PostWidget> {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: 'post_widget_' + widget.model.uuid,
+      tag: 'post_widget_' + widget.model.core.uuid,
       flightShuttleBuilder:
           (
             flightContext,
@@ -419,44 +431,44 @@ class _PostWidgetState extends State<PostWidget> {
               image,name etc is shown
             */
             _postTopBar(),
-            if (widget.model.caption != null)
+            if (widget.model.core.caption != null)
               StatusWidget(
-                text: widget.model.caption!,
+                text: widget.model.core.caption!,
                 width: 1.sw - 40.w,
-                mentions: widget.model.mentions,
+                mentions: widget.model.core.mentions,
                 truncatedLines:
-                    (widget.model.images.isEmpty &&
-                        widget.model.videos.isEmpty &&
-                        widget.model.link_preview == null &&
-                        widget.model.youtube_attachment == null)
+                    (widget.model.core.images.isEmpty &&
+                        widget.model.core.videos.isEmpty &&
+                        widget.model.core.link_preview == null &&
+                        widget.model.core.youtube_attachment == null)
                     ? 10
                     : 3,
               ),
-            if (widget.model.link_preview != null)
+            if (widget.model.core.link_preview != null)
               MyLinkPreview(
                 padding: EdgeInsets.only(top: 12.h),
-                previewData: widget.model.link_preview!,
+                previewData: widget.model.core.link_preview!,
               ),
-            if (widget.model.youtube_attachment != null)
+            if (widget.model.core.youtube_attachment != null)
               YoutubeAttachmentWidget(
                 padding: EdgeInsets.only(top: 12.h),
                 width: 1.sw - 40.w,
-                model: widget.model.youtube_attachment!,
+                model: widget.model.core.youtube_attachment!,
               ),
-            if (widget.model.images.isNotEmpty ||
-                widget.model.videos.isNotEmpty)
+            if (widget.model.core.images.isNotEmpty ||
+                widget.model.core.videos.isNotEmpty)
               Padding(
                 padding: EdgeInsets.only(top: 12.h),
                 child: ImageVideoCarousel(
                   borderRadius: BorderRadius.circular(10.r),
-                  images: widget.model.images,
-                  videos: widget.model.videos,
+                  images: widget.model.core.images,
+                  videos: widget.model.core.videos,
                   width: carouselWidth,
                 ),
               ),
-            if (widget.model.poll != null)
+            if (widget.model.core.poll != null)
               PollWidget(
-                model: widget.model.poll!,
+                model: widget.model.core.poll!,
                 padding: EdgeInsets.only(top: 12.h),
               ),
             _postInteractions(),

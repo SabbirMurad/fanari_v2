@@ -1,7 +1,7 @@
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/posts.dart';
+import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/view/home/widgets/post.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final posts = ref.watch(postsNotifierProvider);
+    final posts = ref.watch(postNotifierProvider);
 
     return LiquidPullToRefresh(
       onRefresh: _onRefresh,

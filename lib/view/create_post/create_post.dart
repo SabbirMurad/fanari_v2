@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/posts.dart';
+import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/custom_dropdown.dart';
@@ -603,7 +603,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 }
 
                 await ref
-                    .read(postsNotifierProvider.notifier)
+                    .read(postNotifierProvider.notifier)
                     .createPost(
                       images: imageIds,
                       visibility: _selectedPrivacy,

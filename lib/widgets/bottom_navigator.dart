@@ -177,12 +177,12 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                             height: 24.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: AppColors.secondary,
                             ),
                             child: Center(
                               child: Icon(
                                 Icons.error_outline_rounded,
-                                color: Theme.of(context).colorScheme.error,
+                                color: AppColors.error,
                                 size: 20,
                               ),
                             ),
@@ -194,7 +194,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
                             height: 24.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: AppColors.secondary,
                             ),
                           );
                         },

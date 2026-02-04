@@ -1,4 +1,5 @@
 import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 
 class UserCore {
   String uuid;
@@ -200,5 +201,9 @@ class UserModel {
       social: UserSocial.fromJson(json['social']),
       stat: UserStat.fromJson(json['stat']),
     );
+  }
+
+  static List<UserModel> fromJsonList(List<dynamic> json) {
+    return json.map((item) => UserModel.fromJson(item)).toList();
   }
 }

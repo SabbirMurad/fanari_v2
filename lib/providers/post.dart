@@ -1,13 +1,14 @@
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/post.dart';
+import 'package:fanari_v2/providers/user.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'posts.g.dart';
+part 'post.g.dart';
 
 @Riverpod(keepAlive: true)
-class PostsNotifier extends _$PostsNotifier {
+class PostNotifier extends _$PostNotifier {
   int offset = 1;
   int limit = 10;
   bool showingFromCache = false;
@@ -32,9 +33,29 @@ class PostsNotifier extends _$PostsNotifier {
       queries: {'page': offset, 'limit': limit},
     );
 
-    if (response.statusCode != 200) return null;
-    
-    final posts = PostModel.fromJsonList(response.data);
+    if (response.statusCode != 200) {
+      printLine(response.error);
+      return null;
+    }
+
+    final posts = await PostModel.fromJsonList(response.data);
+
+    final post_owners_ids = posts.map((post) => post.core.owner_id).toList();
+
+    final users = await ref
+        .read(userNotifierProvider.notifier)
+        .loadMoreUsers(post_owners_ids);
+
+    if (users == null) {
+      printLine('Failed to load users');
+      return null;
+    }
+
+    posts.forEach(
+      (post) => post.owner = users.firstWhere(
+        (user) => user.core.uuid == post.core.owner_id,
+      ),
+    );
 
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
     Future.microtask(() async {
@@ -42,7 +63,7 @@ class PostsNotifier extends _$PostsNotifier {
       final updated = [...posts];
 
       for (int i = 0; i < updated.length; i++) {
-        await updated[i].load3rdPartyInfos();
+        await updated[i].core.load3rdPartyInfos();
       }
 
       // After all posts finished updating, update provider state

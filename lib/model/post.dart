@@ -10,31 +10,23 @@ import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
-class PostModel {
+class PostCore {
   String uuid;
   String? caption;
   List<MentionModel> mentions;
   List<ImageModel> images;
   List<VideoModel> videos;
+  PollModel? poll;
   String? audio;
   int created_at;
-  bool bookmarked;
-
-  UserModel owner;
-
-  bool liked;
-  int like_count;
-  int comment_count;
-
-  PollModel? poll;
+  String owner_id;
 
   NhentaiBookModel? nhentai_book;
   YoutubeModel? youtube_attachment;
   PreviewData? link_preview;
 
-  PostModel({
+  PostCore({
     required this.uuid,
-    required this.bookmarked,
     this.caption,
     required this.mentions,
     required this.images,
@@ -42,21 +34,13 @@ class PostModel {
     this.audio,
     this.poll,
     required this.created_at,
-    required this.owner,
-    required this.liked,
-    required this.like_count,
-    required this.comment_count,
+    required this.owner_id,
     this.nhentai_book,
     this.youtube_attachment,
     this.link_preview,
   });
 
-  factory PostModel.fromJson(Map<String, dynamic> json) {
-    final core = json['core'];
-    final stat = json['stat'];
-    final owner = json['owner'];
-    final meta = json['meta'];
-
+  factory PostCore.fromJson(Map<String, dynamic> core) {
     List<ImageModel> images = [];
     for (var i = 0; i < core['images'].length; i++) {
       images.add(ImageModel.fromJson(core['images'][i]));
@@ -72,32 +56,23 @@ class PostModel {
       mentions.add(MentionModel.fromJson(core['mentions'][i]));
     }
 
-    final post = PostModel(
+    return PostCore(
       uuid: core['uuid'],
+      owner_id: core['owner_id'],
       caption: core['caption'],
-      images: images,
-      videos: videos,
-      bookmarked: meta['bookmarked'],
-      mentions: mentions,
+
       audio: core['audio'] != null
           ? '${AppCredentials.domain}/upload/audio/${core['audio']}'
           : null,
       poll: core['poll'] != null ? PollModel.fromJson(core['poll']) : null,
       created_at: core['created_at'],
-      owner: UserModel.fromJson(owner),
-      liked: meta['liked'],
-      like_count: stat['like_count'],
-      comment_count: stat['comment_count'],
+      images: images,
+      videos: videos,
+      mentions: mentions,
       // nhentai_book: json['nhentai_book'] != null
       //     ? NhentaiBookModel.fromJson(jsonDecode(json['nhentai_book']))
       //     : null,
     );
-
-    return post;
-  }
-
-  static List<PostModel> fromJsonList(List<dynamic> json) {
-    return json.map((item) => PostModel.fromJson(item)).toList();
   }
 
   Future<void> load3rdPartyInfos() async {
@@ -133,5 +108,68 @@ class PostModel {
         }
       }
     }
+  }
+}
+
+class PostStat {
+  int like_count;
+  int comment_count;
+  int share_count;
+  int view_count;
+
+  PostStat({
+    required this.like_count,
+    required this.comment_count,
+    required this.share_count,
+    required this.view_count,
+  });
+
+  factory PostStat.fromJson(Map<String, dynamic> stat) {
+    return PostStat(
+      like_count: stat['like_count'],
+      comment_count: stat['comment_count'],
+      share_count: stat['share_count'],
+      view_count: stat['view_count'],
+    );
+  }
+}
+
+class PostMeta {
+  bool liked;
+  bool bookmarked;
+
+  PostMeta({required this.liked, required this.bookmarked});
+
+  factory PostMeta.fromJson(Map<String, dynamic> meta) {
+    return PostMeta(liked: meta['liked'], bookmarked: meta['bookmarked']);
+  }
+}
+
+class PostModel {
+  PostCore core;
+  PostStat stat;
+  PostMeta meta;
+
+  UserModel? owner;
+
+  PostModel({
+    required this.core,
+    required this.stat,
+    required this.meta,
+    this.owner,
+  });
+
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    final post = PostModel(
+      core: PostCore.fromJson(json['core']),
+      stat: PostStat.fromJson(json['stat']),
+      meta: PostMeta.fromJson(json['meta']),
+    );
+
+    return post;
+  }
+
+  static List<PostModel> fromJsonList(List<dynamic> json) {
+    return json.map((item) => PostModel.fromJson(item)).toList();
   }
 }
