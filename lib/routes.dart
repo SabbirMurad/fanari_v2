@@ -1,9 +1,9 @@
 import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
 import 'package:fanari_v2/view/chat/chat_screen.dart';
-import 'package:fanari_v2/view/chat/chat_texts.dart';
 import 'package:fanari_v2/view/home_navigator.dart';
 import 'package:fanari_v2/view/landing.dart';
+import 'package:fanari_v2/view/profile/profile.dart';
 import 'package:fanari_v2/view/settings/notification_setting.dart';
 import 'package:fanari_v2/view/settings/profile_settings.dart';
 import 'package:go_router/go_router.dart';
@@ -39,6 +39,9 @@ class AppRoutes {
   static final String settings = '/settings';
   static final String profileSettings = '/profile-settings';
   static final String notificationSettings = '/notification-settings';
+
+  //Profile
+  static final String profile = '/profile/:userId';
 
   static void push(String route) => allRoutes.push(route);
   static void go(String route) => allRoutes.go(route);
@@ -97,6 +100,16 @@ class AppRoutes {
         // },
         builder: (context, state) {
           return const HomeNavigator(selectedPage: 2);
+        },
+      ),
+      GoRoute(
+        path: profile,
+        // redirect: (context, state) async {
+        //   return !(await isSingedIn()) ? sign_in : null;
+        // },
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          return ProfileScreen(user_id: userId);
         },
       ),
       GoRoute(

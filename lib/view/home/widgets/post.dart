@@ -1,6 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/post.dart';
+import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -187,7 +188,7 @@ class _PostWidgetState extends State<PostWidget> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                // AppRoutes.push(AppRoutes.landing);
+                AppRoutes.push('/profile/${widget.model.owner.core.uuid}');
               },
               child: Row(
                 mainAxisSize: MainAxisSize.max,
