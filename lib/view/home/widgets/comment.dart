@@ -149,7 +149,9 @@ class _CommentWidgetState extends State<CommentWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.model.owner.name,
+                widget.model.owner.profile.first_name +
+                    ' ' +
+                    widget.model.owner.profile.last_name,
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 14.sp,
@@ -195,8 +197,8 @@ class _CommentWidgetState extends State<CommentWidget> {
         children: [
           NamedAvatar(
             loading: false,
-            image: widget.model.owner.image,
-            name: widget.model.owner.name,
+            image: widget.model.owner.profile.profile_picture,
+            name: widget.model.owner.profile.first_name,
             size: 32.w,
           ),
           SizedBox(width: 12.w),
@@ -231,7 +233,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                     width: 1.sw - 40.w - 32.w - 12.w,
                     model: widget.model.youtube_attachment!,
                   ),
-                if (widget.model.images.isNotEmpty )
+                if (widget.model.images.isNotEmpty)
                   Padding(
                     padding: EdgeInsets.only(top: 12.h),
                     child: ImageVideoCarousel(
