@@ -33,7 +33,7 @@ class PostNotifier extends _$PostNotifier {
       queries: {'page': offset, 'limit': limit},
     );
 
-    if (response.statusCode != 200) {
+    if (!response.ok) {
       printLine(response.error);
       return null;
     }
@@ -103,8 +103,23 @@ class PostNotifier extends _$PostNotifier {
       },
     );
 
-    if (response.statusCode != 200) return;
+    if (!response.ok) return;
 
-    state = AsyncData([PostModel.fromJson(response.data), ...state.value!]);
+    final new_post = PostModel.fromJson(response.data);
+
+    final users = await ref.read(userNotifierProvider.notifier).loadMoreUsers([
+      new_post.core.owner_id,
+    ]);
+
+    if (users == null) {
+      printLine('Failed to load users');
+      return null;
+    }
+
+    new_post.owner = users.firstWhere(
+      (user) => user.core.uuid == new_post.core.owner_id,
+    );
+
+    state = AsyncData([new_post, ...state.value!]);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 
 enum ConversationType { Single, Group }
 
@@ -108,28 +109,18 @@ class ConversationModel {
 
   bool typing;
   List<TextModel> texts;
+  bool initial_text_loaded = false;
 
   ConversationModel({
     required this.core,
     this.group_metadata,
     this.single_metadata,
-    required this.texts,
+    this.texts = const [],
     this.typing = false,
+    this.initial_text_loaded = false,
   });
 
-  static ConversationModel fromJson(Map<String, dynamic> json, String myId) {
-    final texts = <TextModel>[];
-    if (json['texts'] != null) {
-      for (var i = 0; i < json['texts'].length; i++) {
-        final model = TextModel.fromJson(json['texts'][i], myId);
-        Future.delayed(Duration(milliseconds: 20), () {
-          //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
-          model.load3rdPartyInfos();
-        });
-        texts.add(model);
-      }
-    }
-
+  static ConversationModel fromJson(Map<String, dynamic> json) {
     return ConversationModel(
       core: ConversationCore.fromJson(json['core']),
       group_metadata: json['group_metadata'] != null
@@ -138,8 +129,6 @@ class ConversationModel {
       single_metadata: json['single_metadata'] != null
           ? ConversationSingleMetadata.fromJson(json['single_metadata'])
           : null,
-      texts: texts,
-      typing: json['typing'],
     );
   }
 
@@ -159,10 +148,10 @@ class ConversationModel {
     );
   }
 
-  static List<ConversationModel> fromJsonList(dynamic json, String myId) {
+  static List<ConversationModel> fromJsonList(dynamic json) {
     List<ConversationModel> newPosts = [];
     for (var i = 0; i < json.length; i++) {
-      newPosts.add(ConversationModel.fromJson(json[i], myId));
+      newPosts.add(ConversationModel.fromJson(json[i]));
     }
 
     return newPosts;

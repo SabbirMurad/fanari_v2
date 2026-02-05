@@ -49,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
       _loading = false;
     });
 
-    if (response.statusCode != 200) return;
+    if (!response.ok) return;
 
     final data = response.data['auth_payload'];
 
@@ -170,9 +170,9 @@ class _SignInScreenState extends State<SignInScreen> {
         _selectedFirstName = response.data['first_name'];
         _selectedLastName = response.data['last_name'];
         _selectedUsername = response.data['username'];
-        _selectedProfileImage = response.data['profile_picture'] != null ? ImageModel.fromJson(
-          response.data['profile_picture'],
-        ) : null;
+        _selectedProfileImage = response.data['profile_picture'] != null
+            ? ImageModel.fromJson(response.data['profile_picture'])
+            : null;
 
         _emailEntered = true;
       });

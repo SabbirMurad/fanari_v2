@@ -24,7 +24,7 @@ class MyselfNotifier extends _$MyselfNotifier {
       endpoint: '/profile/myself/details',
     );
 
-    if (response.statusCode != 200) return null;
+    if (!response.ok) return null;
 
     return MyselfModel.fromJson(response.data);
   }

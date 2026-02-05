@@ -4,7 +4,6 @@ import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'conversation.g.dart';
 
@@ -19,16 +18,39 @@ class ConversationNotifier extends _$ConversationNotifier {
   }
 
   Future<List<ConversationModel>?> load() async {
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    String? userId = localStorage.getString('user_id');
-    
     final response = await utils.CustomHttp.get(endpoint: '/conversation/list');
 
-    if (response.statusCode != 200) {
+    if (!response.ok) {
       printLine('Failed to load conversations');
       return null;
     }
-    return ConversationModel.fromJsonList(response.data, userId!);
+
+    return ConversationModel.fromJsonList(response.data);
+  }
+
+  Future<String?> createSingleConversation({
+    required String target_user,
+  }) async {
+    final existingConversations = state.value;
+
+    for (var conversation in existingConversations!) {
+      if (conversation.core.type == ConversationType.Group) continue;
+      if (conversation.single_metadata!.user_id == target_user)
+        return conversation.core.uuid;
+    }
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/conversation/single',
+      body: {'other_user': target_user},
+    );
+
+    if (!response.ok) return null;
+
+    final conversation = ConversationModel.fromJson(response.data);
+
+    state = AsyncValue.data([conversation, ...state.value!]);
+
+    return conversation.core.uuid;
   }
 
   Future<void> addMessage({

@@ -4,8 +4,14 @@ class CustomHttpResult {
   final dynamic data;
   final int statusCode;
   final String? error;
+  final bool ok;
 
-  const CustomHttpResult({this.data, required this.statusCode, this.error});
+  const CustomHttpResult({
+    this.data,
+    required this.statusCode,
+    this.error,
+    required this.ok,
+  });
 }
 
 enum CommonCustomMethods { POST, PUT, PATCH }
@@ -22,6 +28,7 @@ class CustomHttp {
   }) async {
     if (!await hasInternet(showError: true)) {
       return CustomHttpResult(
+        ok: false,
         statusCode: -1,
         error: 'No internet connection found!',
       );
@@ -40,6 +47,7 @@ class CustomHttp {
           if (!await setNewAccessToken()) {
             AppRoutes.go(AppRoutes.landing);
             return CustomHttpResult(
+              ok: false,
               statusCode: 401,
               error: 'Session expired, Please sign in again!',
             );
@@ -91,7 +99,7 @@ class CustomHttp {
       debugPrint('url: $endpoint');
       debugPrint('error: ${e.toString()}');
       debugPrint('');
-      return CustomHttpResult(statusCode: -2, error: e.toString());
+      return CustomHttpResult(statusCode: -2, error: e.toString(), ok: false);
     }
   }
 
@@ -125,6 +133,7 @@ class CustomHttp {
   }) async {
     if (!await hasInternet(showError: true)) {
       return CustomHttpResult(
+        ok: false,
         statusCode: -1,
         error: 'No internet connection found!',
       );
@@ -145,6 +154,7 @@ class CustomHttp {
           if (!await setNewAccessToken()) {
             AppRoutes.go(AppRoutes.landing);
             return CustomHttpResult(
+              ok: false,
               statusCode: 401,
               error: 'Session expired, Please sign in again!',
             );
@@ -226,7 +236,7 @@ class CustomHttp {
       debugPrint('url: $endpoint');
       debugPrint('error: ${e.toString()}');
       debugPrint('');
-      return CustomHttpResult(statusCode: -2, error: e.toString());
+      return CustomHttpResult(statusCode: -2, error: e.toString(), ok: false);
     }
   }
 
@@ -261,7 +271,7 @@ class CustomHttp {
       );
       return true;
     } else {
-      printLine('response.statusCode != 200');
+      printLine('!response.ok');
       // await localStorage.clear();
       return false;
     }
@@ -271,8 +281,13 @@ class CustomHttp {
     http.Response response,
     bool showFloatingError,
   ) {
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 204 ||
+        response.statusCode == 202 ||
+        response.statusCode == 203) {
       return CustomHttpResult(
+        ok: true,
         statusCode: response.statusCode,
         data: jsonDecode(response.body),
       );
@@ -300,7 +315,11 @@ class CustomHttp {
         showCustomToast(text: message);
       }
 
-      return CustomHttpResult(statusCode: response.statusCode, error: message);
+      return CustomHttpResult(
+        statusCode: response.statusCode,
+        error: message,
+        ok: false,
+      );
     }
   }
 }

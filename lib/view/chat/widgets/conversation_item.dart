@@ -80,7 +80,7 @@ class _ConversationItemState extends State<ConversationItem> {
 
     // TODO: Fix
     // if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
-      return null;
+    return null;
 
     return AppColors.surface;
   }
@@ -92,7 +92,7 @@ class _ConversationItemState extends State<ConversationItem> {
 
     // TODO: Fix
     // if (widget.model.texts.last.seen_by.contains(widget.model.user_id))
-      return FontWeight.w400;
+    return FontWeight.w400;
 
     return FontWeight.w600;
   }
@@ -130,7 +130,7 @@ class _ConversationItemState extends State<ConversationItem> {
           child: Row(
             children: [
               Stack(
-                alignment: Alignment(0.9, 0.8),
+                alignment: Alignment.bottomCenter,
                 children: [
                   NamedAvatar(
                     loading: false,
@@ -144,14 +144,23 @@ class _ConversationItemState extends State<ConversationItem> {
                   ),
                   if (widget.model.core.type == ConversationType.Single)
                     Container(
-                      width: 10.w,
-                      height: 10.w,
-                      margin: EdgeInsets.only(right: 6.w),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: widget.model.single_metadata!.online
-                            ? Colors.green[400]
+                            ? Colors.green[400]!.withValues(alpha: 0.5)
                             : Color.fromARGB(255, 102, 105, 103),
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        'Online',
+                        style: TextStyle(
+                          fontSize: 8.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                 ],

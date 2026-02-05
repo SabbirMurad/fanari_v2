@@ -1,22 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/user.dart';
+import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:fanari_v2/view/chat/chat_texts.dart';
+import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_uploader_v_one.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final String user_id;
   final UserModel? user;
 
   const ProfileScreen({super.key, required this.user_id, this.user});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   UserModel? _user;
 
   @override
@@ -38,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       endpoint: '/profile/profile/${widget.user_id}',
     );
 
-    if (response.statusCode != 200) return;
+    if (!response.ok) return;
 
     final user = UserModel.fromJson(response.data[0]);
 
@@ -46,6 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _user = user;
     });
   }
+
+  bool creatingConversation = false;
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +100,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _user?.core.username ?? '',
                 style: TextStyle(color: AppColors.text, fontSize: 14.sp),
               ),
+              if (_user != null && !_user!.stat.myself)
+                CustomSvg(
+                  'assets/icons/chat.svg',
+                  width: 32.w,
+                  height: 32.w,
+                  color: creatingConversation
+                      ? AppColors.primary
+                      : AppColors.text,
+                  onTap: () async {
+                    if (_user == null || creatingConversation) return;
+
+                    setState(() {
+                      creatingConversation = true;
+                    });
+
+                    final conversation_id = await ref
+                        .read(conversationNotifierProvider.notifier)
+                        .createSingleConversation(
+                          target_user: _user!.core.uuid,
+                        );
+
+                    setState(() {
+                      creatingConversation = false;
+                    });
+
+                    if (conversation_id == null) return;
+
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ChatTextsScreen(
+                            conversation_id: conversation_id,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),

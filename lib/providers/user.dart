@@ -30,7 +30,7 @@ class UserNotifier extends _$UserNotifier {
       body: user_ids,
     );
 
-    if (response.statusCode != 200) {
+    if (!response.ok) {
       printLine(response.error);
       return null;
     }

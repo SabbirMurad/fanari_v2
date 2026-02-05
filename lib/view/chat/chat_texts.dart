@@ -1,31 +1,28 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/providers/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+ 
+class ChatTextsScreen extends ConsumerStatefulWidget {
+  final String conversation_id;
 
-class ChatTextsScreen extends StatefulWidget {
-  final String conversationId;
-  final ConversationModel model;
-
-  const ChatTextsScreen({
-    super.key,
-    required this.conversationId,
-    required this.model,
-  });
+  const ChatTextsScreen({super.key, required this.conversation_id});
 
   @override
-  State<ChatTextsScreen> createState() => _ChatTextsScreenState();
+  ConsumerState<ChatTextsScreen> createState() => _ChatTextsScreenState();
 }
 
-class _ChatTextsScreenState extends State<ChatTextsScreen> {
+class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   ScrollController _scrollController = ScrollController();
 
-  Widget _header() {
+  Widget _header(ConversationModel model) {
     return Container(
       width: double.infinity,
       color: AppColors.surface,
@@ -62,12 +59,12 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                 children: [
                   NamedAvatar(
                     loading: false,
-                    image: widget.model.core.type == ConversationType.Group
-                        ? widget.model.group_metadata!.image
-                        : widget.model.single_metadata!.image,
-                    name: widget.model.core.type == ConversationType.Group
-                        ? widget.model.group_metadata!.name
-                        : widget.model.single_metadata!.first_name,
+                    image: model.core.type == ConversationType.Group
+                        ? model.group_metadata!.image
+                        : model.single_metadata!.image,
+                    name: model.core.type == ConversationType.Group
+                        ? model.group_metadata!.name
+                        : model.single_metadata!.first_name,
                     size: 40.w,
                   ),
                   SizedBox(width: 6.w),
@@ -76,15 +73,15 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Hero(
-                        tag: 'conversation_name_' + widget.model.core.uuid,
+                        tag: 'conversation_name_' + model.core.uuid,
                         child: Material(
                           color: Colors.transparent,
                           child: Text(
-                            widget.model.core.type == ConversationType.Group
-                                ? widget.model.group_metadata!.name
-                                : widget.model.single_metadata!.first_name +
+                            model.core.type == ConversationType.Group
+                                ? model.group_metadata!.name
+                                : model.single_metadata!.first_name +
                                       ' ' +
-                                      widget.model.single_metadata!.last_name,
+                                      model.single_metadata!.last_name,
                             style: TextStyle(
                               color: AppColors.text,
                               fontWeight: FontWeight.w600,
@@ -96,23 +93,23 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                       ),
                       Row(
                         children: [
-                          if (widget.model.core.type == ConversationType.Single)
+                          if (model.core.type == ConversationType.Single)
                             Container(
                               width: 10.w,
                               height: 10.w,
                               margin: EdgeInsets.only(right: 6.w),
                               decoration: BoxDecoration(
-                                color: widget.model.single_metadata!.online
+                                color: model.single_metadata!.online
                                     ? Colors.green[400]
                                     : Color.fromARGB(255, 102, 105, 103),
                                 shape: BoxShape.circle,
                               ),
                             ),
-                          if (widget.model.core.type == ConversationType.Single)
+                          if (model.core.type == ConversationType.Single)
                             Text(
-                              widget.model.single_metadata!.online
+                              model.single_metadata!.online
                                   ? 'Online'
-                                  : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(widget.model.single_metadata!.last_seen))}',
+                                  : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
                               style: TextStyle(
                                 color: AppColors.text,
                                 fontWeight: FontWeight.w400,
@@ -171,6 +168,18 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final conversations = ref
+        .watch(conversationNotifierProvider)
+        .when(
+          data: (data) => data,
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+
+    final target_conversation = conversations!
+        .where((element) => element.core.uuid == widget.conversation_id)
+        .first;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -187,7 +196,7 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                 slivers: [
                   SliverAppBar(
                     titleSpacing: 0.0,
-                    title: _header(),
+                    title: _header(target_conversation),
                     floating: true,
                     snap: true,
                     automaticallyImplyLeading: false,
@@ -198,18 +207,25 @@ class _ChatTextsScreenState extends State<ChatTextsScreen> {
                     shadowColor: AppColors.containerBg,
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: 24.h)),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return TextItemWidget(model: widget.model.texts[index]);
-                    }, childCount: widget.model.texts.length),
-                  ),
+                  if (target_conversation.initial_text_loaded)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return TextItemWidget(
+                          model: target_conversation.texts[index],
+                        );
+                      }, childCount: target_conversation.texts.length),
+                    ),
                   SliverToBoxAdapter(child: SizedBox(height: 96.h)),
                 ],
               ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: CommentInputWidget(),
+              child: CommentInputWidget(
+                onSend: (text) {
+                  
+                },
+              ),
             ),
           ],
         ),

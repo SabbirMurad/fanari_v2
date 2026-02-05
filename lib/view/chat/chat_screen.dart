@@ -213,8 +213,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             MaterialPageRoute(
                               builder: (_) {
                                 return ChatTextsScreen(
-                                  conversationId: item.core.uuid,
-                                  model: item,
+                                  conversation_id: item.core.uuid,
                                 );
                               },
                             ),

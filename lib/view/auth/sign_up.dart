@@ -142,7 +142,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         showFloatingError: false,
       );
 
-      if (response.statusCode != 200) {
+      if (!response.ok) {
         setState(() {
           _checkingUsernameAvailability = false;
           _usernameUnique = true;
@@ -189,7 +189,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         showFloatingError: false,
       );
 
-      if (response.statusCode != 200) {
+      if (!response.ok) {
         setState(() {
           _checkingEmailAvailability = false;
           _emailUnique = true;

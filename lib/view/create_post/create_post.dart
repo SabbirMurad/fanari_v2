@@ -18,7 +18,6 @@ import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 
-
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
 
@@ -51,7 +50,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   bool _videoError = false;
   Uint8List? _videoThumbnail;
 
-
   @override
   void initState() {
     super.initState();
@@ -76,7 +74,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     _videoController?.dispose();
     _subscription?.unsubscribe();
     VideoCompress.deleteAllCache();
-
 
     super.dispose();
   }
@@ -616,7 +613,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       poll: poll,
                     );
 
-                // AppRoutes.pop();
+                AppRoutes.pop();
               },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),

@@ -1,8 +1,5 @@
 import 'package:fanari_v2/model/emoji.dart';
-import 'package:fanari_v2/model/mention.dart';
-import 'package:fanari_v2/model/post.dart';
 import 'package:fanari_v2/utils.dart' as utils;
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'emoji.g.dart';
@@ -33,7 +30,7 @@ class EmojiNotifier extends _$EmojiNotifier {
       // queries: {'page': offset, 'limit': limit},
     );
 
-    if (response.statusCode != 200) return null;
+    if (!response.ok) return null;
 
     final posts = EmojiModel.fromJsonList(response.data);
 
