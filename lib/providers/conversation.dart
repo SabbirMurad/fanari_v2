@@ -31,7 +31,15 @@ class ConversationNotifier extends _$ConversationNotifier {
   Future<String?> createSingleConversation({
     required String target_user,
   }) async {
-    final existingConversations = state.value;
+    List<ConversationModel>? existingConversations = state.value;
+
+    if (existingConversations == null) {
+      final conversations = await load();
+      if (conversations == null) return null;
+      state = AsyncValue.data(conversations);
+    }
+
+    existingConversations = state.value;
 
     for (var conversation in existingConversations!) {
       if (conversation.core.type == ConversationType.Group) continue;
@@ -57,6 +65,8 @@ class ConversationNotifier extends _$ConversationNotifier {
     required String conversation_id,
     required TextModel message,
   }) async {
+    printLine('Called here');
+
     List<ConversationModel> conversations = state.value ?? [];
     for (var i = 0; i < conversations.length; i++) {
       if (conversations[i].core.uuid == conversation_id) {
@@ -108,7 +118,7 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     state = AsyncValue.data(conversations);
 
-    _timer = Timer(Duration(seconds: 4), () {
+    _timer = Timer(Duration(seconds: 3), () {
       for (var i = 0; i < conversations.length; i++) {
         if (conversations[i].core.uuid == conversation_id) {
           conversations[i].typing = false;

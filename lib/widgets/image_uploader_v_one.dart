@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -39,12 +40,8 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
   </svg>
   ''';
 
-  static String editIcon = '''
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M8.17157 19.8284L19.8285 8.17157C20.3737 7.62632 20.6463 7.3537 20.7921 7.0596C21.0694 6.50005 21.0694 5.8431 20.7921 5.28354C20.6463 4.98945 20.3737 4.71682 19.8285 4.17157C19.2832 3.62632 19.0106 3.3537 18.7165 3.20796C18.1569 2.93068 17.5 2.93068 16.9404 3.20796C16.6463 3.3537 16.3737 3.62632 15.8285 4.17157L4.17157 15.8284C3.59351 16.4064 3.30448 16.6955 3.15224 17.063C3 17.4305 3 17.8393 3 18.6568V20.9999H5.34314C6.16065 20.9999 6.5694 20.9999 6.93694 20.8477C7.30448 20.6955 7.59351 20.4064 8.17157 19.8284Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M12 21H18" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M14.5 5.5L18.5 9.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
+  static String cameraIcon = '''
+<?xml version="1.0" ?><!DOCTYPE svg><svg enable-background="new 0 0 48 48" height="48px" id="Layer_1" version="1.1" viewBox="0 0 48 48" width="48px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path clip-rule="evenodd" d="M43,41H5c-2.209,0-4-1.791-4-4V15c0-2.209,1.791-4,4-4h1l0,0c0-1.104,0.896-2,2-2  h2c1.104,0,2,0.896,2,2h2c0,0,1.125-0.125,2-1l2-2c0,0,0.781-1,2-1h8c1.312,0,2,1,2,1l2,2c0.875,0.875,2,1,2,1h9  c2.209,0,4,1.791,4,4v22C47,39.209,45.209,41,43,41z M45,15c0-1.104-0.896-2-2-2l-9.221-0.013c-0.305-0.033-1.889-0.269-3.193-1.573  l-2.13-2.13l-0.104-0.151C28.351,9.132,28.196,9,28,9h-8c-0.153,0-0.375,0.178-0.424,0.231l-0.075,0.096l-2.087,2.086  c-1.305,1.305-2.889,1.54-3.193,1.573l-4.151,0.006C10.046,12.994,10.023,13,10,13H8c-0.014,0-0.026-0.004-0.04-0.004L5,13  c-1.104,0-2,0.896-2,2v22c0,1.104,0.896,2,2,2h38c1.104,0,2-0.896,2-2V15z M24,37c-6.075,0-11-4.925-11-11s4.925-11,11-11  s11,4.925,11,11S30.075,37,24,37z M24,17c-4.971,0-9,4.029-9,9s4.029,9,9,9s9-4.029,9-9S28.971,17,24,17z M24,31  c-2.762,0-5-2.238-5-5s2.238-5,5-5s5,2.238,5,5S26.762,31,24,31z M24,23c-1.656,0-3,1.344-3,3c0,1.657,1.344,3,3,3  c1.657,0,3-1.343,3-3C27,24.344,25.657,23,24,23z M10,19H6c-0.553,0-1-0.447-1-1v-2c0-0.552,0.447-1,1-1h4c0.553,0,1,0.448,1,1v2  C11,18.553,10.553,19,10,19z" fill-rule="evenodd"/></svg>
   ''';
 
   void selectImage(ImageSource source) async {
@@ -70,93 +67,101 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
       width: widget.height,
       child: Stack(
         children: [
-          GestureDetector(
-            onTap: () {
-              if (image != null || widget.currentImage != null) {
-                if (image != null) {
-                  utils.openImageViewer(
-                    context: context,
-                    images: [MemoryImage(image!)],
-                  );
-                } else {
-                  utils.openImageViewer(
-                    context: context,
-                    images: [widget.currentImage!],
-                  );
-                }
-              } else {
-                if (widget.enable) {
-                  utils.showImagePickerOptions(context, selectImage);
-                }
-              }
-            },
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.containerBg,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(widget.height / 2),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(widget.height / 2),
-                ),
-                child: image == null && widget.currentImage == null
-                    ? Center(
-                        child: widget.defaultImage != null
-                            ? SvgPicture.asset(
-                                widget.defaultImage!,
-                                width: widget.height * 0.7,
-                                height: widget.height * 0.7,
-                                fit: BoxFit.cover,
-                                color: AppColors.textDeemed,
-                              )
-                            : SvgPicture.string(
-                                userIcon,
-                                width: widget.height * 0.7,
-                                height: widget.height * 0.7,
-                                fit: BoxFit.cover,
-                                color: AppColors.textDeemed,
-                              ),
-                      )
-                    : Image(
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        image: image != null
-                            ? MemoryImage(image!)
-                            : widget.currentImage!,
-                        color: AppColors.secondary,
+          Padding(
+            padding: EdgeInsetsGeometry.only(bottom: 4.w),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (image != null || widget.currentImage != null) {
+                      if (image != null) {
+                        utils.openImageViewer(
+                          context: context,
+                          images: [MemoryImage(image!)],
+                        );
+                      } else {
+                        utils.openImageViewer(
+                          context: context,
+                          images: [widget.currentImage!],
+                        );
+                      }
+                    } else {
+                      if (widget.enable) {
+                        utils.showImagePickerOptions(context, selectImage);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.containerBg,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(widget.height / 2),
                       ),
-              ),
-            ),
-          ),
-          if (widget.loading)
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: .3),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(widget.height / 2),
-                ),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: widget.height / 3.5,
-                  height: widget.height / 3.5,
-                  child: CircularProgressIndicator(
-                    color: AppColors.surface,
-                    strokeWidth: 2,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(widget.height / 2),
+                      ),
+                      child: image == null && widget.currentImage == null
+                          ? Center(
+                              child: widget.defaultImage != null
+                                  ? SvgPicture.asset(
+                                      widget.defaultImage!,
+                                      width: widget.height * 0.7,
+                                      height: widget.height * 0.7,
+                                      fit: BoxFit.cover,
+                                      color: AppColors.textDeemed,
+                                    )
+                                  : SvgPicture.string(
+                                      userIcon,
+                                      width: widget.height * 0.7,
+                                      height: widget.height * 0.7,
+                                      fit: BoxFit.cover,
+                                      color: AppColors.textDeemed,
+                                    ),
+                            )
+                          : Image(
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              image: image != null
+                                  ? MemoryImage(image!)
+                                  : widget.currentImage!,
+                              color: AppColors.secondary,
+                            ),
+                    ),
                   ),
                 ),
-              ),
+                if (widget.loading)
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: .3),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(widget.height / 2),
+                      ),
+                    ),
+                    child: Center(
+                      child: SizedBox(
+                        width: widget.height / 3.5,
+                        height: widget.height / 3.5,
+                        child: CircularProgressIndicator(
+                          color: AppColors.surface,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+          ),
           if (widget.enable)
             Align(
-              alignment: const Alignment(0.95, 0.9),
+              alignment: Alignment.bottomCenter,
               child: GestureDetector(
                 onTap: () {
                   if (!widget.loading) {
@@ -164,20 +169,32 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
                   }
                 },
                 child: Container(
-                  width: widget.height * .24,
-                  height: widget.height * .24,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(widget.height * .08),
+                    borderRadius: BorderRadius.all(Radius.circular(50.r)),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xffffffff).withValues(alpha: 0.18),
+                        Color(0xffffffff).withValues(alpha: 0.28),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.topCenter,
                     ),
                   ),
-                  child: Center(
-                    child: SvgPicture.string(
-                      editIcon,
-                      color: AppColors.text,
-                      width: widget.height * .18,
-                    ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 4.w,
+                    children: [
+                      SvgPicture.string(
+                        cameraIcon,
+                        color: AppColors.text,
+                        width: widget.height * .12,
+                      ),
+                      Text(
+                        'Upload',
+                        style: TextStyle(color: AppColors.text, fontSize: 9.sp),
+                      ),
+                    ],
                   ),
                 ),
               ),

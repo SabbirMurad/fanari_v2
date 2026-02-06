@@ -213,8 +213,8 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     double carouselHeight = 0.3.sh;
 
     double imageWidth =
-        (carouselHeight * widget.model.images.first.width) /
-        widget.model.images.first.height;
+        (carouselHeight * widget.model.images!.first.width) /
+        widget.model.images!.first.height;
     if (imageWidth > _maxTextWidth) {
       imageWidth = _maxTextWidth;
     }
@@ -262,11 +262,11 @@ class _TextItemWidgetState extends State<TextItemWidget> {
 
           utils.openImageViewer(
             context: context,
-            images: [widget.model.images.first.provider],
+            images: [widget.model.images!.first.provider],
           );
         },
         child: CachedNetworkImage(
-          imageUrl: widget.model.images.first.webp_url,
+          imageUrl: widget.model.images!.first.webp_url,
           width: imageWidth,
           height: carouselHeight,
           fit: BoxFit.cover,
@@ -308,7 +308,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     return Container(
       transform: Matrix4.translationValues(_swipeOffset, 0, 0),
       child: MultipleImageCard(
-        images: widget.model.images,
+        images: widget.model.images!,
         decoration: widget.model.my_text
             ? TextDirection.rtl
             : TextDirection.ltr,
@@ -390,12 +390,12 @@ class _TextItemWidgetState extends State<TextItemWidget> {
   Widget _typeHandler() {
     if (widget.model.type == TextType.Text) return _text();
     if (widget.model.type == TextType.Image) {
-      if (widget.model.images.length == 1) {
+      if (widget.model.images!.length == 1) {
         return _singleImage();
       }
 
       print('');
-      print('Image length: ${widget.model.images.length}');
+      print('Image length: ${widget.model.images!.length}');
       print('');
 
       return _multipleImagesWidget();
@@ -424,10 +424,8 @@ class _TextItemWidgetState extends State<TextItemWidget> {
       },
       child: Container(
         width: double.infinity,
-        color: widget.selected
-            ? Theme.of(context).colorScheme.primary.withValues(alpha: .3)
-            : null,
-        margin: widget.margin ?? EdgeInsets.only(bottom: 24.h),
+        color: widget.selected ? AppColors.primary.withValues(alpha: .3) : null,
+        margin: widget.margin,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: widget.model.my_text

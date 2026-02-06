@@ -247,7 +247,10 @@ class CustomHttp {
     String? role = localStorage.getString('role');
 
     if (refreshToken == null || userId == null || role == null) {
-      printLine('refreshToken == null || userId == null');
+      printLine('Some kind of issue here');
+      printLine('refreshToken: $refreshToken');
+      printLine('user_id: $userId');
+      printLine('role: $role');
       // await localStorage.clear();
       return false;
     }

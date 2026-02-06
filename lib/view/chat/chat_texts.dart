@@ -1,7 +1,10 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
@@ -9,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
- 
+
 class ChatTextsScreen extends ConsumerStatefulWidget {
   final String conversation_id;
 
@@ -21,6 +24,24 @@ class ChatTextsScreen extends ConsumerStatefulWidget {
 
 class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   ScrollController _scrollController = ScrollController();
+
+  bool _selectMode = false;
+  List<String> _selectedTexts = [];
+  String? _replyingTo;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+
+    CustomSocket.instance.openedConversationId = null;
+
+    super.dispose();
+  }
 
   Widget _header(ConversationModel model) {
     return Container(
@@ -93,7 +114,8 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                       ),
                       Row(
                         children: [
-                          if (model.core.type == ConversationType.Single)
+                          if (model.core.type == ConversationType.Single &&
+                              model.single_metadata!.online)
                             Container(
                               width: 10.w,
                               height: 10.w,
@@ -166,6 +188,130 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     );
   }
 
+  SliverChildDelegate _textWidgets(List<TextModel> texts) {
+    List<Widget> widgets = [];
+
+    String previousTextOwner = '';
+    int previousTextTime = 0;
+
+    for (var text in texts) {
+      bool showProfile = false;
+      bool differentProfile = false;
+      if (previousTextOwner != text.owner) {
+        showProfile = true;
+        differentProfile = true;
+      } else {
+        showProfile = false;
+        differentProfile = false;
+      }
+
+      previousTextOwner = text.owner;
+
+      bool addTimeDivider = false;
+
+      if (previousTextTime == 0 ||
+          previousTextTime + 1000 * 60 * 10 < text.created_at) {
+        addTimeDivider = true;
+        showProfile = true;
+      } else {
+        addTimeDivider = false;
+      }
+
+      previousTextTime = text.created_at;
+
+      if (addTimeDivider) {
+        widgets.add(SizedBox(height: 18));
+        widgets.add(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 0.8,
+                width: (1.sw / 2) - 12 - (150 / 2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.tertiary.withValues(alpha: .2),
+              ),
+              Container(
+                // color: Colors.green,
+                width: 150,
+                child: Center(
+                  child: Text(
+                    utils.prettyDate(text.created_at),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.tertiary.withValues(alpha: .3),
+                      fontWeight: FontWeight.w400,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: .8,
+                width: (1.sw / 2) - 12 - (150 / 2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.tertiary.withValues(alpha: .2),
+              ),
+            ],
+          ),
+        );
+        widgets.add(SizedBox(height: 18));
+      } else if (differentProfile) {
+        widgets.add(SizedBox(height: 24));
+      } else {
+        widgets.add(SizedBox(height: 6));
+      }
+
+      widgets.add(
+        TextItemWidget(
+          onSelect: (id) {
+            if (_selectedTexts.isEmpty) {
+              setState(() {
+                _selectMode = true;
+              });
+            }
+            setState(() {
+              _selectedTexts.add(id);
+            });
+          },
+          onDeSelect: (id) {
+            setState(() {
+              _selectedTexts.remove(id);
+            });
+
+            if (_selectedTexts.isEmpty) {
+              setState(() {
+                _selectMode = false;
+              });
+            }
+          },
+          selectMode: _selectMode,
+          model: text,
+          showProfile: showProfile,
+          selected: _selectedTexts.contains(text.uuid),
+          // ownerImage: widget.model.image?.url,
+          // ownerName: widget.model.name,
+          onReply: () {
+            // setState(() {
+            //   _replyingTo = text.type == MessageType.Text
+            //       ? text.text!
+            //       : '%${text.type.name}%';
+            // });
+          },
+        ),
+      );
+    }
+
+    return SliverChildBuilderDelegate((context, index) {
+      return widgets[index];
+    }, childCount: widgets.length);
+  }
+
   @override
   Widget build(BuildContext context) {
     final conversations = ref
@@ -180,6 +326,16 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         .where((element) => element.core.uuid == widget.conversation_id)
         .first;
 
+    CustomSocket.instance.openedConversationId = target_conversation.core.uuid;
+
+    final myself = ref
+        .watch(myselfNotifierProvider)
+        .when(
+          data: (data) => data,
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -191,9 +347,14 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
               width: double.infinity,
               height: double.infinity,
               child: CustomScrollView(
+                reverse: true,
                 physics: AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
                 slivers: [
+                  SliverToBoxAdapter(child: SizedBox(height: 72.h)),
+                  // if (target_conversation.initial_text_loaded)
+                  SliverList(delegate: _textWidgets(target_conversation.texts)),
+                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
                   SliverAppBar(
                     titleSpacing: 0.0,
                     title: _header(target_conversation),
@@ -206,24 +367,30 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                     backgroundColor: AppColors.surface,
                     shadowColor: AppColors.containerBg,
                   ),
-                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
-                  if (target_conversation.initial_text_loaded)
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return TextItemWidget(
-                          model: target_conversation.texts[index],
-                        );
-                      }, childCount: target_conversation.texts.length),
-                    ),
-                  SliverToBoxAdapter(child: SizedBox(height: 96.h)),
                 ],
               ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
               child: CommentInputWidget(
-                onSend: (text) {
-                  
+                showTyping: target_conversation.typing,
+                onSend: (message) {
+                  if (myself == null) return;
+                  CustomSocket.instance.sendText(
+                    SocketOutgoingTextModel(
+                      conversation_id: widget.conversation_id,
+                      type: TextType.Text,
+                      text: message.text,
+                    ),
+                  );
+                },
+                onTyping: () {
+                  if (myself == null) return;
+
+                  CustomSocket.instance.sendTyping(
+                    conversation_id: widget.conversation_id,
+                    user_id: myself.core.uuid,
+                  );
                 },
               ),
             ),

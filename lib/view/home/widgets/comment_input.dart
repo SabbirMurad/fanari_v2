@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/providers/emoji.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/social_voice_recorder.dart';
@@ -37,8 +41,8 @@ class CommentInputColorTheme {
     this.emojiBackgroundColor = const Color.fromRGBO(24, 24, 24, 0.2),
     this.bgGradient = const LinearGradient(
       colors: [
-        const Color.fromRGBO(24, 24, 24, 0.85),
-        const Color.fromRGBO(24, 24, 24, 0.2),
+        const Color.fromRGBO(24, 24, 24, 0.1),
+        const Color.fromRGBO(24, 24, 24, 0.95),
       ],
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -56,12 +60,16 @@ class CommentInputSubmitValue {
 
 class CommentInputWidget extends ConsumerStatefulWidget {
   final void Function(CommentInputSubmitValue)? onSend;
+  final void Function()? onTyping;
   final CommentInputColorTheme colorTheme;
+  final bool showTyping;
 
   const CommentInputWidget({
     super.key,
     this.colorTheme = const CommentInputColorTheme(),
     this.onSend,
+    this.onTyping,
+    this.showTyping = false,
   });
 
   @override
@@ -71,23 +79,38 @@ class CommentInputWidget extends ConsumerStatefulWidget {
 class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   final _spacialTextController = TextEditingController();
 
+  bool _typingSent = false;
+
   @override
   void initState() {
     super.initState();
 
     _spacialTextController.addListener(() {
+      printLine("called");
       if (_hasInputText) {
         if (_spacialTextController.text.isEmpty) {
           setState(() {
             _hasInputText = false;
           });
         }
+        // return;
       } else {
         if (_spacialTextController.text.isNotEmpty) {
           setState(() {
             _hasInputText = true;
           });
         }
+      }
+
+      printLine(_typingSent);
+
+      if (!_typingSent) {
+        _typingSent = true;
+        widget.onTyping?.call();
+
+        Future.delayed(const Duration(seconds: 3), () {
+          _typingSent = false;
+        });
       }
 
       final text = _spacialTextController.text;
@@ -632,6 +655,26 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (widget.showTyping)
+                Padding(
+                  padding: EdgeInsets.only(left: 20.w, bottom: 12.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Typing',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      BouncingDots(dotSize: 3, gap: 4),
+                    ],
+                  ),
+                ),
               _imageContainer(),
               _emojiContainer(emojis),
               Padding(
@@ -646,19 +689,30 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                         SizedBox(width: 12.w),
                         Expanded(child: _inputContainer(emojis)),
                         SizedBox(width: 12.w),
-                        Container(
-                          width: 40.w,
-                          height: 40.w,
-                          decoration: BoxDecoration(
-                            color: widget.colorTheme.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: CustomSvg(
-                              'assets/icons/send.svg',
-                              width: 18.w,
-                              height: 18.w,
-                              color: widget.colorTheme.textColor,
+                        GestureDetector(
+                          onTap: () {
+                            widget.onSend?.call(
+                              CommentInputSubmitValue(
+                                text: _spacialTextController.text,
+                              ),
+                            );
+
+                            _spacialTextController.text = '';
+                          },
+                          child: Container(
+                            width: 40.w,
+                            height: 40.w,
+                            decoration: BoxDecoration(
+                              color: widget.colorTheme.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: CustomSvg(
+                                'assets/icons/send.svg',
+                                width: 18.w,
+                                height: 18.w,
+                                color: widget.colorTheme.textColor,
+                              ),
                             ),
                           ),
                         ),

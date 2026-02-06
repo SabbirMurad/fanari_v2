@@ -82,6 +82,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _user!.profile.profile_picture!.webp_url,
                       )
                     : null,
+                enable: _user != null && _user!.stat.myself,
                 onImageSelected: (newImage) {},
               ),
               Text(

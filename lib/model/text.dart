@@ -13,8 +13,8 @@ class TextModel {
   final String owner;
   final String conversation_id;
   final String? text;
-  final List<ImageModel> images;
-  final List<VideoModel> videos;
+  final List<ImageModel>? images;
+  final List<VideoModel>? videos;
   final AttachmentModel? attachment;
   final AudioModel? audio;
   final TextType type;
@@ -30,10 +30,10 @@ class TextModel {
     required this.conversation_id,
     this.text,
     required this.my_text,
-    required this.images,
+    this.images,
     required this.seen_by,
     required this.created_at,
-    required this.videos,
+    this.videos,
     required this.type,
     this.attachment,
     this.audio,
@@ -68,7 +68,7 @@ class TextModel {
       text: json['text'],
       type: type,
       conversation_id: json['conversation_id'],
-      images: json['images'].map((item) => ImageModel.fromJson(item)).toList(),
+      images: json['images'] == null ? null : json['images'].map((item) => ImageModel.fromJson(item)).toList(),
       my_text: json['owner'] == myId,
       seen_by: seen_by,
       created_at: json['created_at'],
@@ -82,8 +82,8 @@ class TextModel {
 
   load3rdPartyInfos() async {
     if (this.youtube_attachment == null &&
-        this.images.isEmpty &&
-        this.videos.isEmpty &&
+        this.images == null &&
+        this.videos == null &&
         audio == null &&
         this.text != null) {
       final id = YoutubeModel.searchId(this.text!);
@@ -93,8 +93,8 @@ class TextModel {
     }
 
     if (this.link_preview == null &&
-        this.images.isEmpty &&
-        this.videos.isEmpty &&
+        this.images == null &&
+        this.videos == null &&
         this.audio == null &&
         this.youtube_attachment == null &&
         this.text != null) {

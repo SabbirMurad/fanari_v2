@@ -132,15 +132,18 @@ class _ConversationItemState extends State<ConversationItem> {
               Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
-                  NamedAvatar(
-                    loading: false,
-                    image: widget.model.core.type == ConversationType.Group
-                        ? widget.model.group_metadata!.image
-                        : widget.model.single_metadata!.image,
-                    name: widget.model.core.type == ConversationType.Group
-                        ? widget.model.group_metadata!.name
-                        : widget.model.single_metadata!.first_name,
-                    size: 56.w,
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 4.w),
+                    child: NamedAvatar(
+                      loading: false,
+                      image: widget.model.core.type == ConversationType.Group
+                          ? widget.model.group_metadata!.image
+                          : widget.model.single_metadata!.image,
+                      name: widget.model.core.type == ConversationType.Group
+                          ? widget.model.group_metadata!.name
+                          : widget.model.single_metadata!.first_name,
+                      size: 56.w,
+                    ),
                   ),
                   if (widget.model.core.type == ConversationType.Single)
                     Container(
@@ -155,7 +158,9 @@ class _ConversationItemState extends State<ConversationItem> {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        'Online',
+                        widget.model.single_metadata!.online
+                            ? 'Online'
+                            : 'Offline',
                         style: TextStyle(
                           fontSize: 8.sp,
                           color: Colors.white,
@@ -191,7 +196,7 @@ class _ConversationItemState extends State<ConversationItem> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 2.w),
                     Row(
                       children: [
                         Expanded(
@@ -220,7 +225,7 @@ class _ConversationItemState extends State<ConversationItem> {
                                     'You can now start a conversation',
                                     style: TextStyle(
                                       color: AppColors.text,
-                                      fontSize: 13.sp,
+                                      fontSize: 12.sp,
                                       fontWeight: FontWeight.w400,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -249,7 +254,7 @@ class _ConversationItemState extends State<ConversationItem> {
                                         ),
                                         SizedBox(width: 6.w),
                                         Text(
-                                          '${widget.model.texts.last.images.length} image${widget.model.texts.last.images.length > 1 ? 's' : ''}',
+                                          '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
                                           style: TextStyle(
                                             color: AppColors.text,
                                             fontSize: 13.sp,

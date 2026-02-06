@@ -14,8 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/providers/conversation.dart';
 
-enum TextType { Text, Emoji, Image, Audio, Video, Attachment }
-
 class SocketOutgoingTextModel {
   final String conversation_id;
   final String? text;
@@ -77,6 +75,7 @@ class CustomSocket {
     _connected = true;
 
     _connection?.listen((message) async {
+      printLine('message from socket: $message');
       final type = message.runtimeType;
       if (type != String) {
         printLine('Something from the message that not a string, type: $type');
@@ -225,8 +224,8 @@ class CustomSocket {
         .updateOnline(user_id: userId, is_online: false);
   }
 
-  void sendTyping(String conversationId, String userId) {
-    final str = "%typing%::$conversationId::$userId";
+  void sendTyping({required String conversation_id, required String user_id}) {
+    final str = "%typing%::$conversation_id::$user_id::todo_name";
     _send(str);
   }
 

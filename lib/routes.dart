@@ -1,3 +1,4 @@
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
 import 'package:fanari_v2/view/chat/chat_screen.dart';
