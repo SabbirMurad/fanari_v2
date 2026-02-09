@@ -249,10 +249,12 @@ class CustomHttp {
     String? refreshToken = localStorage.getString('refresh_token');
     String? userId = localStorage.getString('user_id');
     String? role = localStorage.getString('role');
+    String? accessToken = localStorage.getString('access_token');
 
     if (refreshToken == null || userId == null || role == null) {
       printLine('Some kind of issue here');
       printLine('refreshToken: $refreshToken');
+      printLine('accessToken: $accessToken');
       printLine('user_id: $userId');
       printLine('role: $role');
       // await localStorage.clear();

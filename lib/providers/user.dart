@@ -15,6 +15,8 @@ class UserNotifier extends _$UserNotifier {
   }
 
   Future<List<UserModel>?> loadMoreUsers(List<String> user_ids) async {
+    if (user_ids.isEmpty) return state.value;
+
     List<String> users_to_load = [];
 
     for (final user_id in user_ids) {

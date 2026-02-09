@@ -2,61 +2,31 @@ part of '../utils.dart';
 
 enum AssetUsedAt { ProfilePic, CoverPic, Post, Comment, Chat, VideoThumbnail }
 
-class _PreparedImage {
-  final Uint8List bytes;
-  final int width;
-  final int height;
-  final String blurHash;
-  _PreparedImage(this.bytes, this.width, this.height, this.blurHash);
-}
-
 Future<List<String>?> uploadImages({
-  required List<File> images,
+  required List<PreparedImage> images,
   required AssetUsedAt used_at,
   bool temporary = true,
 }) async {
   var uri = Uri.parse('${AppCredentials.domain}/image');
   var request = http.MultipartRequest('POST', uri);
 
-  final prepared = <_PreparedImage>[];
 
-  print("images length: ${images.length}");
+  for (int i = 0; i < images.length; i++) {
+    final p = images[i];
 
-  List<String> _filePaths = [];
-
-  for (final image in images) {
-    _filePaths.add(image.path);
-  }
-
-  for (int i = 0; i < _filePaths.length; i++) {
-    final bytes = await File(_filePaths[i]).readAsBytes();
-    final decoded = img.decodeImage(bytes)!;
-
-    final blurHash = await BlurhashFFI.encode(
-      MemoryImage(bytes),
-      componentX: 4,
-      componentY: 3,
-    );
-    print('blurHash: $blurHash');
-    prepared.add(
-      _PreparedImage(bytes, decoded.width, decoded.height, blurHash),
-    );
-  }
-
-  for (int i = 0; i < prepared.length; i++) {
-    final p = prepared[i];
+    final meta = p.meta!;
 
     request.files.add(
       http.MultipartFile.fromBytes(
         'image_$i',
-        p.bytes,
+        meta.compressed_bytes,
         filename: 'image_$i.jpg',
       ),
     );
 
-    request.fields['width_$i'] = '${p.width}';
-    request.fields['height_$i'] = '${p.height}';
-    request.fields['blur_hash_$i'] = p.blurHash;
+    request.fields['width_$i'] = '${meta.width}';
+    request.fields['height_$i'] = '${meta.height}';
+    request.fields['blur_hash_$i'] = meta.blur_hash;
     request.fields['used_at_$i'] = used_at.toString();
     request.fields['temporary_$i'] = temporary.toString();
   }

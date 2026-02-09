@@ -620,11 +620,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (response.statusCode == 200) {
       final localStorage = await SharedPreferences.getInstance();
-      localStorage.setString('access_token', response.data['access_token']);
+      final data = response.data;
+      
+      localStorage.setString('access_token', data['access_token']);
       localStorage.setInt(
         'access_token_valid_till',
-        response.data['access_token_valid_till'],
+        data['access_token_valid_till'],
       );
+      localStorage.setString('refresh_token', data['refresh_token']);
+      localStorage.setString('role', data['role']);
+      localStorage.setString('user_id', data['user_id']);
 
       AppRoutes.go(AppRoutes.feed);
     }

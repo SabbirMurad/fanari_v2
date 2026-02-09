@@ -24,7 +24,7 @@ class ImageErrorWidget extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(24, 24, 24, 0.8),
+                color: Color.fromRGBO(24, 24, 24, 0.6),
                 border: Border.all(color: Colors.white.withValues(alpha: .1)),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [

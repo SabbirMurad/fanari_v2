@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
@@ -28,7 +28,7 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   bool _hasText = false;
-  List<File> _selectedImages = [];
+  List<PreparedImage> _selectedImages = [];
   String _selectedPrivacy = 'Public';
   int _optionsCount = 2;
 
@@ -79,6 +79,103 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
+  Widget _singleImageWidget(MapEntry<int, PreparedImage> entry) {
+    int index = entry.key;
+    final image = entry.value;
+
+    final imageWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image(image: FileImage(image.file), height: 148.h),
+    );
+
+    return LongPressDraggable<int>(
+      data: index,
+      delay: Duration(milliseconds: 272),
+      feedback: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.white),
+        ),
+        child: imageWidget,
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.5,
+        child: Container(
+          padding: const EdgeInsets.only(right: 12),
+          child: imageWidget,
+        ),
+      ),
+      child: DragTarget<int>(
+        onAcceptWithDetails: (details) {
+          setState(() {
+            final item = _selectedImages.removeAt(details.data);
+            _selectedImages.insert(index, item);
+          });
+        },
+        builder: (context, candidateData, rejectedData) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IntrinsicWidth(
+              child: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  imageWidget,
+                  if (image.preparing)
+                    Container(
+                      height: 148.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6.r),
+                        color: Colors.black.withValues(alpha: .4),
+                      ),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            color: AppColors.primary,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (!image.preparing)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedImages.removeAt(index);
+                        });
+                      },
+                      child: Container(
+                        width: 18.w,
+                        height: 18.w,
+                        margin: EdgeInsets.only(top: 4.w, right: 4.w),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF181818).withValues(alpha: .45),
+                        ),
+                        child: Center(
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..rotateZ(pi / 4),
+                            child: Icon(
+                              Icons.add,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _selectedImagesWidget() {
     return Container(
       margin: EdgeInsets.only(
@@ -98,86 +195,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(width: 20.w),
-                  ..._selectedImages.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    final image = entry.value;
-
-                    final imageWidget = ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image(image: FileImage(image), height: 148.h),
-                    );
-
-                    return LongPressDraggable<int>(
-                      data: index,
-                      delay: Duration(milliseconds: 272),
-                      feedback: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.white),
-                        ),
-                        child: imageWidget,
-                      ),
-                      childWhenDragging: Opacity(
-                        opacity: 0.5,
-                        child: Container(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: imageWidget,
-                        ),
-                      ),
-                      child: DragTarget<int>(
-                        onAcceptWithDetails: (details) {
-                          setState(() {
-                            final item = _selectedImages.removeAt(details.data);
-                            _selectedImages.insert(index, item);
-                          });
-                        },
-                        builder: (context, candidateData, rejectedData) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                imageWidget,
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedImages.removeAt(index);
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 18.w,
-                                    height: 18.w,
-                                    margin: EdgeInsets.only(
-                                      top: 4.w,
-                                      right: 4.w,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Color(
-                                        0xFF181818,
-                                      ).withValues(alpha: .45),
-                                    ),
-                                    child: Center(
-                                      child: Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.identity()
-                                          ..rotateZ(pi / 4),
-                                        child: Icon(
-                                          Icons.add,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }).toList(),
+                  ..._selectedImages.asMap().entries.map(_singleImageWidget),
                   SizedBox(width: 20.w),
                 ],
               ),
@@ -568,7 +586,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         images: _selectedImages,
         used_at: utils.AssetUsedAt.Post,
       );
-      
+
       if (ids == null) return;
       imageIds.addAll(ids);
     }
@@ -716,6 +734,26 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       });
   }
 
+  Future<void> _handleGalleryTap() async {
+    final images = await utils.pickImageFromGallery(context: context);
+
+    if (images == null) return;
+
+    List<PreparedImage> prepared_images = PreparedImage.fromFiles(images);
+
+    setState(() {
+      _selectedImages.addAll(prepared_images);
+    });
+
+    for (int i = 0; i < _selectedImages.length; i++) {
+      final image_meta = await _selectedImages[i].get_prepare_meta();
+
+      setState(() {
+        _selectedImages[i].meta = image_meta;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -744,25 +782,28 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Row(
                   spacing: 18.w,
-                  children: ['camera', 'video', 'poll'].map((item) {
+                  children: ['camera', 'gallery', 'video', 'poll'].map((item) {
                     return CustomSvg(
                       'assets/icons/post/$item.svg',
                       width: 20.w,
                       height: 20.w,
                       fit: BoxFit.contain,
+                      color: AppColors.text,
                       onTap: () async {
                         if (item == 'camera') {
-                          utils.showImagePickerOptions(context, (source) async {
-                            final images = await utils.pickImageFromGallery(
-                              context: context,
-                            );
+                          // utils.showImagePickerOptions(context, (source) async {
+                          //   final images = await utils.pickImageFromGallery(
+                          //     context: context,
+                          //   );
 
-                            if (images == null) return;
+                          //   if (images == null) return;
 
-                            setState(() {
-                              _selectedImages.addAll(images);
-                            });
-                          });
+                          //   setState(() {
+                          //     _selectedImages.addAll(images);
+                          //   });
+                          // });
+                        } else if (item == 'gallery') {
+                          _handleGalleryTap();
                         } else if (item == 'poll') {
                           setState(() {
                             _hasPoll = !_hasPoll;

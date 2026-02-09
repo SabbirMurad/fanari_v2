@@ -74,17 +74,6 @@ Future<Uint8List?> pickSingleImage({
     filePath = file.path;
   }
 
-  // Uint8List? image;
-  // if (crop) {
-  //   final Uint8List? croppedImage = await cropImage(filePath);
-
-  //   if (croppedImage == null) {
-  //     return null;
-  //   }
-  //   image = croppedImage;
-  // } else {
-  //   image = await File(filePath).readAsBytes();
-  // }
   final image = await File(filePath).readAsBytes();
   if (compress) {
     final Uint8List compressedImage = await compressImage(image, 400);
@@ -97,7 +86,6 @@ Future<Uint8List?> pickSingleImage({
 Future<List<File>?> pickImageFromGallery({
   required BuildContext context,
   int? limit,
-  bool compress = true,
 }) async {
   List<File> images = [];
 
@@ -116,22 +104,7 @@ Future<List<File>?> pickImageFromGallery({
     final file = await asset.file;
     if (file == null) continue;
 
-    if (compress) {
-      final Uint8List compressedImage = await compressImage(
-        file.readAsBytesSync(),
-        400,
-      );
-
-      final dir = await getTemporaryDirectory();
-      final newPath =
-          '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.${file.path.split('.').last}';
-
-      final compressed_file = await File(newPath).create();
-
-      await compressed_file.writeAsBytes(compressedImage);
-
-      images.add(compressed_file);
-    }
+    images.add(file);
   }
 
   return images;

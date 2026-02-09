@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
+import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/providers/emoji.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
@@ -53,7 +54,7 @@ class CommentInputColorTheme {
 class CommentInputSubmitValue {
   final String? text;
   final String? audioPath;
-  final List<File>? images;
+  final List<PreparedImage>? images;
 
   const CommentInputSubmitValue({this.text, this.audioPath, this.images});
 }
@@ -353,6 +354,30 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
+  Future<void> _handleGalleryTap() async {
+    final images = await utils.pickImageFromGallery(context: context);
+
+    if (images == null) return;
+
+    List<PreparedImage> prepared_images = PreparedImage.fromFiles(images);
+
+    setState(() {
+      _selectedImages.addAll(prepared_images);
+    });
+
+    setState(() {
+      _attachmentsOptionsVisible = false;
+    });
+
+    for (int i = 0; i < _selectedImages.length; i++) {
+      final image_meta = await _selectedImages[i].get_prepare_meta();
+
+      setState(() {
+        _selectedImages[i].meta = image_meta;
+      });
+    }
+  }
+
   bool _attachmentsOptionsVisible = false;
 
   Widget _attachmentOptionsWidget() {
@@ -401,21 +426,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
             duration: Duration(milliseconds: 272),
             bottom: _attachmentsOptionsVisible ? 40.w + 12.h : 0,
             child: GestureDetector(
-              onTap: () async {
-                final images = await utils.pickImageFromGallery(
-                  context: context,
-                  compress: true,
-                );
-                if (images == null) return;
-
-                setState(() {
-                  _selectedImages.addAll(images);
-                });
-
-                setState(() {
-                  _attachmentsOptionsVisible = false;
-                });
-              },
+              onTap: _handleGalleryTap,
               child: Container(
                 width: 40.w,
                 height: 40.w,
@@ -538,7 +549,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     });
   }
 
-  List<File> _selectedImages = [];
+  List<PreparedImage> _selectedImages = [];
 
   Widget _imageContainer() {
     return AnimatedContainer(
@@ -565,7 +576,10 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image(image: FileImage(image), height: 112.h + 12),
+                    child: Image(
+                      image: FileImage(image.file),
+                      height: 112.h + 12,
+                    ),
                   ),
                 ),
                 childWhenDragging: Opacity(
@@ -574,7 +588,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     padding: const EdgeInsets.only(right: 12),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image(image: FileImage(image), height: 112.h),
+                      child: Image(image: FileImage(image.file), height: 112.h),
                     ),
                   ),
                 ),
@@ -587,46 +601,70 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   },
                   builder: (context, candidateData, rejectedData) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Stack(
-                        alignment: Alignment.topRight,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image(
-                              image: FileImage(image),
-                              height: 112.h,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedImages.removeAt(index);
-                              });
-                            },
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              margin: EdgeInsets.only(top: 6, right: 6),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: Color(0xFF181818).withValues(alpha: .45),
+                      padding: EdgeInsets.only(right: 8.w),
+                      child: IntrinsicWidth(
+                        child: Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6.r),
+                              child: Image(
+                                image: FileImage(image.file),
+                                height: 112.h,
                               ),
-                              child: Center(
-                                child: Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()
-                                    ..rotateZ(pi / 4),
-                                  child: Icon(
-                                    Icons.add,
-                                    size: 18,
-                                    color: Colors.white,
+                            ),
+                            if (image.preparing)
+                              Container(
+                                height: 112.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  color: Colors.black.withValues(alpha: .4),
+                                ),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: AppColors.primary,
+                                      backgroundColor: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
+                            if (!image.preparing)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedImages.removeAt(index);
+                                  });
+                                },
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  margin: EdgeInsets.only(top: 6, right: 6),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Color(
+                                      0xFF181818,
+                                    ).withValues(alpha: .45),
+                                  ),
+                                  child: Center(
+                                    child: Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.identity()
+                                        ..rotateZ(pi / 4),
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     );
                   },
