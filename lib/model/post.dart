@@ -6,11 +6,10 @@ import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:fanari_v2/constants/credential.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
-class PostCore {
+class _PostCore {
   String uuid;
   String? caption;
   List<MentionModel> mentions;
@@ -25,7 +24,7 @@ class PostCore {
   YoutubeModel? youtube_attachment;
   PreviewData? link_preview;
 
-  PostCore({
+  _PostCore({
     required this.uuid,
     this.caption,
     required this.mentions,
@@ -40,7 +39,7 @@ class PostCore {
     this.link_preview,
   });
 
-  factory PostCore.fromJson(Map<String, dynamic> core) {
+  factory _PostCore.fromJson(Map<String, dynamic> core) {
     List<ImageModel> images = [];
     for (var i = 0; i < core['images'].length; i++) {
       images.add(ImageModel.fromJson(core['images'][i]));
@@ -56,7 +55,7 @@ class PostCore {
       mentions.add(MentionModel.fromJson(core['mentions'][i]));
     }
 
-    return PostCore(
+    return _PostCore(
       uuid: core['uuid'],
       owner_id: core['owner_id'],
       caption: core['caption'],
@@ -111,21 +110,21 @@ class PostCore {
   }
 }
 
-class PostStat {
+class _PostStat {
   int like_count;
   int comment_count;
   int share_count;
   int view_count;
 
-  PostStat({
+  _PostStat({
     required this.like_count,
     required this.comment_count,
     required this.share_count,
     required this.view_count,
   });
 
-  factory PostStat.fromJson(Map<String, dynamic> stat) {
-    return PostStat(
+  factory _PostStat.fromJson(Map<String, dynamic> stat) {
+    return _PostStat(
       like_count: stat['like_count'],
       comment_count: stat['comment_count'],
       share_count: stat['share_count'],
@@ -134,21 +133,21 @@ class PostStat {
   }
 }
 
-class PostMeta {
+class _PostMeta {
   bool liked;
   bool bookmarked;
 
-  PostMeta({required this.liked, required this.bookmarked});
+  _PostMeta({required this.liked, required this.bookmarked});
 
-  factory PostMeta.fromJson(Map<String, dynamic> meta) {
-    return PostMeta(liked: meta['liked'], bookmarked: meta['bookmarked']);
+  factory _PostMeta.fromJson(Map<String, dynamic> meta) {
+    return _PostMeta(liked: meta['liked'], bookmarked: meta['bookmarked']);
   }
 }
 
 class PostModel {
-  PostCore core;
-  PostStat stat;
-  PostMeta meta;
+  _PostCore core;
+  _PostStat stat;
+  _PostMeta meta;
 
   UserModel? owner;
 
@@ -161,9 +160,9 @@ class PostModel {
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     final post = PostModel(
-      core: PostCore.fromJson(json['core']),
-      stat: PostStat.fromJson(json['stat']),
-      meta: PostMeta.fromJson(json['meta']),
+      core: _PostCore.fromJson(json['core']),
+      stat: _PostStat.fromJson(json['stat']),
+      meta: _PostMeta.fromJson(json['meta']),
     );
 
     return post;

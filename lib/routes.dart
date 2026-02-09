@@ -1,4 +1,4 @@
-import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
 import 'package:fanari_v2/view/chat/chat_screen.dart';
@@ -8,11 +8,9 @@ import 'package:fanari_v2/view/profile/profile.dart';
 import 'package:fanari_v2/view/settings/notification_setting.dart';
 import 'package:fanari_v2/view/settings/profile_settings.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> isSingedIn() async {
-  SharedPreferences localStorage = await SharedPreferences.getInstance();
-  String? accessToken = localStorage.getString('access_token');
+  String? accessToken = await LocalStorage.access_token.get();
 
   if (accessToken != null) {
     return true;
