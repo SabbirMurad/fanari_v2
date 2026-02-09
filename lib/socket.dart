@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:fanari_v2/firebase/firebase_api.dart';
 import 'package:fanari_v2/model/attachment.dart';
-import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/model/video.dart';
@@ -18,7 +17,7 @@ class SocketOutgoingTextModel {
   final String conversation_id;
   final String? text;
   final List<MentionModel>? mentions;
-  final List<ImageModel>? images;
+  final List<String>? images;
   final VideoModel? video;
   final String? audio;
   final TextType type;

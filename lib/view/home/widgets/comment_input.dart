@@ -404,11 +404,16 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
               onTap: () async {
                 final images = await utils.pickImageFromGallery(
                   context: context,
+                  compress: true,
                 );
                 if (images == null) return;
 
                 setState(() {
                   _selectedImages.addAll(images);
+                });
+
+                setState(() {
+                  _attachmentsOptionsVisible = false;
                 });
               },
               child: Container(
@@ -694,10 +699,12 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                             widget.onSend?.call(
                               CommentInputSubmitValue(
                                 text: _spacialTextController.text,
+                                images: _selectedImages,
                               ),
                             );
 
                             _spacialTextController.text = '';
+                            _selectedImages.clear();
                           },
                           child: Container(
                             width: 40.w,

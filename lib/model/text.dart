@@ -3,8 +3,10 @@ import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:fanari_v2/model/attachment.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:fanari_v2/utils.dart' as utils;
 
 enum TextType { Text, Emoji, Image, Audio, Video, Attachment }
 
@@ -41,7 +43,10 @@ class TextModel {
     this.link_preview,
   });
 
-  factory TextModel.fromJson(Map<String, dynamic> json, String myId) {
+  static Future<TextModel> fromJson(
+    Map<String, dynamic> json,
+    String my_id,
+  ) async {
     List<String> seen_by = [];
     for (var i = 0; i < json['seen_by'].length; i++) {
       seen_by.add(json['seen_by'][i]);
@@ -62,14 +67,28 @@ class TextModel {
       type = TextType.Attachment;
     }
 
+    List<ImageModel>? image_metadata;
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/image/metadata',
+      body: json['images'],
+      addApiPrefix: false,
+    );
+
+    if (!response.ok) {
+      throw Exception('Failed to get image metadata');
+    }
+
+    image_metadata = ImageModel.fromJsonList(response.data!);
+
     return TextModel(
       uuid: json['uuid'],
       owner: json['owner'],
       text: json['text'],
       type: type,
       conversation_id: json['conversation_id'],
-      images: json['images'] == null ? null : json['images'].map((item) => ImageModel.fromJson(item)).toList(),
-      my_text: json['owner'] == myId,
+      images: json['images'] == null ? null : image_metadata,
+      my_text: json['owner'] == my_id,
       seen_by: seen_by,
       created_at: json['created_at'],
       videos: [],

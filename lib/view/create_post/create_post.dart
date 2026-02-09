@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
@@ -251,18 +252,30 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Widget _profileWidget() {
+    final myself = ref
+        .watch(myselfNotifierProvider)
+        .whenOrNull(data: (data) => data);
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
       child: Row(
         children: [
-          NamedAvatar(loading: false, name: 'Sabbir', size: 64.w),
+          NamedAvatar(
+            loading: false,
+            name: myself?.profile.first_name ?? 'Loading',
+            size: 64.w,
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Abdul Karim',
+                  myself == null
+                      ? 'Loading'
+                      : myself.profile.first_name +
+                            ' ' +
+                            myself.profile.last_name,
                   style: TextStyle(
                     color: AppColors.text,
                     fontSize: 16.sp,
@@ -548,6 +561,48 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
   }
 
+  void _createPost() async {
+    List<String> imageIds = [];
+    if (_selectedImages.isNotEmpty) {
+      final ids = await utils.uploadImages(
+        images: _selectedImages,
+        used_at: utils.AssetUsedAt.Post,
+      );
+      
+      if (ids == null) return;
+      imageIds.addAll(ids);
+    }
+
+    dynamic poll = null;
+    if (_hasPoll) {
+      poll = {
+        'question': _pollQuestionController.text.trim(),
+        'options': _pollOptionsController
+            .map((e) => e.text.trim())
+            .toList()
+            .where((e) => e.isNotEmpty)
+            .toList(),
+        'type': _selectedPollType,
+      };
+    }
+
+    await ref
+        .read(postNotifierProvider.notifier)
+        .createPost(
+          images: imageIds,
+          visibility: _selectedPrivacy,
+          videos: [],
+          mentions: [],
+          tags: [],
+          caption: _textController.text.isEmpty
+              ? null
+              : _textController.text.trim(),
+          poll: poll,
+        );
+
+    AppRoutes.pop();
+  }
+
   Widget _header() {
     return SafeArea(
       bottom: false,
@@ -578,43 +633,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
             Spacer(),
             GestureDetector(
-              onTap: () async {
-                List<String> imageIds = [];
-                if (_selectedImages.isNotEmpty) {
-                  final ids = await utils.uploadImages(_selectedImages);
-                  if (ids == null) return;
-                  imageIds.addAll(ids);
-                }
-
-                dynamic poll = null;
-                if (_hasPoll) {
-                  poll = {
-                    'question': _pollQuestionController.text.trim(),
-                    'options': _pollOptionsController
-                        .map((e) => e.text.trim())
-                        .toList()
-                        .where((e) => e.isNotEmpty)
-                        .toList(),
-                    'type': _selectedPollType,
-                  };
-                }
-
-                await ref
-                    .read(postNotifierProvider.notifier)
-                    .createPost(
-                      images: imageIds,
-                      visibility: _selectedPrivacy,
-                      videos: [],
-                      mentions: [],
-                      tags: [],
-                      caption: _textController.text.isEmpty
-                          ? null
-                          : _textController.text.trim(),
-                      poll: poll,
-                    );
-
-                AppRoutes.pop();
-              },
+              onTap: _createPost,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(

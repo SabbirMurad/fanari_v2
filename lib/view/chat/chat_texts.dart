@@ -1,12 +1,15 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/providers/conversation.dart';
 import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
+import 'package:fanari_v2/view/profile/profile.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,148 +50,159 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     return Container(
       width: double.infinity,
       color: AppColors.surface,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            padding: const EdgeInsets.all(0.0),
-            onPressed: () {
-              AppRoutes.pop();
-            },
-            icon: Icon(
-              Icons.arrow_back_ios_rounded,
-              size: 20.w,
-              color: AppColors.text,
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: SafeArea(
+        bottom: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              padding: const EdgeInsets.all(0.0),
+              onPressed: () {
+                AppRoutes.pop();
+              },
+              icon: Icon(
+                Icons.arrow_back_ios_rounded,
+                size: 20.w,
+                color: AppColors.text,
+              ),
             ),
-          ),
-          Expanded(
-            child: GestureDetector(
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (model.core.type == ConversationType.Group) return;
+
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return ProfileScreen(
+                          user_id: model.single_metadata!.user_id,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Hero(
+                      tag: 'conversation_image_' + model.core.uuid,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: NamedAvatar(
+                          loading: false,
+                          image: model.core.type == ConversationType.Group
+                              ? model.group_metadata!.image
+                              : model.single_metadata!.image,
+                          name: model.core.type == ConversationType.Group
+                              ? model.group_metadata!.name
+                              : model.single_metadata!.first_name,
+                          size: 40.w,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Hero(
+                          tag: 'conversation_name_' + model.core.uuid,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Text(
+                              model.core.type == ConversationType.Group
+                                  ? model.group_metadata!.name
+                                  : model.single_metadata!.first_name +
+                                        ' ' +
+                                        model.single_metadata!.last_name,
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.sp,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            if (model.core.type == ConversationType.Single &&
+                                model.single_metadata!.online)
+                              Container(
+                                width: 10.w,
+                                height: 10.w,
+                                margin: EdgeInsets.only(right: 6.w),
+                                decoration: BoxDecoration(
+                                  color: model.single_metadata!.online
+                                      ? Colors.green[400]
+                                      : Color.fromARGB(255, 102, 105, 103),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            if (model.core.type == ConversationType.Single)
+                              Text(
+                                model.single_metadata!.online
+                                    ? 'Online'
+                                    : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
+                                style: TextStyle(
+                                  color: AppColors.text,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 6),
+            GestureDetector(
               onTap: () {
                 // Navigator.of(context).push(
                 //   MaterialPageRoute(
                 //     builder: (_) {
-                //       return ProfilePage(
-                //         userId: widget.model.user_id,
-                //         myProfile: false,
+                //       return CallPage(
+                //         username: widget.model.name,
+                //         image: widget.model.image,
                 //       );
                 //     },
                 //   ),
                 // );
               },
-              child: Row(
-                children: [
-                  NamedAvatar(
-                    loading: false,
-                    image: model.core.type == ConversationType.Group
-                        ? model.group_metadata!.image
-                        : model.single_metadata!.image,
-                    name: model.core.type == ConversationType.Group
-                        ? model.group_metadata!.name
-                        : model.single_metadata!.first_name,
-                    size: 40.w,
-                  ),
-                  SizedBox(width: 6.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Hero(
-                        tag: 'conversation_name_' + model.core.uuid,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            model.core.type == ConversationType.Group
-                                ? model.group_metadata!.name
-                                : model.single_metadata!.first_name +
-                                      ' ' +
-                                      model.single_metadata!.last_name,
-                            style: TextStyle(
-                              color: AppColors.text,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15.sp,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          if (model.core.type == ConversationType.Single &&
-                              model.single_metadata!.online)
-                            Container(
-                              width: 10.w,
-                              height: 10.w,
-                              margin: EdgeInsets.only(right: 6.w),
-                              decoration: BoxDecoration(
-                                color: model.single_metadata!.online
-                                    ? Colors.green[400]
-                                    : Color.fromARGB(255, 102, 105, 103),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          if (model.core.type == ConversationType.Single)
-                            Text(
-                              model.single_metadata!.online
-                                  ? 'Online'
-                                  : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
-                              style: TextStyle(
-                                color: AppColors.text,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.videocam, size: 24.w, color: AppColors.text),
               ),
             ),
-          ),
-          SizedBox(width: 6),
-          GestureDetector(
-            onTap: () {
-              // Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (_) {
-              //       return CallPage(
-              //         username: widget.model.name,
-              //         image: widget.model.image,
-              //       );
-              //     },
-              //   ),
-              // );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.videocam, size: 24.w, color: AppColors.text),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.call, size: 20.w, color: AppColors.text),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.more_vert_rounded,
-                size: 24.w,
-                color: AppColors.text,
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.call, size: 20.w, color: AppColors.text),
               ),
             ),
-          ),
-        ],
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.more_vert_rounded,
+                  size: 24.w,
+                  color: AppColors.text,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  SliverChildDelegate _textWidgets(List<TextModel> texts) {
+  List<Widget> _textWidgets(List<TextModel> texts) {
     List<Widget> widgets = [];
 
     String previousTextOwner = '';
@@ -220,51 +234,47 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       previousTextTime = text.created_at;
 
       if (addTimeDivider) {
-        widgets.add(SizedBox(height: 18));
+        widgets.add(SizedBox(height: 18.h));
         widgets.add(
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                height: 0.8,
-                width: (1.sw / 2) - 12 - (150 / 2),
-                color: Theme.of(
-                  context,
-                ).colorScheme.tertiary.withValues(alpha: .2),
-              ),
-              Container(
-                // color: Colors.green,
-                width: 150,
-                child: Center(
-                  child: Text(
-                    utils.prettyDate(text.created_at),
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.tertiary.withValues(alpha: .3),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 11,
-                    ),
-                  ),
+              SizedBox(width: 20.w),
+              Expanded(
+                child: Container(
+                  height: 0.8,
+                  width: double.infinity,
+                  color: AppColors.border.withValues(alpha: .5),
                 ),
               ),
-              Container(
-                height: .8,
-                width: (1.sw / 2) - 12 - (150 / 2),
-                color: Theme.of(
-                  context,
-                ).colorScheme.tertiary.withValues(alpha: .2),
+              SizedBox(width: 12.w),
+              Text(
+                utils.prettyDate(text.created_at),
+                style: TextStyle(
+                  color: AppColors.border.withValues(alpha: .5),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11,
+                ),
               ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Container(
+                  height: .8,
+                  width: double.infinity,
+                  color: AppColors.border.withValues(alpha: .5),
+                ),
+              ),
+              SizedBox(width: 20.w),
             ],
           ),
         );
-        widgets.add(SizedBox(height: 18));
+        widgets.add(SizedBox(height: 18.h));
       } else if (differentProfile) {
-        widgets.add(SizedBox(height: 24));
+        widgets.add(SizedBox(height: 24.h));
       } else {
-        widgets.add(SizedBox(height: 6));
+        widgets.add(SizedBox(height: 6.h));
       }
 
       widgets.add(
@@ -307,9 +317,40 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       );
     }
 
-    return SliverChildBuilderDelegate((context, index) {
-      return widgets[index];
-    }, childCount: widgets.length);
+    return widgets;
+  }
+
+  void _onMessageSend(CommentInputSubmitValue message) async {
+    if (message.text != null && message.text!.isNotEmpty) {
+      CustomSocket.instance.sendText(
+        SocketOutgoingTextModel(
+          conversation_id: widget.conversation_id,
+          type: TextType.Text,
+          text: message.text,
+        ),
+      );
+    }
+
+    if (message.images != null && message.images!.isNotEmpty) {
+      final images = await utils.uploadImages(
+        images: message.images!,
+        used_at: utils.AssetUsedAt.Chat,
+        temporary: false,
+      );
+
+      if (images == null) {
+        printLine('Failed to upload image');
+        return;
+      }
+
+      CustomSocket.instance.sendText(
+        SocketOutgoingTextModel(
+          conversation_id: widget.conversation_id,
+          type: TextType.Image,
+          images: images,
+        ),
+      );
+    }
   }
 
   @override
@@ -330,11 +371,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
     final myself = ref
         .watch(myselfNotifierProvider)
-        .when(
-          data: (data) => data,
-          error: (error, stackTrace) => null,
-          loading: () => null,
-        );
+        .whenOrNull(data: (data) => data);
 
     return Scaffold(
       body: Container(
@@ -343,47 +380,29 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         height: double.infinity,
         child: Stack(
           children: [
-            SizedBox(
+            Container(
               width: double.infinity,
               height: double.infinity,
-              child: CustomScrollView(
+              child: ListView(
+                padding: EdgeInsets.all(0),
                 reverse: true,
-                physics: AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
-                slivers: [
-                  SliverToBoxAdapter(child: SizedBox(height: 72.h)),
-                  // if (target_conversation.initial_text_loaded)
-                  SliverList(delegate: _textWidgets(target_conversation.texts)),
-                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
-                  SliverAppBar(
-                    titleSpacing: 0.0,
-                    title: _header(target_conversation),
-                    floating: true,
-                    snap: true,
-                    automaticallyImplyLeading: false,
-                    actions: [Container()],
-                    expandedHeight: 40.h,
-                    surfaceTintColor: AppColors.surface,
-                    backgroundColor: AppColors.surface,
-                    shadowColor: AppColors.containerBg,
-                  ),
+                children: [
+                  SizedBox(height: 72.h),
+                  ..._textWidgets(target_conversation.texts),
+                  SizedBox(height: 84.h),
                 ],
               ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: _header(target_conversation),
             ),
             Align(
               alignment: Alignment.bottomCenter,
               child: CommentInputWidget(
                 showTyping: target_conversation.typing,
-                onSend: (message) {
-                  if (myself == null) return;
-                  CustomSocket.instance.sendText(
-                    SocketOutgoingTextModel(
-                      conversation_id: widget.conversation_id,
-                      type: TextType.Text,
-                      text: message.text,
-                    ),
-                  );
-                },
+                onSend: _onMessageSend,
                 onTyping: () {
                   if (myself == null) return;
 

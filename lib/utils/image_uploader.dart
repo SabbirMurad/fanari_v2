@@ -1,42 +1,64 @@
 part of '../utils.dart';
 
-Future<List<String>?> uploadImages(List<File> images) async {
+enum AssetUsedAt { ProfilePic, CoverPic, Post, Comment, Chat, VideoThumbnail }
+
+class _PreparedImage {
+  final Uint8List bytes;
+  final int width;
+  final int height;
+  final String blurHash;
+  _PreparedImage(this.bytes, this.width, this.height, this.blurHash);
+}
+
+Future<List<String>?> uploadImages({
+  required List<File> images,
+  required AssetUsedAt used_at,
+  bool temporary = true,
+}) async {
   var uri = Uri.parse('${AppCredentials.domain}/image');
   var request = http.MultipartRequest('POST', uri);
 
-  for (int i = 0; i < images.length; i++) {
-    var image = images[i];
+  final prepared = <_PreparedImage>[];
 
-    final bytes = await image.readAsBytes();
-    final decodedImage = img.decodeImage(bytes);
+  print("images length: ${images.length}");
 
-    if (decodedImage == null) {
-      debugPrint('');
-      debugPrint('Error decoding image');
-      debugPrint('');
-      return null;
-    }
+  List<String> _filePaths = [];
 
-    final blur_hash = await BlurhashFFI.encode(
+  for (final image in images) {
+    _filePaths.add(image.path);
+  }
+
+  for (int i = 0; i < _filePaths.length; i++) {
+    final bytes = await File(_filePaths[i]).readAsBytes();
+    final decoded = img.decodeImage(bytes)!;
+
+    final blurHash = await BlurhashFFI.encode(
       MemoryImage(bytes),
       componentX: 4,
       componentY: 3,
     );
+    print('blurHash: $blurHash');
+    prepared.add(
+      _PreparedImage(bytes, decoded.width, decoded.height, blurHash),
+    );
+  }
 
-    // Attach image
+  for (int i = 0; i < prepared.length; i++) {
+    final p = prepared[i];
+
     request.files.add(
-      await http.MultipartFile.fromPath(
-        'images', // <-- same key for all images
-        image.path,
-        filename: image.uri.pathSegments.last,
+      http.MultipartFile.fromBytes(
+        'image_$i',
+        p.bytes,
+        filename: 'image_$i.jpg',
       ),
     );
 
-    // Attach metadata for that image (by index)
-    request.fields['width_$i'] = '${decodedImage.width}';
-    request.fields['height_$i'] = '${decodedImage.height}';
-    request.fields['blur_hash_$i'] = blur_hash;
-    request.fields['used_at_$i'] = 'Post';
+    request.fields['width_$i'] = '${p.width}';
+    request.fields['height_$i'] = '${p.height}';
+    request.fields['blur_hash_$i'] = p.blurHash;
+    request.fields['used_at_$i'] = used_at.toString();
+    request.fields['temporary_$i'] = temporary.toString();
   }
 
   var response = await request.send();

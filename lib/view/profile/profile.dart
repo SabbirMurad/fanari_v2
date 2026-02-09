@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/providers/user.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/chat_texts.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -9,7 +10,6 @@ import 'package:fanari_v2/widgets/image_uploader_v_one.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fanari_v2/utils.dart' as utils;
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final String user_id;
@@ -39,13 +39,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return;
     }
 
-    final response = await utils.CustomHttp.get(
-      endpoint: '/profile/profile/${widget.user_id}',
-    );
+    final user = await ref
+        .read(userNotifierProvider.notifier)
+        .loadSingleUsers(widget.user_id);
 
-    if (!response.ok) return;
-
-    final user = UserModel.fromJson(response.data[0]);
+    if (user == null) {
+      printLine('Failed to load user');
+      return;
+    }
 
     setState(() {
       _user = user;

@@ -134,15 +134,22 @@ class _ConversationItemState extends State<ConversationItem> {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(bottom: 4.w),
-                    child: NamedAvatar(
-                      loading: false,
-                      image: widget.model.core.type == ConversationType.Group
-                          ? widget.model.group_metadata!.image
-                          : widget.model.single_metadata!.image,
-                      name: widget.model.core.type == ConversationType.Group
-                          ? widget.model.group_metadata!.name
-                          : widget.model.single_metadata!.first_name,
-                      size: 56.w,
+                    child: Hero(
+                      tag: 'conversation_image_' + widget.model.core.uuid,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: NamedAvatar(
+                          loading: false,
+                          image:
+                              widget.model.core.type == ConversationType.Group
+                              ? widget.model.group_metadata!.image
+                              : widget.model.single_metadata!.image,
+                          name: widget.model.core.type == ConversationType.Group
+                              ? widget.model.group_metadata!.name
+                              : widget.model.single_metadata!.first_name,
+                          size: 56.w,
+                        ),
+                      ),
                     ),
                   ),
                   if (widget.model.core.type == ConversationType.Single)

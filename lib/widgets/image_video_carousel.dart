@@ -3,6 +3,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:fanari_v2/widgets/video_player_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -228,53 +229,12 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
     );
   }
 
-  Widget _errorWidget(String blur_hash) {
-    return Container(
-      width: double.infinity,
-      height: carouselHeight,
-      child: Stack(
-        children: [
-          BlurHash(
-            hash: blur_hash,
-            color: AppColors.secondary,
-            optimizationMode: BlurHashOptimizationMode.approximation,
-          ),
-          Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(24, 24, 24, 0.8),
-                border: Border.all(color: Colors.white.withValues(alpha: .1)),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromRGBO(24, 24, 24, .2),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                'Couldn\'t load image',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget singleImageItem(CarouselItem item) {
     return CachedNetworkImage(
       imageUrl: item.image!.webp_url,
       height: carouselHeight,
       fit: BoxFit.contain,
-      placeholder: (context, url) { 
+      placeholder: (context, url) {
         return SizedBox(
           width: widget.width,
           height: carouselHeight,
@@ -286,7 +246,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
         );
       },
       errorWidget: (context, url, error) {
-        return _errorWidget(item.image!.blur_hash);
+        return ImageErrorWidget(blur_hash: item.image!.blur_hash);
       },
     );
   }

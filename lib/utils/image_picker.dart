@@ -116,8 +116,24 @@ Future<List<File>?> pickImageFromGallery({
     final file = await asset.file;
     if (file == null) continue;
 
-    images.add(file);
+    if (compress) {
+      final Uint8List compressedImage = await compressImage(
+        file.readAsBytesSync(),
+        400,
+      );
+
+      final dir = await getTemporaryDirectory();
+      final newPath =
+          '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.${file.path.split('.').last}';
+
+      final compressed_file = await File(newPath).create();
+
+      await compressed_file.writeAsBytes(compressedImage);
+
+      images.add(compressed_file);
+    }
   }
+
   return images;
 }
 

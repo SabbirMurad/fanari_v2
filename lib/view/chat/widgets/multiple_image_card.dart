@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
+import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 // import 'package:vector_math/vector_math.dart';
@@ -30,7 +32,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
         borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
-            color: Color(0xff242424).withValues(alpha: 0.65),
+            color: Color(0xff242424).withValues(alpha: 0.35),
             blurRadius: 6,
             offset: const Offset(0, 5),
           ),
@@ -43,40 +45,19 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
           height: double.infinity,
           fit: BoxFit.cover,
           placeholder: (context, url) {
-            return Container(
-              color: AppColors.secondary,
+            return SizedBox(
               width: double.infinity,
               height: double.infinity,
+              child: BlurHash(
+                hash: image.blur_hash,
+                color: AppColors.secondary,
+                optimizationMode: BlurHashOptimizationMode.approximation,
+              ),
             );
           },
-          errorWidget: (context, url, error) => Container(
-            color: AppColors.secondary,
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(24, 24, 24, 0.8),
-                  border: Border.all(color: Colors.white.withValues(alpha: .1)),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromRGBO(24, 24, 24, .2),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  'Couldn\'t load image',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          errorWidget: (context, url, error) {
+            return ImageErrorWidget(blur_hash: image.blur_hash);
+          },
         ),
       ),
     );

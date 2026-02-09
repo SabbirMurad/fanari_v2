@@ -1,16 +1,18 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/attachment.dart';
-import 'package:fanari_v2/model/text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
+import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:fanari_v2/widgets/status_widget.dart';
 import 'package:fanari_v2/widgets/youtube_attachment.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fanari_v2/utils.dart' as utils;
@@ -172,7 +174,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                 bottomRight: Radius.circular(widget.model.my_text ? 4.r : 10.r),
               ),
             ),
-            padding: EdgeInsets.all(10.w),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             child: StatusWidget(
               text: widget.model.text!,
               width: _maxTextWidth,
@@ -186,9 +188,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
               selectable: false,
               fontSize: 14.sp,
 
-              textColor: widget.model.my_text
-                  ? AppColors.surface
-                  : AppColors.text,
+              textColor: AppColors.text,
             ),
           ),
           if (widget.model.youtube_attachment != null)
@@ -210,7 +210,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
   }
 
   Widget _singleImage() {
-    double carouselHeight = 0.3.sh;
+    double carouselHeight = 236.h;
 
     double imageWidth =
         (carouselHeight * widget.model.images!.first.width) /
@@ -271,18 +271,19 @@ class _TextItemWidgetState extends State<TextItemWidget> {
           height: carouselHeight,
           fit: BoxFit.cover,
           placeholder: (context, url) {
-            return Container(color: Theme.of(context).colorScheme.secondary);
+            return SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: BlurHash(
+                hash: widget.model.images!.first.blur_hash,
+                color: AppColors.secondary,
+                optimizationMode: BlurHashOptimizationMode.approximation,
+              ),
+            );
           },
           errorWidget: (context, url, error) {
-            return Container(
-              color: Theme.of(context).colorScheme.secondary,
-              child: Center(
-                child: Icon(
-                  Icons.broken_image_rounded,
-                  color: Colors.white,
-                  size: imageWidth * 0.30,
-                ),
-              ),
+            return ImageErrorWidget(
+              blur_hash: widget.model.images!.first.blur_hash,
             );
           },
         ),
@@ -394,10 +395,6 @@ class _TextItemWidgetState extends State<TextItemWidget> {
         return _singleImage();
       }
 
-      print('');
-      print('Image length: ${widget.model.images!.length}');
-      print('');
-
       return _multipleImagesWidget();
     }
 
@@ -452,7 +449,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                 if (!widget.model.my_text && !widget.showProfile)
                   SizedBox(width: 36.w + 8.w),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: Stack(
                     alignment: widget.model.my_text
                         ? Alignment.centerRight

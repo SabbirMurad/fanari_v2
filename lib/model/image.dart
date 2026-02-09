@@ -34,4 +34,14 @@ class ImageModel {
       ),
     );
   }
+
+  static List<ImageModel> fromJsonList(List<dynamic> json) {
+    List<ImageModel> images = [];
+
+    for (var i = 0; i < json.length; i++) {
+      images.add(ImageModel.fromJson(json[i]));
+    }
+
+    return images;
+  }
 }

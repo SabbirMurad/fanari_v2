@@ -43,4 +43,28 @@ class UserNotifier extends _$UserNotifier {
 
     return state.value;
   }
+
+  Future<UserModel?> loadSingleUsers(String user_id) async {
+    if (loaded_user_ids.contains(user_id)) {
+      return state.value!.firstWhere((user) => user.core.uuid == user_id);
+    }
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/profile/list',
+      body: [user_id],
+    );
+
+    if (!response.ok) {
+      printLine(response.error);
+      return null;
+    }
+
+    final users = UserModel.fromJsonList(response.data);
+
+    users.forEach((user) => loaded_user_ids.add(user.core.uuid));
+
+    state = AsyncValue.data(state.value! + users);
+
+    return state.value!.firstWhere((user) => user.core.uuid == user_id);
+  }
 }

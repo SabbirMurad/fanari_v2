@@ -55,11 +55,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final myself = ref
         .watch(myselfNotifierProvider)
-        .when(
-          data: (data) => data,
-          error: (error, stackTrace) => null,
-          loading: () => null,
-        );
+        .whenOrNull(data: (data) => data);
 
     return Container(
       width: double.infinity,
