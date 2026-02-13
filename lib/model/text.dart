@@ -99,7 +99,7 @@ class TextModel {
     );
   }
 
-  load3rdPartyInfos() async {
+  Future<TextModel> load3rdPartyInfos() async {
     if (this.youtube_attachment == null &&
         this.images == null &&
         this.videos == null &&
@@ -126,10 +126,12 @@ class TextModel {
           final preview = await getPreviewData(arr[i]);
           if (preview.title != null) {
             this.link_preview = preview;
-            return;
+            return this;
           }
         }
       }
     }
+
+    return this;
   }
 }

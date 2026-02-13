@@ -41,7 +41,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   void dispose() {
     _scrollController.dispose();
 
-    CustomSocket.instance.openedConversationId = null;
+    CustomSocket.instance.opened_conversation_id = null;
 
     super.dispose();
   }
@@ -322,7 +322,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
   void _onMessageSend(CommentInputSubmitValue message) async {
     if (message.text != null && message.text!.isNotEmpty) {
-      CustomSocket.instance.sendText(
+      CustomSocket.instance.send_text(
         SocketOutgoingTextModel(
           conversation_id: widget.conversation_id,
           type: TextType.Text,
@@ -343,7 +343,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         return;
       }
 
-      CustomSocket.instance.sendText(
+      CustomSocket.instance.send_text(
         SocketOutgoingTextModel(
           conversation_id: widget.conversation_id,
           type: TextType.Image,
@@ -367,7 +367,8 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         .where((element) => element.core.uuid == widget.conversation_id)
         .first;
 
-    CustomSocket.instance.openedConversationId = target_conversation.core.uuid;
+    CustomSocket.instance.opened_conversation_id =
+        target_conversation.core.uuid;
 
     final myself = ref
         .watch(myselfNotifierProvider)
@@ -406,7 +407,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                 onTyping: () {
                   if (myself == null) return;
 
-                  CustomSocket.instance.sendTyping(
+                  CustomSocket.instance.send_typing(
                     conversation_id: widget.conversation_id,
                     user_id: myself.core.uuid,
                   );

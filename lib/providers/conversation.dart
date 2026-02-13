@@ -65,17 +65,37 @@ class ConversationNotifier extends _$ConversationNotifier {
     required String conversation_id,
     required TextModel message,
   }) async {
-    printLine('Called here');
-
-    List<ConversationModel> conversations = state.value ?? [];
-    for (var i = 0; i < conversations.length; i++) {
-      if (conversations[i].core.uuid == conversation_id) {
-        conversations[i].texts = [message, ...conversations[i].texts];
+    for (int i = 0; i < state.value!.length; i++) {
+      if (state.value![i].core.uuid == conversation_id) {
+        state.value![i].texts = [message, ...state.value![i].texts];
+        // Load third party data later so ui does not block
+        state.value![i].texts[0] = await state.value![i].texts[0]
+            .load3rdPartyInfos();
         break;
       }
     }
+  }
 
-    state = AsyncValue.data(conversations);
+  Future<ConversationModel> getTargetConversation(
+    String conversation_id,
+  ) async {
+    List<ConversationModel>? existingConversations = state.value;
+
+    if (existingConversations == null) {
+      final conversations = await load();
+      if (conversations == null) {
+        throw 'Failed to load conversations';
+      }
+      ;
+
+      state = AsyncValue.data(conversations);
+    }
+
+    existingConversations = state.value;
+
+    return existingConversations!.firstWhere(
+      (elm) => elm.core.uuid == conversation_id,
+    );
   }
 
   Timer? _timer;
