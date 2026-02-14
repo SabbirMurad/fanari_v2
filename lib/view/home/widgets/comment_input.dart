@@ -87,7 +87,6 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     super.initState();
 
     _spacialTextController.addListener(() {
-      printLine("called");
       if (_hasInputText) {
         if (_spacialTextController.text.isEmpty) {
           setState(() {
@@ -102,8 +101,6 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           });
         }
       }
-
-      printLine(_typingSent);
 
       if (!_typingSent) {
         _typingSent = true;

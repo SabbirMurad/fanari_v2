@@ -1,151 +1,132 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fanari_v2/utils.dart' as utils;
-import 'package:fanari_v2/routes.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const iOS = DarwinInitializationSettings();
-const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-const settings = InitializationSettings(android: android, iOS: iOS);
+// ── Notification Channel ──────────────────────────────────────────────────────
 
-const androidChannel = const AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'High Importance Notifications', // title
-  description:
-      'This channel is used for important notifications.', // description
-  importance: Importance.defaultImportance,
+const _ios_settings = DarwinInitializationSettings();
+const _android_settings = AndroidInitializationSettings('@mipmap/ic_launcher');
+const _init_settings = InitializationSettings(
+  android: _android_settings,
+  iOS: _ios_settings,
 );
 
-final localNotificationPlugin = FlutterLocalNotificationsPlugin()
+const android_channel = AndroidNotificationChannel(
+  'high_importance_channel',
+  'High Importance Notifications',
+  description: 'This channel is used for important notifications.',
+  importance: Importance.high,
+);
+
+final local_notification_plugin = FlutterLocalNotificationsPlugin()
   ..initialize(
-    settings,
-    onDidReceiveNotificationResponse: handleReceiveNotificationResponse,
+    _init_settings,
+    onDidReceiveNotificationResponse: _handle_notification_response,
     onDidReceiveBackgroundNotificationResponse:
-        handleReceiveBackgroundNotificationResponse,
+        _handle_background_notification_response,
   );
 
-Future<void> handleReceiveNotificationResponse(
+// ── Notification Types ────────────────────────────────────────────────────────
+
+enum NotificationType {
+  system,
+  liked_profile,
+  liked_post,
+  commented_post,
+  started_following,
+  friend_request,
+  friend_request_reject,
+  friend_request_accept,
+  incoming_call, // ✅ added for call notifications
+  message,
+}
+
+// ── Notification State ────────────────────────────────────────────────────────
+
+// Tracks message threads for MessagingStyleInformation grouping
+final Map<String, List<Message>> notification_texts = {};
+
+// ── Response Handlers ─────────────────────────────────────────────────────────
+
+Future<void> _handle_notification_response(
   NotificationResponse response,
 ) async {
-  print('');
-  print('response: ${response.actionId}');
-  print('');
+  printLine('Notification tapped — action: ${response.actionId}');
+  AppRoutes.go('/home/notification');
+}
+
+// Runs in a background isolate — keep it minimal, no providers or state
+Future<void> _handle_background_notification_response(
+  NotificationResponse response,
+) async {
+  printLine('Background notification action: ${response.actionId}');
+
+  switch (response.actionId) {
+    case 'reply_action_id':
+      // TODO: send reply
+      break;
+    case 'mark_as_read_action_id':
+      // TODO: mark conversation as read
+      break;
+    case 'follow_back_action_id':
+      // TODO: follow back
+      break;
+    case 'accept_friend_request_action_id':
+      // TODO: accept request
+      break;
+    case 'reject_friend_request_action_id':
+      // TODO: reject request
+      break;
+  }
 
   AppRoutes.go('/home/notification');
 }
 
-Future<void> handleReceiveBackgroundNotificationResponse(
-  NotificationResponse response,
-) async {
-  print('');
-  print('Background response handler called');
-  print('response: ${response.actionId}');
-  print('');
+// ── Foreground Message Handler ────────────────────────────────────────────────
 
-  if (response.actionId == 'follow_back_action_id') {
-  } else if (response.actionId == 'accept_friend_request_action_id') {
-  } else if (response.actionId == 'reject_friend_request_action_id') {
-  } else if (response.actionId == 'reply_action_id') {
-  } else if (response.actionId == 'mark_as_read_action_id') {}
-
-  AppRoutes.go('/home/notification');
-}
-
-Future<void> handleMessage(RemoteMessage message) async {
-  print('');
-  print('Notification incoming');
-  print('');
-
-  List<AndroidNotificationAction> actions = [];
-  StyleInformation? styleInformation;
+Future<void> handle_message(RemoteMessage message) async {
+  printLine('Notification incoming — topic: ${message.data['topic']}');
 
   final data = message.data;
-  if (data['topic'] == NotificationType.StartedFollowing.name) {
-    actions.add(
-      AndroidNotificationAction('follow_back_action_id', 'Follow Back'),
-    );
-  } else if (data['topic'] == NotificationType.FriendRequest.name) {
-    actions.add(
-      AndroidNotificationAction('accept_friend_request_action_id', 'Accept'),
-    );
-    actions.add(
-      AndroidNotificationAction('reject_friend_request_action_id', 'Reject'),
-    );
-  } else if (data['topic'] == NotificationType.Message.name) {
-    actions.add(
-      AndroidNotificationAction(
-        'reply_action_id',
-        'Reply',
-        inputs: [AndroidNotificationActionInput(label: 'Type your reply')],
-      ),
-    );
-    actions.add(
-      AndroidNotificationAction('mark_as_read_action_id', 'Mark as Read'),
-    );
+  final topic_str = data['topic'] as String?;
+  final notification_id = data['group_id'] != null
+      ? int.parse(data['group_id'])
+      : message.hashCode;
 
-    if (notification_texts[data['group_id']] != null) {
-      notification_texts[data['group_id']]!.add(
-        Message(data['body'], DateTime.now(), null),
-      );
-    } else {
-      notification_texts[data['group_id']] = [
-        Message(data['body'], DateTime.now(), null),
-      ];
-    }
+  // Map topic string to enum — unknown topics are ignored
+  final NotificationType? type = NotificationType.values
+      .where((e) => e.name == topic_str)
+      .firstOrNull;
 
-    styleInformation = MessagingStyleInformation(
-      Person(name: 'Sabbir'),
-      conversationTitle: data['title'],
-      groupConversation: false,
-      messages: notification_texts[data['group_id']],
-    );
-  } else if (data['topic'] == NotificationType.FriendRequestAccept.name) {
-  } else if (data['topic'] == NotificationType.FriendRequestReject.name) {
-  } else if (data['topic'] == NotificationType.LikedProfile.name) {
-  } else if (data['topic'] == NotificationType.LikedPost.name) {
-  } else if (data['topic'] == NotificationType.CommentedPost.name) {
-  } else if (data['topic'] == NotificationType.System.name) {
-  } else {
-    print('\nNotification topic not implemented: ${data['topic']}\n');
+  if (type == null) {
+    printLine('Notification topic not implemented: $topic_str');
     return;
   }
 
-  if (styleInformation == null) {
-    String? imagePath;
-    if (data['image'] != null) {
-      imagePath = await downloadAndSaveImage(
-        data['image'],
-        'notification_image.jpg',
-      );
-    }
+  final List<AndroidNotificationAction> actions = _build_actions(type, data);
+  final StyleInformation? style_information = await _build_style(type, data);
 
-    styleInformation = imagePath != null
-        ? BigPictureStyleInformation(
-            FilePathAndroidBitmap(imagePath),
-            contentTitle: data['title'],
-            summaryText: data['body'],
-          )
-        : null;
-  }
-
-  localNotificationPlugin.show(
-    data['group_id'] != null ? int.parse(data['group_id']) : message.hashCode,
+  local_notification_plugin.show(
+    notification_id,
     data['title'],
     data['body'],
     NotificationDetails(
       android: AndroidNotificationDetails(
-        androidChannel.id,
-        androidChannel.name,
-        channelDescription: androidChannel.description,
+        android_channel.id,
+        android_channel.name,
+        channelDescription: android_channel.description,
         icon: '@mipmap/ic_launcher',
         enableLights: true,
         color: const Color(0xFF9A79F5),
-        styleInformation: styleInformation,
+        styleInformation: style_information,
         actions: actions,
         priority: Priority.high,
         importance: Importance.high,
@@ -155,84 +136,157 @@ Future<void> handleMessage(RemoteMessage message) async {
   );
 }
 
-Future<String?> downloadAndSaveImage(String url, String fileName) async {
+// ── Action Builder ────────────────────────────────────────────────────────────
+
+List<AndroidNotificationAction> _build_actions(
+  NotificationType type,
+  Map<String, dynamic> data,
+) {
+  switch (type) {
+    case NotificationType.started_following:
+      return [
+        const AndroidNotificationAction('follow_back_action_id', 'Follow Back'),
+      ];
+
+    case NotificationType.friend_request:
+      return [
+        const AndroidNotificationAction(
+          'accept_friend_request_action_id',
+          'Accept',
+        ),
+        const AndroidNotificationAction(
+          'reject_friend_request_action_id',
+          'Reject',
+        ),
+      ];
+
+    case NotificationType.message:
+      return [
+        AndroidNotificationAction(
+          'reply_action_id',
+          'Reply',
+          inputs: [
+            const AndroidNotificationActionInput(label: 'Type your reply'),
+          ],
+        ),
+        const AndroidNotificationAction(
+          'mark_as_read_action_id',
+          'Mark as Read',
+        ),
+      ];
+
+    case NotificationType.incoming_call:
+      return [
+        const AndroidNotificationAction('accept_call_action_id', 'Accept'),
+        const AndroidNotificationAction('reject_call_action_id', 'Reject'),
+      ];
+
+    default:
+      return [];
+  }
+}
+
+// ── Style Builder ─────────────────────────────────────────────────────────────
+
+Future<StyleInformation?> _build_style(
+  NotificationType type,
+  Map<String, dynamic> data,
+) async {
+  // Message notifications use conversation threading style
+  if (type == NotificationType.message) {
+    final group_id = data['group_id'] as String;
+
+    notification_texts[group_id] ??= [];
+    notification_texts[group_id]!.add(
+      Message(data['body'], DateTime.now(), null),
+    );
+
+    return MessagingStyleInformation(
+      const Person(name: 'Sabbir'), // TODO: replace with actual user name
+      conversationTitle: data['title'],
+      groupConversation: false,
+      messages: notification_texts[group_id],
+    );
+  }
+
+  // All other types use a big picture if an image URL is provided
+  if (data['image'] != null) {
+    final image_path = await _download_and_save_image(
+      data['image'],
+      'notification_image.jpg',
+    );
+    if (image_path != null) {
+      return BigPictureStyleInformation(
+        FilePathAndroidBitmap(image_path),
+        contentTitle: data['title'],
+        summaryText: data['body'],
+      );
+    }
+  }
+
+  return null;
+}
+
+// ── Image Download ────────────────────────────────────────────────────────────
+
+Future<String?> _download_and_save_image(String url, String file_name) async {
   try {
     final response = await http.get(Uri.parse(url));
     final directory = await getTemporaryDirectory();
-    final filePath = '${directory.path}/$fileName';
-    final file = File(filePath);
+    final file_path = '${directory.path}/$file_name';
+    final file = File(file_path);
+
     if (await file.exists()) await file.delete();
     await file.writeAsBytes(response.bodyBytes);
-    return filePath;
+
+    return file_path;
   } catch (e) {
-    print("");
-    print("Error downloading image: $e");
-    print("");
+    printLine('Error downloading notification image: $e');
     return null;
   }
 }
 
-Map<String, List<Message>> notification_texts = {};
-
-enum NotificationType {
-  System,
-  LikedProfile,
-  LikedPost,
-  CommentedPost,
-  StartedFollowing,
-  FriendRequest,
-  FriendRequestReject,
-  FriendRequestAccept,
-  Message,
-}
+// ── FirebaseApi ───────────────────────────────────────────────────────────────
 
 class FirebaseApi {
-  final _firebaseMessaging = FirebaseMessaging.instance;
+  final _firebase_messaging = FirebaseMessaging.instance;
 
-  Future<void> initNotification() async {
-    await _firebaseMessaging.requestPermission();
-    final token = await _firebaseMessaging.getToken();
+  Future<void> init_notification() async {
+    await _firebase_messaging.requestPermission();
 
-    initPushNotification();
+    await _firebase_messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
+    // Wire up all message entry points
+    FirebaseMessaging.instance.getInitialMessage().then(_handle_app_open);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handle_app_open);
+    FirebaseMessaging.onBackgroundMessage(handle_message);
+    FirebaseMessaging.onMessage.listen(handle_message);
+
+    // Register FCM token with backend if user is logged in
     if (!await utils.hasInternet()) return;
 
-    if (token != null) {
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
-      String? accessToken = localStorage.getString('access_token');
-      if (accessToken != null) {
-        saveFcmToken(token);
-      }
-    }
+    final token = await _firebase_messaging.getToken();
+    if (token == null) return;
+
+    final local_storage = await SharedPreferences.getInstance();
+    final access_token = local_storage.getString('access_token');
+    if (access_token != null) await _save_fcm_token(token);
   }
 
-  saveFcmToken(String token) async {
+  // Handles tapping a notification that opened the app from terminated/background state
+  void _handle_app_open(RemoteMessage? message) {
+    if (message == null) return;
+    // TODO: route to the relevant screen based on message.data['topic']
+  }
+
+  Future<void> _save_fcm_token(String token) async {
     await utils.CustomHttp.post(
       endpoint: '/account/fcm-token/add',
       body: {'fcm_token': token},
     );
-  }
-
-  void handleMessage2(RemoteMessage? message) {
-    if (message == null) return;
-    //TODO: handle redirect
-    //This if for routing to notification page
-    // routes.myRoutes.go('/home/notification');
-  }
-
-  Future initPushNotification() async {
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-
-    FirebaseMessaging.instance.getInitialMessage().then(handleMessage2);
-    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage2);
-    //TODO: Not sure why this being used
-    FirebaseMessaging.onBackgroundMessage(handleMessage);
-
-    FirebaseMessaging.onMessage.listen(handleMessage);
   }
 }

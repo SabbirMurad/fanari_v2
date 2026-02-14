@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/firebase/firebase_api.dart';
 import 'package:fanari_v2/model/attachment.dart';
 import 'package:fanari_v2/model/conversation.dart';
@@ -367,10 +368,13 @@ class CustomSocket {
           message: text_model,
         );
 
-    if (text_model.my_text ||
-        (in_chat_page &&
-            (opened_conversation_id == text_model.uuid ||
-                opened_conversation_id == null)))
+    if (text_model.my_text) return;
+
+    final this_conversation_opened =
+        opened_conversation_id == text_model.conversation_id;
+    final no_conversation_opened = opened_conversation_id == null;
+
+    if (in_chat_page && (this_conversation_opened || no_conversation_opened))
       return;
 
     final conversation = await _ref!
@@ -393,6 +397,8 @@ class CustomSocket {
   }
 
   Future<void> _handle_message_notification(Map<String, dynamic> data) async {
+    printLine('Handle message notification: $data');
+
     List<AndroidNotificationAction> actions = [];
     StyleInformation? style_information;
 
@@ -424,18 +430,18 @@ class CustomSocket {
       messages: notification_texts[data['group_id']],
     );
 
-    localNotificationPlugin.show(
+    local_notification_plugin.show(
       int.parse(data['group_id']),
       data['title'],
       data['body'],
       NotificationDetails(
         android: AndroidNotificationDetails(
-          androidChannel.id,
-          androidChannel.name,
-          channelDescription: androidChannel.description,
-          icon: '@mipmap/ic_launcher',
+          android_channel.id,
+          android_channel.name,
+          channelDescription: android_channel.description,
+          icon: '@mipmap/launcher_icon',
           enableLights: true,
-          color: const Color(0xFF9A79F5),
+          color: AppColors.primary,
           styleInformation: style_information,
           actions: actions,
           priority: Priority.high,
@@ -458,14 +464,18 @@ class CustomSocket {
         .updateOnline(user_id: user_id, is_online: false);
   }
 
-  void send_typing({required String conversation_id, required String user_id}) {
+  void send_typing({
+    required String conversation_id,
+    required String user_id,
+    required String name,
+  }) {
     _send(
       WsEnvelope(
         type: 'typing',
         payload: {
           'conversation_id': conversation_id,
           'user_id': user_id,
-          'name': 'TODO:',
+          'name': name,
         },
       ),
     );

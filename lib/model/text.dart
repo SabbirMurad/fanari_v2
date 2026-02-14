@@ -69,17 +69,19 @@ class TextModel {
 
     List<ImageModel>? image_metadata;
 
-    final response = await utils.CustomHttp.post(
-      endpoint: '/image/metadata',
-      body: json['images'],
-      addApiPrefix: false,
-    );
+    if (json['images'] != null) {
+      final response = await utils.CustomHttp.post(
+        endpoint: '/image/metadata',
+        body: json['images'],
+        addApiPrefix: false,
+      );
 
-    if (!response.ok) {
-      throw Exception('Failed to get image metadata');
+      if (!response.ok) {
+        throw Exception('Failed to get image metadata');
+      }
+
+      image_metadata = ImageModel.fromJsonList(response.data!);
     }
-
-    image_metadata = ImageModel.fromJsonList(response.data!);
 
     return TextModel(
       uuid: json['uuid'],

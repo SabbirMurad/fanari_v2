@@ -1,6 +1,5 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
-import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/providers/conversation.dart';
 import 'package:fanari_v2/providers/myself.dart';
@@ -410,6 +409,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                   CustomSocket.instance.send_typing(
                     conversation_id: widget.conversation_id,
                     user_id: myself.core.uuid,
+                    name: myself.                    profile.first_name,
                   );
                 },
               ),

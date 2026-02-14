@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:fanari_v2/app.dart';
+import 'package:fanari_v2/firebase/firebase_api.dart';
+import 'package:fanari_v2/firebase/firebase_options.dart';
 import 'package:fanari_v2/sqlite/sqlite.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,11 +22,11 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
   MediaStore.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // await FirebaseApi().initNotification();
+  await FirebaseApi().init_notification();
   await Sqlite.instance.init();
 
   SystemChrome.setPreferredOrientations([
