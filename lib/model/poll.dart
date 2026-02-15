@@ -1,5 +1,3 @@
-import 'package:fanari_v2/utils/print_helper.dart';
-
 enum PollType { Single, Multiple }
 
 class PollModel {

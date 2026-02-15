@@ -3,7 +3,6 @@ import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:fanari_v2/model/attachment.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:fanari_v2/utils.dart' as utils;

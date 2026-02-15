@@ -1,5 +1,4 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/product.dart';
 import 'package:fanari_v2/view/market/widgets/product_card.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';

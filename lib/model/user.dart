@@ -1,5 +1,4 @@
 import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 
 class UserCore {
   String uuid;

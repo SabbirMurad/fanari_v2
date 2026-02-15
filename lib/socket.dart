@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/firebase/firebase_api.dart';
 import 'package:fanari_v2/model/attachment.dart';
@@ -72,20 +71,20 @@ class CallSignal {
     final type_str = json['type'] as String? ?? '';
 
     final type = switch (type_str) {
-      'CallRequest' => CallSignalType.call_request,
-      'CallAccept' => CallSignalType.call_accept,
-      'CallReject' => CallSignalType.call_reject,
-      'CallEnd' => CallSignalType.call_end,
-      'CallStart' => CallSignalType.call_start,
-      'CallJoin' => CallSignalType.call_join,
-      'CallLeave' => CallSignalType.call_leave,
-      'Offer' => CallSignalType.offer,
-      'Answer' => CallSignalType.answer,
-      'IceCandidate' => CallSignalType.ice_candidate,
-      'VideoToggle' => CallSignalType.video_toggle,
-      'AudioToggle' => CallSignalType.audio_toggle,
-      'CallParticipants' => CallSignalType.call_participants,
-      'PeerOffline' => CallSignalType.peer_offline,
+      'call_request' => CallSignalType.call_request,
+      'call_accept' => CallSignalType.call_accept,
+      'call_reject' => CallSignalType.call_reject,
+      'call_end' => CallSignalType.call_end,
+      'call_start' => CallSignalType.call_start,
+      'call_join' => CallSignalType.call_join,
+      'call_leave' => CallSignalType.call_leave,
+      'offer' => CallSignalType.offer,
+      'answer' => CallSignalType.answer,
+      'ice_candidate' => CallSignalType.ice_candidate,
+      'video_toggle' => CallSignalType.video_toggle,
+      'audio_toggle' => CallSignalType.audio_toggle,
+      'call_participants' => CallSignalType.call_participants,
+      'peer_offline' => CallSignalType.peer_offline,
       _ => CallSignalType.unknown,
     };
 

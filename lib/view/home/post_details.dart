@@ -1,9 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/comment.dart';
-import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/post.dart';
-import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/view/home/widgets/comment.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/view/home/widgets/post.dart';

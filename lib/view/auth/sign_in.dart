@@ -1,11 +1,9 @@
-import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
-import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
