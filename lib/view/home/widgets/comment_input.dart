@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/providers/emoji.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -318,6 +316,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
             child: CompositedTransformTarget(
               link: _layerLink,
               child: ExtendedTextField(
+                autocorrect: false,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   errorBorder: InputBorder.none,

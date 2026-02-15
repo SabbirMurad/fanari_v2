@@ -68,12 +68,22 @@ class ConversationNotifier extends _$ConversationNotifier {
     for (int i = 0; i < state.value!.length; i++) {
       if (state.value![i].core.uuid == conversation_id) {
         state.value![i].texts = [message, ...state.value![i].texts];
-        // Load third party data later so ui does not block
-        state.value![i].texts[0] = await state.value![i].texts[0]
-            .load3rdPartyInfos();
         break;
       }
     }
+
+    Future.microtask(() async {
+      for (int i = 0; i < state.value!.length; i++) {
+        if (state.value![i].core.uuid == conversation_id) {
+          // Load third party data later so ui does not block
+          final loaded_data = await state.value![i].texts[0]
+              .load3rdPartyInfos();
+          if (loaded_data == null) return;
+          state.value![i].texts[0] = loaded_data;
+          break;
+        }
+      }
+    });
   }
 
   Future<ConversationModel> getTargetConversation(
@@ -86,7 +96,6 @@ class ConversationNotifier extends _$ConversationNotifier {
       if (conversations == null) {
         throw 'Failed to load conversations';
       }
-      ;
 
       state = AsyncValue.data(conversations);
     }

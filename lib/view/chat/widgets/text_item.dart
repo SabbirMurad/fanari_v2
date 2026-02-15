@@ -165,7 +165,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             constraints: BoxConstraints(maxWidth: _maxTextWidth),
             decoration: BoxDecoration(
               color: widget.model.my_text
-                  ? const Color.fromARGB(255, 163, 186, 255)
+                  ? AppColors.primary
                   : AppColors.secondary,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(10.r),

@@ -278,6 +278,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
       widgets.add(
         TextItemWidget(
+          key: Key(text.uuid),
           onSelect: (id) {
             if (_selectedTexts.isEmpty) {
               setState(() {

@@ -43,6 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // }
     });
   }
+
   Widget _appBar() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -141,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   data: (posts) {
                     return SliverChildBuilderDelegate((context, index) {
                       final post = posts[index];
-                      return PostWidget(model: post);
+                      return PostWidget(key: Key(post.core.uuid), model: post);
                     }, childCount: posts.length);
                   },
                 ),

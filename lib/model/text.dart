@@ -93,7 +93,8 @@ class TextModel {
       my_text: json['owner'] == my_id,
       seen_by: seen_by,
       created_at: json['created_at'],
-      videos: [],
+      //TODO: Add support for videos
+      videos: null,
       attachment: json['attachment'] == null
           ? null
           : AttachmentModel.fromJson(json['attachment']),
@@ -101,7 +102,7 @@ class TextModel {
     );
   }
 
-  Future<TextModel> load3rdPartyInfos() async {
+  Future<TextModel?> load3rdPartyInfos() async {
     if (this.youtube_attachment == null &&
         this.images == null &&
         this.videos == null &&
@@ -110,6 +111,7 @@ class TextModel {
       final id = YoutubeModel.searchId(this.text!);
       if (id != null) {
         this.youtube_attachment = await YoutubeModel.load(id);
+        return this;
       }
     }
 
@@ -134,6 +136,6 @@ class TextModel {
       }
     }
 
-    return this;
+    return null;
   }
 }
