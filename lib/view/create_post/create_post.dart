@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/constants/credential.dart';
+import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/custom_dropdown.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -49,7 +54,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   int _videoSize = 0;
   bool _loadingVideo = false;
   bool _videoError = false;
-  Uint8List? _videoThumbnail;
+  File? _videoThumbnail;
 
   @override
   void initState() {
@@ -503,37 +508,33 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12),
       child: Stack(
         children: [
-          if (_videoThumbnail != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image(
-                height: (1.sw - 24) * 9 / 16,
-                width: 1.sw - 24,
-                fit: BoxFit.cover,
-                image: MemoryImage(_videoThumbnail!),
-              ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image(
+              height: (1.sw - 24.w) * 9 / 16,
+              width: 1.sw - 24.w,
+              fit: BoxFit.cover,
+              image: FileImage(_videoThumbnail!),
             ),
+          ),
           Container(
-            width: 1.sw - 24,
-            height: (1.sw - 24) * 9 / 16,
+            width: 1.sw - 24.w,
+            height: (1.sw - 24.w) * 9 / 16,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: Theme.of(
-                context,
-              ).colorScheme.secondary.withValues(alpha: .5),
+              color: Color(0xFF181818).withValues(alpha: .35),
             ),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (!_videoError)
-                    Container(
+              child: _videoError
+                  ? Text(
+                      'Failed to compress video',
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : Container(
                       width: 100,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.secondary.withValues(alpha: 0.5),
+                        color: Color(0xffffffff).withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Center(
@@ -553,25 +554,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         ),
                       ),
                     ),
-                  SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        _loadingVideoText,
-                        style: TextStyle(
-                          color: AppColors.text,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(width: 6),
-                      BouncingDots(color: AppColors.text, dotSize: 3),
-                    ],
-                  ),
-                ],
-              ),
             ),
           ),
         ],
@@ -580,7 +562,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   void _createPost() async {
-    List<String> imageIds = [];
+    List<String> image_ids = [];
     if (_selectedImages.isNotEmpty) {
       final ids = await utils.uploadImages(
         images: _selectedImages,
@@ -588,7 +570,16 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       );
 
       if (ids == null) return;
-      imageIds.addAll(ids);
+      image_ids.addAll(ids);
+    }
+
+    List<String> video_ids = [];
+    if (_selectedVideoPath != null) {
+      printLine('Called');
+      final video_id = await utils.uploadVideo(path: _selectedVideoPath!);
+
+      if (video_id == null) return;
+      video_ids.add(video_id);
     }
 
     dynamic poll = null;
@@ -607,9 +598,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     await ref
         .read(postNotifierProvider.notifier)
         .createPost(
-          images: imageIds,
+          images: image_ids,
           visibility: _selectedPrivacy,
-          videos: [],
+          videos: video_ids,
           mentions: [],
           tags: [],
           caption: _textController.text.isEmpty
@@ -674,64 +665,64 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     setState(() {
       _videoController = null;
       _selectedVideoPath = null;
+      _videoThumbnail = null;
+      _loadingVideo = true;
     });
 
     final videos = await utils.pickVideoFromGallery(context: context, limit: 1);
 
     if (videos == null) {
+      setState(() {
+        _loadingVideo = false;
+      });
       return;
     }
-    setState(() {
-      _loadingVideo = true;
-    });
 
     final file = videos[0];
 
-    // final thumbnail = await getThumbnail(file.path);
-    // if (thumbnail == null) {
-    //   utils.showCustomToast(
-    //     text: 'Something went wrong, getting the thumbnail',
-    //   );
-    //   setState(() {
-    //     _loadingVideo = false;
-    //   });
-    //   return;
-    // }
+    final thumbnail = await VideoCompress.getFileThumbnail(
+      file.path,
+      quality: 80,
+    );
 
-    // setState(() {
-    //   _videoThumbnail = thumbnail;
-    // });
+    setState(() {
+      _videoThumbnail = thumbnail;
+    });
 
-    // final compressedVideo = await VideoCompress.compressVideo(
-    //   file.path,
-    //   quality: VideoQuality.DefaultQuality,
-    //   frameRate: 29,
-    //   includeAudio: true,
-    // );
+    final compressedVideo = await VideoCompress.compressVideo(
+      file.path,
+      quality: VideoQuality.DefaultQuality,
+      frameRate: 29,
+      includeAudio: true,
+    );
 
-    // if (compressedVideo == null) {
-    //   utils.showCustomToast(
-    //     text: 'Something went wrong, compressing the video',
-    //   );
-    //   setState(() {
-    //     _loadingVideo = false;
-    //   });
-    //   return;
-    // }
-
-    // setState(() {
-    //   _videoSize = compressedVideo.filesize!;
-    // });
-
-    _videoController = VideoPlayerController.file(file, closedCaptionFile: null)
-      ..initialize().then((_) {
-        setState(() {
-          _videoController;
-          _loadingVideo = false;
-          _videoCompressProgress = 0.0;
-          _selectedVideoPath = file.path;
-        });
+    if (compressedVideo == null) {
+      utils.showCustomToast(
+        text: 'Something went wrong, compressing the video',
+      );
+      setState(() {
+        _loadingVideo = false;
       });
+      return;
+    }
+
+    setState(() {
+      _videoSize = compressedVideo.filesize!;
+    });
+
+    _videoController =
+        VideoPlayerController.file(
+            compressedVideo.file!,
+            closedCaptionFile: null,
+          )
+          ..initialize().then((_) {
+            setState(() {
+              _videoController;
+              _loadingVideo = false;
+              _videoCompressProgress = 0.0;
+              _selectedVideoPath = compressedVideo.file!.path;
+            });
+          });
   }
 
   Future<void> _handleGalleryTap() async {
@@ -774,7 +765,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               ),
               _selectedImagesWidget(),
               SizedBox(height: 12.h),
-              if (_loadingVideo) _videoProcessingWidget(),
+              if (_loadingVideo && _videoThumbnail != null)
+                _videoProcessingWidget(),
               if (_selectedVideoPath != null) _videoWidget(),
               if (_hasPoll) _pollWidget(),
               SizedBox(height: 72.h),

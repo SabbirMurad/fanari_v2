@@ -29,9 +29,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 // import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:blurhash_ffi/blurhash_ffi.dart';
+import 'package:fanari_v2/constants/local_storage.dart';
+import 'package:http_parser/http_parser.dart';
 
 part './utils/image_blur_hash.dart';
 part './utils/image_uploader.dart';
+part './utils/video_uploader.dart';
 part './utils/validation.dart';
 part './utils/rich_text.dart';
 part './utils/data_types/string.dart';

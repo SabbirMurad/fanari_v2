@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fanari_v2/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -64,10 +65,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       if (mounted) {
         setState(() {
           isPlaying = widget.controller.value.isPlaying;
-          _videoPosition =
-              widget.controller.value.position.inSeconds.toDouble();
-          _videoDuration =
-              widget.controller.value.duration.inSeconds.toDouble();
+          _videoPosition = widget.controller.value.position.inSeconds
+              .toDouble();
+          _videoDuration = widget.controller.value.duration.inSeconds
+              .toDouble();
 
           _isBuffering = widget.controller.value.isBuffering;
 
@@ -111,10 +112,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       },
       child: Container(
         width: widget.fullScreen ? double.infinity : widget.width,
-        height:
-            widget.fullScreen
-                ? double.infinity
-                : widget.height ?? widget.width / widget.aspectRatio,
+        height: widget.fullScreen
+            ? double.infinity
+            : widget.height ?? widget.width / widget.aspectRatio,
         color: widget.transparentBackground ? Colors.transparent : Colors.black,
         child: Stack(
           children: [
@@ -163,8 +163,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           value: _videoPosition,
                           min: 0,
                           max: _videoDuration,
-                          activeColor: Theme.of(context).colorScheme.primary,
-                          thumbColor: Theme.of(context).colorScheme.primary,
+                          activeColor: AppColors.primary,
+                          thumbColor: AppColors.primary,
                           inactiveColor: Colors.white.withValues(alpha: .8),
                           onChanged: (value) {
                             widget.controller.seekTo(
@@ -201,10 +201,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                crossFadeState:
-                                    _soundOn
-                                        ? CrossFadeState.showFirst
-                                        : CrossFadeState.showSecond,
+                                crossFadeState: _soundOn
+                                    ? CrossFadeState.showFirst
+                                    : CrossFadeState.showSecond,
                                 duration: const Duration(milliseconds: 300),
                               ),
                             ),
@@ -280,32 +279,76 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             if (!_isBuffering)
               Align(
                 alignment: Alignment(0, -0.05),
-                child:
-                    _ended
-                        ? GestureDetector(
+                child: _ended
+                    ? GestureDetector(
+                        onTap: () {
+                          widget.controller.play().then((value) {
+                            setState(() {
+                              _ended = false;
+                            });
+                          });
+                          _timer?.cancel();
+                          setState(() {
+                            isPlaying = true;
+                          });
+                          _timer = Timer(Duration(seconds: 2), () {
+                            setState(() {
+                              showPlayControllers = false;
+                            });
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: 0.25,
+                                ), // Shadow color
+                                blurRadius: 10, // Spread of the shadow
+                                offset: Offset(0, 0), // Position of the shadow
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.replay_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                      )
+                    : AnimatedOpacity(
+                        duration: const Duration(milliseconds: 372),
+                        opacity: showPlayControllers ? 1 : 0,
+                        child: GestureDetector(
                           onTap: () {
-                            widget.controller.play().then((value) {
+                            if (isPlaying) {
+                              widget.controller.pause();
+                              _timer?.cancel();
                               setState(() {
+                                showPlayControllers = true;
+                                isPlaying = false;
+                              });
+                            } else {
+                              widget.controller.play();
+                              _timer?.cancel();
+                              setState(() {
+                                isPlaying = true;
                                 _ended = false;
                               });
-                            });
-                            _timer?.cancel();
-                            setState(() {
-                              isPlaying = true;
-                            });
-                            _timer = Timer(Duration(seconds: 2), () {
-                              setState(() {
-                                showPlayControllers = false;
+                              _timer = Timer(Duration(seconds: 2), () {
+                                setState(() {
+                                  showPlayControllers = false;
+                                });
                               });
-                            });
+                            }
                           },
                           child: Container(
                             decoration: BoxDecoration(
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: 0.25,
-                                  ), // Shadow color
+                                  color: Color(
+                                    0xff242424,
+                                  ).withValues(alpha: 0.15), // Shadow color
                                   blurRadius: 10, // Spread of the shadow
                                   offset: Offset(
                                     0,
@@ -314,74 +357,25 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.replay_rounded,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                          ),
-                        )
-                        : AnimatedOpacity(
-                          duration: const Duration(milliseconds: 372),
-                          opacity: showPlayControllers ? 1 : 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              if (isPlaying) {
-                                widget.controller.pause();
-                                _timer?.cancel();
-                                setState(() {
-                                  showPlayControllers = true;
-                                  isPlaying = false;
-                                });
-                              } else {
-                                widget.controller.play();
-                                _timer?.cancel();
-                                setState(() {
-                                  isPlaying = true;
-                                  _ended = false;
-                                });
-                                _timer = Timer(Duration(seconds: 2), () {
-                                  setState(() {
-                                    showPlayControllers = false;
-                                  });
-                                });
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: 0.25,
-                                    ), // Shadow color
-                                    blurRadius: 10, // Spread of the shadow
-                                    offset: Offset(
-                                      0,
-                                      0,
-                                    ), // Position of the shadow
-                                  ),
-                                ],
+                            child: AnimatedCrossFade(
+                              firstChild: Icon(
+                                Icons.play_arrow_rounded,
+                                color: AppColors.primary,
+                                size: 36.w,
                               ),
-                              child: AnimatedCrossFade(
-                                firstChild: Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  size: 32,
-                                ),
-                                secondChild: Icon(
-                                  Icons.pause,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  size: 32,
-                                ),
-                                crossFadeState:
-                                    isPlaying
-                                        ? CrossFadeState.showSecond
-                                        : CrossFadeState.showFirst,
-                                duration: const Duration(milliseconds: 300),
+                              secondChild: Icon(
+                                Icons.pause,
+                                color: AppColors.primary,
+                                size: 36.w,
                               ),
+                              crossFadeState: isPlaying
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: const Duration(milliseconds: 300),
                             ),
                           ),
                         ),
+                      ),
               ),
             if (_isBuffering)
               Align(
