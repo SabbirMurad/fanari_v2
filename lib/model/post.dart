@@ -74,25 +74,25 @@ class _PostCore {
     );
   }
 
-  Future<void> load3rdPartyInfos() async {
-    // Must have a caption to work with
-    if (this.caption == null) return;
-
-    // If contains these datas then not showing the 3rd party infos
-    if (this.images.isNotEmpty || this.videos.isNotEmpty || this.audio != null)
-      return;
-
-    if (this.youtube_attachment == null) {
+  Future<_PostCore?> load3rdPartyInfos() async {
+    if (this.youtube_attachment == null &&
+        this.images.isEmpty &&
+        this.videos.isEmpty &&
+        audio == null &&
+        this.caption != null) {
       final id = YoutubeModel.searchId(this.caption!);
-
       if (id != null) {
         this.youtube_attachment = await YoutubeModel.load(id);
+        return this;
       }
     }
 
     if (this.link_preview == null &&
-        this.nhentai_book == null &&
-        this.youtube_attachment == null) {
+        this.images.isEmpty &&
+        this.videos.isEmpty &&
+        this.audio == null &&
+        this.youtube_attachment == null &&
+        this.caption != null) {
       final arr = this.caption!.split(' ');
       for (var i = 0; i < arr.length; i++) {
         if (arr[i].startsWith('https://') ||
@@ -102,11 +102,13 @@ class _PostCore {
           final preview = await getPreviewData(arr[i]);
           if (preview.title != null) {
             this.link_preview = preview;
-            return;
+            return this;
           }
         }
       }
     }
+
+    return null;
   }
 }
 

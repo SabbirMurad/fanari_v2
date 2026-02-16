@@ -59,15 +59,13 @@ class PostNotifier extends _$PostNotifier {
 
     //! This is done so that posts loads quickly and info that might take time to load doesn't block the UI
     Future.microtask(() async {
-      // Create a mutable copy
-      final updated = [...posts];
+      for (int i = 0; i < posts.length; i++) {
+        final updated = await posts[i].core.load3rdPartyInfos();
 
-      for (int i = 0; i < updated.length; i++) {
-        await updated[i].core.load3rdPartyInfos();
+        if (updated != null) {
+          posts[i].core = updated;
+        }
       }
-
-      // After all posts finished updating, update provider state
-      state = AsyncData(updated);
     });
 
     return posts;
@@ -121,5 +119,11 @@ class PostNotifier extends _$PostNotifier {
     );
 
     state = AsyncData([new_post, ...state.value!]);
+
+    final updated = await state.value![0].core.load3rdPartyInfos();
+
+    if (updated != null) {
+      state.value![0].core = updated;
+    }
   }
 }
