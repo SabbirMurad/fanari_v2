@@ -1,16 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/constants/credential.dart';
-import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/providers/myself.dart';
 import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
-import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/custom_dropdown.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
@@ -575,10 +570,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     List<String> video_ids = [];
     if (_selectedVideoPath != null) {
-      printLine('Called');
       final video_id = await utils.uploadVideo(path: _selectedVideoPath!);
 
-      if (video_id == null) return;
+      if (video_id == null) {
+        printLine('Failed to upload video');
+        return;
+      }
+      
       video_ids.add(video_id);
     }
 

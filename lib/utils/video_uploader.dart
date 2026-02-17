@@ -33,16 +33,27 @@ Future<String?> uploadVideo({required String path}) async {
 
     printLine(video_id);
 
-    // final thumbnail = await VideoCompress.getFileThumbnail(
-    //   path,
-    //   quality: 80,
-    // );
-    // final videoInfo = await _uploadThumbnail(_videoThumbnail!, video_id);
+    final thumbnail = await VideoCompress.getFileThumbnail(path, quality: 80);
 
-    // if (videoInfo == null) return null;
+    PreparedImage prepared_image = PreparedImage.fromFileWithId(
+      thumbnail,
+      video_id,
+    );
+    
+    final image_meta = await prepared_image.get_prepare_meta();
+    prepared_image.meta = image_meta;
 
-    return null;
-    // return videoInfo;
+    final images = await uploadImages(
+      images: [prepared_image],
+      used_at: AssetUsedAt.VideoThumbnail,
+      temporary: false,
+    );
+
+    if (images == null) {
+      throw Exception('Failed to upload video thumbnail');
+    }
+
+    return video_id;
   } else {
     return null;
   }

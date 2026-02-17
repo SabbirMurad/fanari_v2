@@ -206,113 +206,113 @@ class _ConversationItemState extends State<ConversationItem> {
                     SizedBox(height: 2.w),
                     Row(
                       children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              if (widget.model.typing)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'Typing',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(width: 6),
-                                    BouncingDots(dotSize: 3, gap: 4),
-                                  ],
-                                ),
-                              if (!widget.model.typing) ...[
-                                if (widget.model.texts.isEmpty)
+                        Row(
+                          children: [
+                            if (widget.model.typing)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
                                   Text(
-                                    'You can now start a conversation',
+                                    'Typing',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(width: 6),
+                                  BouncingDots(dotSize: 3, gap: 4),
+                                ],
+                              ),
+                            if (!widget.model.typing) ...[
+                              if (widget.model.texts.isEmpty)
+                                Text(
+                                  'You can now start a conversation',
+                                  style: TextStyle(
+                                    color: AppColors.text,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              if (widget.model.texts.isNotEmpty) ...[
+                                if (widget.model.texts.last.type ==
+                                    TextType.Text)
+                                  Text(
+                                    widget.model.texts.last.text!,
                                     style: TextStyle(
                                       color: AppColors.text,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
+                                      fontSize: 13.sp,
+                                      fontWeight: _textWeight(),
                                     ),
                                     overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
-                                if (widget.model.texts.isNotEmpty) ...[
-                                  if (widget.model.texts.last.type ==
-                                      TextType.Text)
-                                    Text(
-                                      widget.model.texts.last.text!,
-                                      style: TextStyle(
+                                if (widget.model.texts.last.type ==
+                                    TextType.Image)
+                                  Row(
+                                    children: [
+                                      CustomSvg(
+                                        'assets/icons/gallery.svg',
+                                        size: 18.w,
+                                        fit: BoxFit.fitWidth,
                                         color: AppColors.text,
-                                        fontSize: 13.sp,
-                                        fontWeight: _textWeight(),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  if (widget.model.texts.last.type ==
-                                      TextType.Image)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/gallery.svg',
-                                          size: 18.w,
-                                          fit: BoxFit.fitWidth,
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
+                                        style: TextStyle(
                                           color: AppColors.text,
+                                          fontSize: 13.sp,
                                         ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (widget.model.texts.last.type ==
-                                      TextType.Audio)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/audio.svg',
-                                          size: 18.w,
-                                          fit: BoxFit.fitWidth,
+                                      ),
+                                    ],
+                                  ),
+                                if (widget.model.texts.last.type ==
+                                    TextType.Audio)
+                                  Row(
+                                    children: [
+                                      CustomSvg(
+                                        'assets/icons/audio.svg',
+                                        size: 18.w,
+                                        fit: BoxFit.fitWidth,
+                                        color: AppColors.text,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        'Voice message',
+                                        style: TextStyle(
                                           color: AppColors.text,
+                                          fontSize: 13.sp,
                                         ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          'Voice message',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (widget.model.texts.last.type ==
-                                      TextType.Attachment)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/attachment.svg',
-                                          size: 14.w,
-                                          fit: BoxFit.fitWidth,
+                                      ),
+                                    ],
+                                  ),
+                                if (widget.model.texts.last.type ==
+                                    TextType.Attachment)
+                                  Row(
+                                    children: [
+                                      CustomSvg(
+                                        'assets/icons/attachment.svg',
+                                        size: 14.w,
+                                        fit: BoxFit.fitWidth,
+                                        color: AppColors.text,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        'Attachment',
+                                        style: TextStyle(
                                           color: AppColors.text,
+                                          fontSize: 13.sp,
                                         ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          'Attachment',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
+                                      ),
+                                    ],
+                                  ),
                               ],
                             ],
-                          ),
+                          ],
                         ),
                         if (widget.model.texts.isNotEmpty)
                           Container(

@@ -1,17 +1,5 @@
 part of '../utils.dart';
 
-class ImageInfo {
-  final String name;
-  final String type;
-  final Uint8List data;
-
-  const ImageInfo(this.name, this.type, this.data);
-
-  factory ImageInfo.fromJson(Map<String, dynamic> json) {
-    return ImageInfo(json['name'], json['type'], json['data']);
-  }
-}
-
 Future<Uint8List> compressImage(
   Uint8List uint8List,
   int targetFileSizeKB,

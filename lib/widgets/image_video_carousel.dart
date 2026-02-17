@@ -1,9 +1,8 @@
-import 'dart:ui';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
+import 'package:fanari_v2/widgets/image_placeholder.dart';
 import 'package:fanari_v2/widgets/video_player_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -82,7 +81,8 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
     }
 
     for (var video in widget.videos) {
-      double height = (widget.width * video.height) / video.width;
+      double height =
+          (widget.width * video.thumbnail.height) / video.thumbnail.width;
 
       if (height > biggestHeight) {
         biggestHeight = height;
@@ -99,7 +99,8 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
         biggestHeight = (widget.width * image.height) / image.width;
       } else {
         final video = widget.videos.first;
-        biggestHeight = (widget.width * video.height) / video.width;
+        biggestHeight =
+            (widget.width * video.thumbnail.height) / video.thumbnail.width;
       }
     }
 
@@ -235,14 +236,10 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
       height: carouselHeight,
       fit: BoxFit.contain,
       placeholder: (context, url) {
-        return SizedBox(
+        return ImagePlaceholder(
           width: widget.width,
           height: carouselHeight,
-          child: BlurHash(
-            hash: item.image!.blur_hash,
-            color: AppColors.secondary,
-            optimizationMode: BlurHashOptimizationMode.approximation,
-          ),
+          blur_hash: item.image!.blur_hash,
         );
       },
       errorWidget: (context, url, error) {
@@ -354,37 +351,6 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
               });
   }
 
-  Widget _errorWidget() {
-    return Container(
-      color: AppColors.secondary,
-      child: Center(
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-          decoration: BoxDecoration(
-            color: Color.fromRGBO(24, 24, 24, 0.8),
-            border: Border.all(color: Colors.white.withValues(alpha: .1)),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromRGBO(24, 24, 24, .2),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            'Couldn\'t load image',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -392,14 +358,16 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
       children: [
         if (!_videoLoaded)
           CachedNetworkImage(
-            imageUrl: widget.item.video!.thumbnailUrl,
+            imageUrl: widget.item.video!.thumbnail.webp_url,
             width: double.infinity,
             fit: BoxFit.contain,
             placeholder: (context, url) {
               return Container(width: double.infinity, height: widget.height);
             },
             errorWidget: (context, url, error) {
-              return _errorWidget();
+              return ImageErrorWidget(
+                blur_hash: widget.item.video!.thumbnail.blur_hash,
+              );
             },
           ),
         if (!_playClicked)
@@ -542,17 +510,11 @@ class _FullScreenCarouselState extends State<FullScreenCarousel> {
                   width: double.infinity,
                   fit: BoxFit.contain,
                   placeholder: (context, url) {
-                    return Container(
-                      color: AppColors.secondary,
-                      width: double.infinity,
-                      height: (1.sw / 4) * 5,
-                    );
+                    return ImagePlaceholder(blur_hash: item.image!.blur_hash);
                   },
-                  errorWidget: (context, url, error) => Icon(
-                    Icons.broken_image_rounded,
-                    color: Colors.white,
-                    size: 1.sw * 0.05,
-                  ),
+                  errorWidget: (context, url, error) {
+                    return ImageErrorWidget(blur_hash: item.image!.blur_hash);
+                  },
                 ),
               );
             } else {

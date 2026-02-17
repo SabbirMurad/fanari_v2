@@ -6,6 +6,7 @@ import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:fanari_v2/constants/credential.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
@@ -161,6 +162,13 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    try {
+      _PostCore.fromJson(json['core']);
+    } catch (e) {
+      printLine(e);
+      printLine(json['core']);
+    }
+
     final post = PostModel(
       core: _PostCore.fromJson(json['core']),
       stat: _PostStat.fromJson(json['stat']),

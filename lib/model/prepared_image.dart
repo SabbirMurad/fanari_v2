@@ -7,11 +7,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 
 class PreparedImage {
+  String? uuid;
   final File file;
   bool preparing;
   PreparedImageMeta? meta;
 
-  PreparedImage({required this.file, this.preparing = false, this.meta});
+  PreparedImage({
+    required this.file,
+    this.preparing = false,
+    this.meta,
+    this.uuid,
+  });
 
   Future<PreparedImageMeta> get_prepare_meta() async {
     final bytes = file.readAsBytesSync();
@@ -45,6 +51,10 @@ class PreparedImage {
 
   static PreparedImage fromFile(File file) {
     return PreparedImage(file: file);
+  }
+
+  static PreparedImage fromFileWithId(File file, String uuid) {
+    return PreparedImage(file: file, uuid: uuid);
   }
 
   static List<PreparedImage> fromFiles(List<File> files) {

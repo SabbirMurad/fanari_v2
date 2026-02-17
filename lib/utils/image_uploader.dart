@@ -10,7 +10,6 @@ Future<List<String>?> uploadImages({
   var uri = Uri.parse('${AppCredentials.domain}/image');
   var request = http.MultipartRequest('POST', uri);
 
-
   for (int i = 0; i < images.length; i++) {
     final p = images[i];
 
@@ -24,6 +23,9 @@ Future<List<String>?> uploadImages({
       ),
     );
 
+    if (p.uuid != null) {
+      request.fields['uuid_$i'] = p.uuid!;
+    }
     request.fields['width_$i'] = '${meta.width}';
     request.fields['height_$i'] = '${meta.height}';
     request.fields['blur_hash_$i'] = meta.blur_hash;
@@ -43,8 +45,8 @@ Future<List<String>?> uploadImages({
     }
     return imageIds;
   } else {
-    print('Upload failed: ${response.statusCode}');
-    print('Upload failed: ${await response.stream.bytesToString()}');
+    printLine('Upload failed: ${response.statusCode}');
+    printLine('Upload failed: ${await response.stream.bytesToString()}');
     return null;
   }
 }
