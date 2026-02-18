@@ -162,20 +162,11 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
-    try {
-      _PostCore.fromJson(json['core']);
-    } catch (e) {
-      printLine(e);
-      printLine(json['core']);
-    }
-
-    final post = PostModel(
+    return PostModel(
       core: _PostCore.fromJson(json['core']),
       stat: _PostStat.fromJson(json['stat']),
       meta: _PostMeta.fromJson(json['meta']),
     );
-
-    return post;
   }
 
   static List<PostModel> fromJsonList(List<dynamic> json) {
