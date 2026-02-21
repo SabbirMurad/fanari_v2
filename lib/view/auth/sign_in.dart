@@ -1,4 +1,5 @@
 import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -6,18 +7,18 @@ import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
-import 'package:shared_preferences/shared_preferences.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenState extends ConsumerState<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -35,33 +36,20 @@ class _SignInScreenState extends State<SignInScreen> {
       _loading = true;
     });
 
-    final response = await utils.CustomHttp.post(
-      endpoint: '/auth/sign-in',
-      body: {
-        'email_or_username': _emailController.text.trim().toLowerCase(),
-        'password': _passwordController.text.trim(),
-      },
-      needAuth: false,
-    );
+    final success = await ref
+        .read(authorNotifierProvider.notifier)
+        .signIn(
+          email_or_username: _emailController.text.trim().toLowerCase(),
+          password: _passwordController.text.trim(),
+        );
+
     setState(() {
       _loading = false;
     });
 
-    if (!response.ok) return;
-
-    final data = response.data['auth_payload'];
-
-    final localStorage = await SharedPreferences.getInstance();
-    localStorage.setString('access_token', data['access_token']);
-    localStorage.setInt(
-      'access_token_valid_till',
-      data['access_token_valid_till'],
-    );
-    localStorage.setString('refresh_token', data['refresh_token']);
-    localStorage.setString('role', data['role']);
-    localStorage.setString('user_id', data['user_id']);
-
-    AppRoutes.go(AppRoutes.feed);
+    if (success) {
+      AppRoutes.go(AppRoutes.feed);
+    }
   }
 
   String _selectedFirstName = '';

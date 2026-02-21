@@ -1,5 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/myself.dart';
+import 'package:fanari_v2/constants/local_storage.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';
@@ -8,7 +9,6 @@ import 'package:fanari_v2/view/settings/settings.dart';
 import 'package:fanari_v2/widgets/bottom_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeNavigator extends ConsumerStatefulWidget {
   final int selectedPage;
@@ -39,10 +39,7 @@ class _HomeNavigatorState extends ConsumerState<HomeNavigator> {
   }
 
   void _loadUserAndConnectSocket() async {
-    await ref.read(myselfNotifierProvider.notifier).loadUserData();
-
-    final local_storage = await SharedPreferences.getInstance();
-    final access_token = local_storage.getString('access_token');
+    final access_token = await LocalStorage.access_token.get();
 
     CustomSocket.instance.connect(ref, access_token: access_token!);
   }

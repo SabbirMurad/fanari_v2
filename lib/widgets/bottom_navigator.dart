@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:fanari_v2/providers/myself.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -62,7 +62,7 @@ class _CustomBottomNavigatorState extends ConsumerState<CustomBottomNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    final myself = ref.watch(myselfNotifierProvider);
+    final myself = ref.watch(authorNotifierProvider);
 
     return SafeArea(
       bottom: true,

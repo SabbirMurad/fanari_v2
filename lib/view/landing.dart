@@ -1,19 +1,22 @@
+import 'package:fanari_v2/constants/local_storage.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LandingScreen extends StatefulWidget {
+class LandingScreen extends ConsumerStatefulWidget {
   const LandingScreen({super.key});
 
   @override
-  State<LandingScreen> createState() => _LandingScreenState();
+  ConsumerState<LandingScreen> createState() => _LandingScreenState();
 }
 
-class _LandingScreenState extends State<LandingScreen> {
+class _LandingScreenState extends ConsumerState<LandingScreen> {
   @override
   void initState() {
     super.initState();
@@ -21,10 +24,27 @@ class _LandingScreenState extends State<LandingScreen> {
     _initiateStartup();
   }
 
-  void _initiateStartup() async {
-    final localStorage = await SharedPreferences.getInstance();
+  bool _loading = false;
 
-    if (localStorage.containsKey('access_token')) {
+  void _initiateStartup() async {
+    final access_token = await LocalStorage.access_token.get();
+
+    if (access_token == null) {
+      setState(() {
+        _loading = false;
+      });
+      return;
+    }
+
+    final success = await ref
+        .read(authorNotifierProvider.notifier)
+        .loadAuthorDetails();
+
+    if (success) {
+      setState(() {
+        _loading = false;
+      });
+
       AppRoutes.go(AppRoutes.feed);
     }
   }
@@ -46,7 +66,7 @@ class _LandingScreenState extends State<LandingScreen> {
               color: AppColors.primary,
             ),
             SizedBox(height: 36.h),
-            Text( 
+            Text(
               'Welcome to Fanari',
               style: TextStyle(
                 fontSize: 31.sp,
@@ -61,13 +81,14 @@ class _LandingScreenState extends State<LandingScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 178.h),
-            PrimaryButton(
-              text: 'Explore',
-              width: 288.w,
-              onTap: () {
-                AppRoutes.push(AppRoutes.sign_up);
-              },
-            ),
+            if (!_loading)
+              PrimaryButton(
+                text: 'Explore',
+                width: 288.w,
+                onTap: () {
+                  AppRoutes.push(AppRoutes.sign_up);
+                },
+              ),
           ],
         ),
       ),

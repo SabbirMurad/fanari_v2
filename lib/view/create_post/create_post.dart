@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
-import 'package:fanari_v2/providers/myself.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/providers/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
@@ -271,7 +271,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   Widget _profileWidget() {
     final myself = ref
-        .watch(myselfNotifierProvider)
+        .watch(authorNotifierProvider)
         .whenOrNull(data: (data) => data);
 
     return Container(
@@ -576,7 +576,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         printLine('Failed to upload video');
         return;
       }
-      
+
       video_ids.add(video_id);
     }
 

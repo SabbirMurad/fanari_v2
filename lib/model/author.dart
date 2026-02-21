@@ -1,13 +1,13 @@
 import 'package:fanari_v2/model/image.dart';
 
-class MyselfCore {
+class AuthorCore {
   String uuid;
   String username;
   String role;
   bool two_a_factor_auth_enabled;
   int? two_a_factor_auth_updated;
 
-  MyselfCore({
+  AuthorCore({
     required this.uuid,
     required this.username,
     required this.role,
@@ -15,14 +15,14 @@ class MyselfCore {
     this.two_a_factor_auth_updated,
   });
 
-  MyselfCore copyWith({
+  AuthorCore copyWith({
     String? uuid,
     String? username,
     String? role,
     bool? two_a_factor_auth_enabled,
     int? two_a_factor_auth_updated,
   }) {
-    return MyselfCore(
+    return AuthorCore(
       uuid: uuid ?? this.uuid,
       username: username ?? this.username,
       role: role ?? this.role,
@@ -33,8 +33,8 @@ class MyselfCore {
     );
   }
 
-  factory MyselfCore.fromJson(Map<String, dynamic> json) {
-    return MyselfCore(
+  factory AuthorCore.fromJson(Map<String, dynamic> json) {
+    return AuthorCore(
       uuid: json['uuid'],
       username: json['username'],
       role: json['role'],
@@ -44,7 +44,7 @@ class MyselfCore {
   }
 }
 
-class MyselfProfile {
+class AuthorProfile {
   String first_name;
   String last_name;
   String? phone_number;
@@ -54,7 +54,7 @@ class MyselfProfile {
   String? biography;
   bool profile_verified;
 
-  MyselfProfile({
+  AuthorProfile({
     required this.first_name,
     required this.last_name,
     this.phone_number,
@@ -65,7 +65,7 @@ class MyselfProfile {
     this.profile_verified = false,
   });
 
-  MyselfProfile copyWith({
+  AuthorProfile copyWith({
     String? first_name,
     String? last_name,
     String? phone_number,
@@ -75,7 +75,7 @@ class MyselfProfile {
     String? biography,
     bool? profile_verified,
   }) {
-    return MyselfProfile(
+    return AuthorProfile(
       first_name: first_name ?? this.first_name,
       last_name: last_name ?? this.last_name,
       phone_number: phone_number ?? this.phone_number,
@@ -87,8 +87,8 @@ class MyselfProfile {
     );
   }
 
-  factory MyselfProfile.fromJson(Map<String, dynamic> json) {
-    return MyselfProfile(
+  factory AuthorProfile.fromJson(Map<String, dynamic> json) {
+    return AuthorProfile(
       first_name: json['first_name'],
       last_name: json['last_name'],
       phone_number: json['phone_number'],
@@ -103,14 +103,14 @@ class MyselfProfile {
   }
 }
 
-class MyselfSocial {
+class AuthorSocial {
   int like_count;
   int follower_count;
   int following_count;
   int friend_count;
   int blocked_count;
 
-  MyselfSocial({
+  AuthorSocial({
     required this.like_count,
     required this.follower_count,
     required this.following_count,
@@ -118,14 +118,14 @@ class MyselfSocial {
     required this.blocked_count,
   });
 
-  MyselfSocial copyWith({
+  AuthorSocial copyWith({
     int? like_count,
     int? follower_count,
     int? following_count,
     int? friend_count,
     int? blocked_count,
   }) {
-    return MyselfSocial(
+    return AuthorSocial(
       like_count: like_count ?? this.like_count,
       follower_count: follower_count ?? this.follower_count,
       following_count: following_count ?? this.following_count,
@@ -134,8 +134,8 @@ class MyselfSocial {
     );
   }
 
-  factory MyselfSocial.fromJson(Map<String, dynamic> json) {
-    return MyselfSocial(
+  factory AuthorSocial.fromJson(Map<String, dynamic> json) {
+    return AuthorSocial(
       like_count: json['like_count'],
       follower_count: json['follower_count'],
       following_count: json['following_count'],
@@ -145,34 +145,34 @@ class MyselfSocial {
   }
 }
 
-class MyselfModel {
-  MyselfCore core;
-  MyselfProfile profile;
-  MyselfSocial social;
+class AuthorModel {
+  AuthorCore core;
+  AuthorProfile profile;
+  AuthorSocial social;
 
-  MyselfModel({
+  AuthorModel({
     required this.core,
     required this.profile,
     required this.social,
   });
 
-  MyselfModel copyWith({
-    MyselfCore? core,
-    MyselfProfile? profile,
-    MyselfSocial? social,
+  AuthorModel copyWith({
+    AuthorCore? core,
+    AuthorProfile? profile,
+    AuthorSocial? social,
   }) {
-    return MyselfModel(
+    return AuthorModel(
       core: core ?? this.core,
       profile: profile ?? this.profile,
       social: social ?? this.social,
     );
   }
 
-  factory MyselfModel.fromJson(Map<String, dynamic> json) {
-    return MyselfModel(
-      core: MyselfCore.fromJson(json['core']),
-      profile: MyselfProfile.fromJson(json['profile']),
-      social: MyselfSocial.fromJson(json['social']),
+  factory AuthorModel.fromJson(Map<String, dynamic> json) {
+    return AuthorModel(
+      core: AuthorCore.fromJson(json['core']),
+      profile: AuthorProfile.fromJson(json['profile']),
+      social: AuthorSocial.fromJson(json['social']),
     );
   }
 }

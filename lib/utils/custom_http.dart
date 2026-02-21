@@ -38,12 +38,11 @@ class CustomHttp {
       Map<String, String> _headers = {'Content-Type': 'application/json'};
 
       if (needAuth) {
-        SharedPreferences localStorage = await SharedPreferences.getInstance();
-        int accessTokenValidTill = localStorage.getInt(
-          'access_token_valid_till',
-        )!;
+        int access_token_valid_till = (await LocalStorage
+            .access_token_valid_till
+            .get())!;
 
-        if (accessTokenValidTill < DateTime.now().millisecondsSinceEpoch) {
+        if (access_token_valid_till < DateTime.now().millisecondsSinceEpoch) {
           if (!await setNewAccessToken()) {
             AppRoutes.go(AppRoutes.landing);
             return CustomHttpResult(
@@ -54,9 +53,11 @@ class CustomHttp {
           }
         }
 
-        String? accessToken = localStorage.getString('access_token');
-        _headers['Authorization'] = 'Bearer $accessToken';
-        final cookie = localStorage.getString('cookie');
+        String? access_token = await LocalStorage.access_token.get();
+
+        _headers['Authorization'] = 'Bearer $access_token';
+
+        final cookie = await LocalStorage.cookie.get();
         if (cookie != null) {
           _headers['Cookie'] = cookie;
         }
@@ -144,13 +145,10 @@ class CustomHttp {
 
     try {
       Map<String, String> _headers = {'Content-Type': 'application/json'};
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
 
       if (needAuth) {
-        SharedPreferences localStorage = await SharedPreferences.getInstance();
-        int? accessTokenValidTill = localStorage.getInt(
-          'access_token_valid_till',
-        );
+        int? accessTokenValidTill = await LocalStorage.access_token_valid_till
+            .get();
 
         if (accessTokenValidTill == null ||
             accessTokenValidTill < DateTime.now().millisecondsSinceEpoch) {
@@ -164,10 +162,11 @@ class CustomHttp {
           }
         }
 
-        String? accessToken = localStorage.getString('access_token');
-        _headers['Authorization'] = 'Bearer $accessToken';
+        String? access_token = await LocalStorage.access_token.get();
+        _headers['Authorization'] = 'Bearer $access_token';
 
-        final cookie = localStorage.getString('cookie');
+        final cookie = await LocalStorage.cookie.get();
+
         if (cookie != null) {
           _headers['Cookie'] = cookie;
         }
@@ -230,7 +229,7 @@ class CustomHttp {
 
       if (response.headers['set-cookie'] != null) {
         String cookie = response.headers['set-cookie']!;
-        localStorage.setString('cookie', cookie);
+        await LocalStorage.cookie.set(cookie);
       }
 
       return handleResponse(response, showFloatingError);
@@ -245,11 +244,10 @@ class CustomHttp {
   }
 
   static Future<bool> setNewAccessToken() async {
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    String? refreshToken = localStorage.getString('refresh_token');
-    String? userId = localStorage.getString('user_id');
-    String? role = localStorage.getString('role');
-    String? accessToken = localStorage.getString('access_token');
+    String? refreshToken = await LocalStorage.refresh_token.get();
+    String? userId = await LocalStorage.user_id.get();
+    String? role = await LocalStorage.role.get();
+    String? accessToken = await LocalStorage.access_token.get();
 
     if (refreshToken == null || userId == null || role == null) {
       printLine('Some kind of issue here');
@@ -273,11 +271,12 @@ class CustomHttp {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      localStorage.setString('access_token', data['access_token']);
-      localStorage.setInt(
-        'access_token_valid_till',
+      await LocalStorage.access_token_valid_till.set(
         data['access_token_valid_till'],
       );
+
+      await LocalStorage.access_token.set(data['access_token']);
+
       return true;
     } else {
       printLine('!response.ok');

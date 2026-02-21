@@ -1,6 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:fanari_v2/widgets/image_placeholder.dart';
 import 'package:fanari_v2/widgets/video_player_widget.dart';
@@ -329,6 +330,8 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
 
     final url = Uri.parse(widget.item.video!.videoUrl);
 
+    printLine('Video URL: ${widget.item.video!.videoUrl}');
+
     _videoPlayerController =
         VideoPlayerController.networkUrl(
             url,
@@ -362,7 +365,10 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
             width: double.infinity,
             fit: BoxFit.contain,
             placeholder: (context, url) {
-              return Container(width: double.infinity, height: widget.height);
+              return ImagePlaceholder(
+                blur_hash: widget.item.video!.thumbnail.blur_hash,
+                height: widget.height,
+              );
             },
             errorWidget: (context, url, error) {
               return ImageErrorWidget(

@@ -19,7 +19,7 @@ class VideoModel {
 
     return VideoModel(
       uuid: videoId,
-      videoUrl: '${AppCredentials.domain}/upload/video/$videoId/index.m3u8',
+      videoUrl: '${AppCredentials.domain}/api/video/segment/$videoId',
       thumbnail: ImageModel.fromJson(json),
     );
   }

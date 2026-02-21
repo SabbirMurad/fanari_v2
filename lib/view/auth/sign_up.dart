@@ -1,26 +1,27 @@
 import 'dart:async';
 
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/auth/reusable/input_message.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 
-class SignUpScreen extends StatefulWidget {
+class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -466,36 +467,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _selectedEmail = '';
 
   Future<void> _createAccount() async {
-    final body = {
-      'first_name': _firstNameController.text,
-      'last_name': _lastNameController.text,
-      'email_address': _emailController.text,
-      'username': _usernameController.text,
-      'password': _passwordController.text,
-      'confirm_password': _passwordController.text,
-    };
-
     setState(() {
       _loading = true;
     });
 
-    final response = await utils.CustomHttp.post(
-      endpoint: '/auth/sign-up',
-      body: body,
-      needAuth: false,
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _createdAccountId = response.data['user_id'];
-      });
-
-      _goToNextPage();
-    }
+    final user_id = await ref
+        .read(authorNotifierProvider.notifier)
+        .signUp(
+          first_name: _firstNameController.text,
+          last_name: _lastNameController.text,
+          email_address: _emailController.text,
+          username: _usernameController.text,
+          password: _passwordController.text,
+          confirm_password: _passwordController.text,
+        );
 
     setState(() {
       _loading = false;
     });
+
+    if (user_id != null) {
+      setState(() {
+        _createdAccountId = user_id;
+      });
+
+      _goToNextPage();
+    }
   }
 
   Widget _enterPasswordWidget() {
@@ -606,31 +603,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _loading = true;
     });
 
-    final body = {'user_id': _createdAccountId, 'verification_code': _otp};
-
-    final response = await utils.CustomHttp.post(
-      endpoint: '/auth/validate-email',
-      body: body,
-      needAuth: false,
-    );
-
+    final success = await ref
+        .read(authorNotifierProvider.notifier)
+        .validateEmail(user_id: _createdAccountId, otp: _otp);
     setState(() {
       _loading = false;
     });
 
-    if (response.statusCode == 200) {
-      final localStorage = await SharedPreferences.getInstance();
-      final data = response.data;
-      
-      localStorage.setString('access_token', data['access_token']);
-      localStorage.setInt(
-        'access_token_valid_till',
-        data['access_token_valid_till'],
-      );
-      localStorage.setString('refresh_token', data['refresh_token']);
-      localStorage.setString('role', data['role']);
-      localStorage.setString('user_id', data['user_id']);
-
+    if (success) {
       AppRoutes.go(AppRoutes.feed);
     }
   }

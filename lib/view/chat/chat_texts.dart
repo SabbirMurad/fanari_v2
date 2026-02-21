@@ -2,7 +2,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/providers/conversation.dart';
-import 'package:fanari_v2/providers/myself.dart';
+import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
@@ -371,7 +371,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         target_conversation.core.uuid;
 
     final myself = ref
-        .watch(myselfNotifierProvider)
+        .watch(authorNotifierProvider)
         .whenOrNull(data: (data) => data);
 
     return Scaffold(
@@ -410,7 +410,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                   CustomSocket.instance.send_typing(
                     conversation_id: widget.conversation_id,
                     user_id: myself.core.uuid,
-                    name: myself.                    profile.first_name,
+                    name: myself.profile.first_name,
                   );
                 },
               ),
