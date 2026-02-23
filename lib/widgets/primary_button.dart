@@ -14,6 +14,7 @@ class PrimaryButton extends StatefulWidget {
   final double? height;
   final double? width;
   final BorderRadius? borderRadius;
+  final Widget? tailing;
 
   const PrimaryButton({
     super.key,
@@ -27,6 +28,7 @@ class PrimaryButton extends StatefulWidget {
     this.shadow = true,
     this.backgroundColor,
     this.textStyle,
+    this.tailing,
   });
 
   @override
@@ -65,24 +67,35 @@ class _PrimaryButtonState extends State<PrimaryButton> {
                 ]
               : [],
         ),
-        child: Center(
-          child: widget.loading
-              ? SizedBox(
+        child: widget.loading
+            ? Center(
+                child: SizedBox(
                   height: 24.w,
                   child: SpinKitWave(color: AppColors.white, size: 24.w),
-                )
-              : Text(
-                  widget.text,
-                  style:
-                      widget.textStyle ??
-                      TextStyle(
-                        color: AppColors.text,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                  textAlign: TextAlign.center,
                 ),
-        ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.text,
+                    style:
+                        widget.textStyle ??
+                        TextStyle(
+                          color: AppColors.text,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (widget.tailing != null)
+                    Padding(
+                      padding: EdgeInsets.only(left: 6.w),
+                      child: widget.tailing!,
+                    ),
+                ],
+              ),
       ),
     );
   }

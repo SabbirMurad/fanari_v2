@@ -263,7 +263,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           });
         }
       },
-      style: TextStyle(color: AppColors.text, fontSize: 18),
+      style: TextStyle(color: AppColors.text, fontSize: 18.sp),
       maxLines: null,
       minLines: 5,
     );
@@ -283,7 +283,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             name: myself?.profile.first_name ?? 'Loading',
             size: 64.w,
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 18.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,36 +296,39 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             myself.profile.last_name,
                   style: TextStyle(
                     color: AppColors.text,
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 2.h),
-                SizedBox(
-                  width: 72.w,
-                  child: CustomDropDown(
-                    selectedOption: _selectedPrivacy,
-                    padding: EdgeInsets.all(6.w),
-                    borderColor: AppColors.containerBg,
-                    fillColor: AppColors.containerBg,
-                    height: 26.h,
-                    options: ['Public', 'Only Me', 'Followers'],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedPrivacy = value;
-                      });
-                    },
-                    optionTextStyle: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.text,
-                    ),
-                    icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18.w,
-                      color: AppColors.text,
-                    ),
-                  ),
+                Text(
+                  myself == null ? 'Loading' : myself.core.username,
+                  style: TextStyle(color: AppColors.text, fontSize: 14.sp),
                 ),
+                // SizedBox(
+                //   width: 72.w,
+                //   child: CustomDropDown(
+                //     selectedOption: _selectedPrivacy,
+                //     padding: EdgeInsets.all(6.w),
+                //     borderColor: AppColors.containerBg,
+                //     fillColor: AppColors.containerBg,
+                //     height: 26.h,
+                //     options: ['Public', 'Only Me', 'Followers'],
+                //     onChanged: (value) {
+                //       setState(() {
+                //         _selectedPrivacy = value;
+                //       });
+                //     },
+                //     optionTextStyle: TextStyle(
+                //       fontSize: 12.sp,
+                //       color: AppColors.text,
+                //     ),
+                //     icon: Icon(
+                //       Icons.keyboard_arrow_down_rounded,
+                //       size: 18.w,
+                //       color: AppColors.text,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -336,21 +339,40 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   Widget _pollWidget() {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(left: 12.w, right: 12.w, bottom: 12.h),
       margin: EdgeInsets.symmetric(horizontal: 20.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(width: 1, color: AppColors.hintText),
-      ),
       child: Column(
+        spacing: 12.h,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Text(
+                '# Poll',
+                style: TextStyle(
+                  color: AppColors.text,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  height: 1,
+                  color: AppColors.secondary,
+                ),
+              ),
+            ],
+          ),
           InputFieldVOne(
             hintText: 'What\'s your go-to after-work drink?',
             controller: _pollQuestionController,
-            border: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.hintText),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.secondary),
+              borderRadius: BorderRadius.circular(10.r),
             ),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            hintStyle: TextStyle(color: AppColors.secondary, fontSize: 14.sp),
           ),
           ...List.generate(_optionsCount, (index) {
             return Stack(
@@ -359,8 +381,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 InputFieldVOne(
                   hintText: 'Option ${index + 1}',
                   controller: _pollOptionsController[index],
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.hintText),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.secondary),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  hintStyle: TextStyle(
+                    color: AppColors.secondary,
+                    fontSize: 14.sp,
                   ),
                 ),
                 GestureDetector(
@@ -368,7 +396,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     _removeAnswer(index);
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(top: 8.h, right: 8.w),
+                    padding: EdgeInsets.only(right: 8.w),
                     child: Icon(
                       Icons.close_rounded,
                       color: AppColors.hintText,
@@ -379,7 +407,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               ],
             );
           }),
-          SizedBox(height: 32.h),
+          SizedBox(height: 18.h),
           Row(
             children: [
               Expanded(
@@ -404,10 +432,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     });
                   }
                 },
-                width: (1.sw - 80.w - 12.w) / 2,
-                height: 46.h,
-                borderRadius: BorderRadius.circular(8.r),
-                backgroundColor: AppColors.containerBg,
+                height: 40.h,
+                width: 136.w,
+                shadow: false,
+                borderRadius: BorderRadius.circular(10.r),
                 textStyle: TextStyle(
                   fontSize: 14.sp,
                   color: _optionsCount < _pollOptionsController.length
@@ -415,6 +443,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       : AppColors.hintText,
                   fontWeight: FontWeight.w400,
                 ),
+                tailing: Icon(Icons.add, size: 20.w, color: AppColors.text),
               ),
             ],
           ),
@@ -614,8 +643,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     return SafeArea(
       bottom: false,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20.w),
-        padding: EdgeInsets.symmetric(vertical: 6.h),
+        margin: EdgeInsets.symmetric(horizontal: 8.w),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppColors.secondary)),
+        ),
         child: Row(
           children: [
             GestureDetector(
@@ -638,20 +670,17 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ),
               ),
             ),
+            SizedBox(width: 18.w),
+            Text(
+              'Post',
+              style: TextStyle(color: AppColors.text, fontSize: 18.sp),
+            ),
             Spacer(),
             GestureDetector(
-              onTap: _createPost,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'Post',
-                  style: TextStyle(fontSize: 14.sp, color: AppColors.text),
-                ),
-              ),
+              onTap: () {
+                AppRoutes.pop();
+              },
+              child: Icon(Icons.close, size: 24.w, color: AppColors.text),
             ),
           ],
         ),
@@ -743,6 +772,91 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     }
   }
 
+  Widget _bottomBar() {
+    return Container(
+      color: AppColors.surface,
+      padding: EdgeInsets.only(
+        left: 20.w,
+        right: 20.w,
+        top: 12.w,
+        bottom: 12.w,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Row(
+              spacing: 12.w,
+              children: ['camera', 'gallery', 'video', 'poll', 'event'].map((
+                item,
+              ) {
+                return GestureDetector(
+                  onTap: () async {
+                    if (item == 'camera') {
+                      // utils.showImagePickerOptions(context, (source) async {
+                      //   final images = await utils.pickImageFromGallery(
+                      //     context: context,
+                      //   );
+
+                      //   if (images == null) return;
+
+                      //   setState(() {
+                      //     _selectedImages.addAll(images);
+                      //   });
+                      // });
+                    } else if (item == 'gallery') {
+                      _handleGalleryTap();
+                    } else if (item == 'poll') {
+                      setState(() {
+                        _hasPoll = !_hasPoll;
+                      });
+                    } else if (item == 'video') {
+                      _selectVideo();
+                    }
+                  },
+                  child: Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: BoxDecoration(
+                      color: (item == 'poll' && _hasPoll)
+                          ? AppColors.primary
+                          : AppColors.secondary,
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Center(
+                      child: CustomSvg(
+                        'assets/icons/post/$item.svg',
+                        width: 20.w,
+                        height: 20.w,
+                        fit: BoxFit.contain,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            Spacer(),
+            GestureDetector(
+              onTap: _createPost,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  'Post',
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.text),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -750,65 +864,41 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _header(),
-              SizedBox(height: 24.h),
-              _profileWidget(),
-              SizedBox(height: 24.h),
-              Padding(
-                padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.w),
-                child: _textBox(),
-              ),
-              _selectedImagesWidget(),
-              SizedBox(height: 12.h),
-              if (_loadingVideo && _videoThumbnail != null)
-                _videoProcessingWidget(),
-              if (_selectedVideoPath != null) _videoWidget(),
-              if (_hasPoll) _pollWidget(),
-              SizedBox(height: 72.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Row(
-                  spacing: 18.w,
-                  children: ['camera', 'gallery', 'video', 'poll'].map((item) {
-                    return CustomSvg(
-                      'assets/icons/post/$item.svg',
-                      width: 20.w,
-                      height: 20.w,
-                      fit: BoxFit.contain,
-                      color: AppColors.text,
-                      onTap: () async {
-                        if (item == 'camera') {
-                          // utils.showImagePickerOptions(context, (source) async {
-                          //   final images = await utils.pickImageFromGallery(
-                          //     context: context,
-                          //   );
-
-                          //   if (images == null) return;
-
-                          //   setState(() {
-                          //     _selectedImages.addAll(images);
-                          //   });
-                          // });
-                        } else if (item == 'gallery') {
-                          _handleGalleryTap();
-                        } else if (item == 'poll') {
-                          setState(() {
-                            _hasPoll = !_hasPoll;
-                          });
-                        } else if (item == 'video') {
-                          _selectVideo();
-                        }
-                      },
-                    );
-                  }).toList(),
+        child: Column(
+          children: [
+            _header(),
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                height: double.infinity,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 24.h),
+                      _profileWidget(),
+                      SizedBox(height: 48.h),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 20.w,
+                          right: 20.w,
+                          bottom: 20.w,
+                        ),
+                        child: _textBox(),
+                      ),
+                      _selectedImagesWidget(),
+                      SizedBox(height: 12.h),
+                      if (_loadingVideo && _videoThumbnail != null)
+                        _videoProcessingWidget(),
+                      if (_selectedVideoPath != null) _videoWidget(),
+                      if (_hasPoll) _pollWidget(),
+                      SizedBox(height: 48.h),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(height: 72.h),
-            ],
-          ),
+            ),
+            _bottomBar(),
+          ],
         ),
       ),
     );

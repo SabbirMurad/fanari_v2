@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/providers/author.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/view/auth/reusable/input_message.dart';
+import 'package:fanari_v2/view/auth/widgets/input_message.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:fanari_v2/widgets/primary_button.dart';
 import 'package:fanari_v2/widgets/svg_handler.dart';

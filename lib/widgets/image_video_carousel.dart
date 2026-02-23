@@ -174,6 +174,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
                           : CarouselSingleVideoItem(
                               height: carouselHeight,
                               item: item,
+                              width: widget.width,
                             ),
                     ),
                   ),
@@ -273,6 +274,7 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
             : CarouselSingleVideoItem(
                 height: carouselHeight,
                 item: _carouselItems[0],
+                width: widget.width,
               ),
       ),
     );
@@ -288,11 +290,13 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
 
 class CarouselSingleVideoItem extends StatefulWidget {
   final double height;
+  final double width;
   final CarouselItem item;
   final bool autoPlay;
 
   const CarouselSingleVideoItem({
     super.key,
+    required this.width,
     required this.height,
     required this.item,
     this.autoPlay = false,
@@ -356,78 +360,82 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if (!_videoLoaded)
-          CachedNetworkImage(
-            imageUrl: widget.item.video!.thumbnail.webp_url,
-            width: double.infinity,
-            fit: BoxFit.contain,
-            placeholder: (context, url) {
-              return ImagePlaceholder(
-                blur_hash: widget.item.video!.thumbnail.blur_hash,
-                height: widget.height,
-              );
-            },
-            errorWidget: (context, url, error) {
-              return ImageErrorWidget(
-                blur_hash: widget.item.video!.thumbnail.blur_hash,
-              );
-            },
-          ),
-        if (!_playClicked)
-          GestureDetector(
-            onTap: () {
-              loadVideo();
-            },
-            child: Align(
+    return Container(
+      color: AppColors.containerBg.withValues(alpha: 0.5),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (!_videoLoaded)
+            CachedNetworkImage(
+              imageUrl: widget.item.video!.thumbnail.webp_url,
+              width: widget.width,
+              fit: BoxFit.contain,
+              placeholder: (context, url) {
+                return ImagePlaceholder(
+                  blur_hash: widget.item.video!.thumbnail.blur_hash,
+                  height: widget.height,
+                  width: widget.width,
+                );
+              },
+              errorWidget: (context, url, error) {
+                return ImageErrorWidget(
+                  blur_hash: widget.item.video!.thumbnail.blur_hash,
+                );
+              },
+            ),
+          if (!_playClicked)
+            GestureDetector(
+              onTap: () {
+                loadVideo();
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: .2),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: 0.25,
+                        ), // Shadow color
+                        blurRadius: 10, // Spread of the shadow
+                        offset: Offset(0, 0), // Position of the shadow
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    color: AppColors.text,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          if (_playClicked && !_videoLoaded)
+            Align(
               alignment: Alignment.center,
               child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: .2),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: 0.25,
-                      ), // Shadow color
-                      blurRadius: 10, // Spread of the shadow
-                      offset: Offset(0, 0), // Position of the shadow
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  color: AppColors.text,
-                  size: 32,
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  color: Colors.grey[200],
+                  strokeWidth: 1.5,
                 ),
               ),
             ),
-          ),
-        if (_playClicked && !_videoLoaded)
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 40,
-              height: 40,
-              child: CircularProgressIndicator(
-                color: Colors.grey[200],
-                strokeWidth: 1.5,
-              ),
+          if (_videoLoaded && _videoPlayerController != null)
+            VideoPlayerWidget(
+              autoPlay: true,
+              transparentBackground: true,
+              controller: _videoPlayerController!,
+              aspectRatio: widget.width / widget.height,
+              width: 1.sw,
             ),
-          ),
-        if (_videoLoaded && _videoPlayerController != null)
-          VideoPlayerWidget(
-            autoPlay: true,
-            transparentBackground: true,
-            controller: _videoPlayerController!,
-            aspectRatio: _videoPlayerController!.value.aspectRatio,
-            width: 1.sw,
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -527,6 +535,7 @@ class _FullScreenCarouselState extends State<FullScreenCarousel> {
               return CarouselSingleVideoItem(
                 height: (1.sw / 4) * 5,
                 item: item,
+                width: 1.sw,
               );
             }
           }).toList(),

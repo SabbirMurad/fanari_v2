@@ -8,6 +8,8 @@ class InputFieldVOne extends StatefulWidget {
   final bool isPasswordField;
   final String? error;
   final InputBorder? border;
+  final TextStyle? hintStyle;
+  final FloatingLabelBehavior? floatingLabelBehavior;
 
   const InputFieldVOne({
     super.key,
@@ -16,6 +18,8 @@ class InputFieldVOne extends StatefulWidget {
     this.isPasswordField = false,
     this.border,
     this.error,
+    this.hintStyle,
+    this.floatingLabelBehavior,
   });
 
   @override
@@ -62,7 +66,6 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
             obscureText: _obscureText,
             focusNode: _focusNode,
             controller: widget.controller,
-
             decoration: InputDecoration(
               isDense: true,
               errorText: widget.error,
@@ -85,7 +88,8 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
               labelText: widget.hintText,
-              floatingLabelBehavior: FloatingLabelBehavior.auto,
+              floatingLabelBehavior:
+                  widget.floatingLabelBehavior ?? FloatingLabelBehavior.auto,
               enabledBorder:
                   widget.border ??
                   OutlineInputBorder(
@@ -93,6 +97,7 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
                     borderSide: BorderSide(color: AppColors.text, width: 1),
                   ),
               labelStyle: TextStyle(color: AppColors.text, fontSize: 16.sp),
+              hintStyle: widget.hintStyle,
             ),
             style: TextStyle(color: AppColors.text, fontSize: 16.sp),
           ),
