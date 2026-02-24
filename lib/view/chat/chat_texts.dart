@@ -1,5 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
+import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/providers/conversation.dart';
 import 'package:fanari_v2/providers/author.dart';
@@ -332,6 +334,41 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     }
 
     if (message.images != null && message.images!.isNotEmpty) {
+      final my_id = await LocalStorage.user_id.get();
+
+      List<ImageModel> temp_images = [];
+      for (final image in message.images!) {
+        temp_images.add(
+          ImageModel(
+            uuid: 'temp_${DateTime.now().toString()}',
+            webp_url: 'temp',
+            original_url: 'temp',
+            blur_hash: image.meta!.blur_hash,
+            width: image.meta!.width.toDouble(),
+            height: image.meta!.height.toDouble(),
+            provider: MemoryImage(image.meta!.bytes),
+            local_bytes: image.meta!.bytes,
+          ),
+        );
+      }
+
+      TextModel temp_text = TextModel(
+        uuid: 'temp_${DateTime.now().toString()}',
+        owner: my_id!,
+        conversation_id: widget.conversation_id,
+        my_text: true,
+        seen_by: [],
+        created_at: DateTime.now().millisecondsSinceEpoch,
+        type: TextType.Image,
+      );
+
+      ref
+          .read(conversationNotifierProvider.notifier)
+          .addMessage(
+            conversation_id: widget.conversation_id,
+            message: temp_text,
+          );
+
       final images = await utils.uploadImages(
         images: message.images!,
         used_at: utils.AssetUsedAt.Chat,

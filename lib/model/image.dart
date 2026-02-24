@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/credential.dart';
@@ -10,6 +12,8 @@ class ImageModel {
   final double width;
   final double height;
   final ImageProvider provider;
+  final bool local;
+  final Uint8List? local_bytes;
 
   const ImageModel({
     required this.uuid,
@@ -19,6 +23,8 @@ class ImageModel {
     required this.width,
     required this.height,
     required this.provider,
+    this.local = false,
+    this.local_bytes,
   });
 
   factory ImageModel.fromJson(Map<String, dynamic> json) {
