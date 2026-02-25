@@ -261,13 +261,13 @@ class _ConversationItemState extends State<ConversationItem> {
                                         color: AppColors.text,
                                       ),
                                       SizedBox(width: 6.w),
-                                      Text(
-                                        '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
-                                        style: TextStyle(
-                                          color: AppColors.text,
-                                          fontSize: 13.sp,
-                                        ),
-                                      ),
+                                      // Text(
+                                      //   '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
+                                      //   style: TextStyle(
+                                      //     color: AppColors.text,
+                                      //     fontSize: 13.sp,
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 if (widget.model.texts.last.type ==

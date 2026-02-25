@@ -7,9 +7,16 @@ Future<List<String>?> uploadImages({
   required AssetUsedAt used_at,
   bool temporary = true,
 }) async {
+  for (int i = 0; i < images.length; i++) {
+    if (images[i].preparing) {
+      throw 'image still preparing';
+    }
+  }
+
   var uri = Uri.parse('${AppCredentials.domain}/image');
   var request = http.MultipartRequest('POST', uri);
 
+  printLine(images.length);
   for (int i = 0; i < images.length; i++) {
     final p = images[i];
 
@@ -26,13 +33,15 @@ Future<List<String>?> uploadImages({
     if (p.uuid != null) {
       request.fields['uuid_$i'] = p.uuid!;
     }
-    
+
     request.fields['width_$i'] = '${meta.width}';
     request.fields['height_$i'] = '${meta.height}';
     request.fields['blur_hash_$i'] = meta.blur_hash;
     request.fields['used_at_$i'] = used_at.toString();
     request.fields['temporary_$i'] = temporary.toString();
   }
+
+  printLine(request.fields);
 
   var response = await request.send();
 

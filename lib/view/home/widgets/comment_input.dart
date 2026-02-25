@@ -370,6 +370,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
       setState(() {
         _selectedImages[i].meta = image_meta;
+        _selectedImages[i].preparing = false;
       });
     }
   }
@@ -730,6 +731,10 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                         SizedBox(width: 12.w),
                         GestureDetector(
                           onTap: () {
+                            for (int i = 0; i < _selectedImages.length; i++) {
+                              if (_selectedImages[i].preparing) return;
+                            }
+
                             widget.onSend?.call(
                               CommentInputSubmitValue(
                                 text: _spacialTextController.text,
@@ -738,7 +743,11 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                             );
 
                             _spacialTextController.text = '';
-                            _selectedImages.clear();
+                            Future.delayed(Duration(milliseconds: 500), () {
+                              setState(() {
+                                _selectedImages.clear();
+                              });
+                            });
                           },
                           child: Container(
                             width: 40.w,

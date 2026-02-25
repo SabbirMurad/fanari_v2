@@ -333,14 +333,19 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       );
     }
 
-    if (message.images != null && message.images!.isNotEmpty) {
+    if (message.images != null && message.images!.length > 0) {
       final my_id = await LocalStorage.user_id.get();
+      printLine('before: ${message.images!.length}');
 
       List<ImageModel> temp_images = [];
-      for (final image in message.images!) {
+      int now = DateTime.now().microsecondsSinceEpoch;
+      for (int i = 0; i < message.images!.length; i++) {
+        final image = message.images![0];
+
+        now++;
         temp_images.add(
           ImageModel(
-            uuid: 'temp_${DateTime.now().toString()}',
+            uuid: 'temp_${now}',
             webp_url: 'temp',
             original_url: 'temp',
             blur_hash: image.meta!.blur_hash,
@@ -348,18 +353,20 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             height: image.meta!.height.toDouble(),
             provider: MemoryImage(image.meta!.bytes),
             local_bytes: image.meta!.bytes,
+            local: true,
           ),
         );
       }
 
       TextModel temp_text = TextModel(
-        uuid: 'temp_${DateTime.now().toString()}',
+        uuid: 'temp_${now}',
         owner: my_id!,
         conversation_id: widget.conversation_id,
         my_text: true,
         seen_by: [],
         created_at: DateTime.now().millisecondsSinceEpoch,
         type: TextType.Image,
+        images: temp_images,
       );
 
       ref
@@ -368,6 +375,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             conversation_id: widget.conversation_id,
             message: temp_text,
           );
+      printLine('after: ${message.images!.length}');
 
       final images = await utils.uploadImages(
         images: message.images!,

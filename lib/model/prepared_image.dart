@@ -14,7 +14,7 @@ class PreparedImage {
 
   PreparedImage({
     required this.file,
-    this.preparing = false,
+    this.preparing = true,
     this.meta,
     this.uuid,
   });

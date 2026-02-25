@@ -247,8 +247,42 @@ class _TextItemWidgetState extends State<TextItemWidget> {
       ),
     );
 
+    late final Widget imageWidget;
+
+    if (widget.model.images!.first.local) {
+      imageWidget = Image.memory(
+        widget.model.images!.first.local_bytes!,
+        width: imageWidth,
+        height: carouselHeight,
+        fit: BoxFit.cover,
+      );
+    } else {
+      imageWidget = CachedNetworkImage(
+        imageUrl: widget.model.images!.first.webp_url,
+        width: imageWidth,
+        height: carouselHeight,
+        fit: BoxFit.cover,
+        placeholder: (context, url) {
+          return SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: BlurHash(
+              hash: widget.model.images!.first.blur_hash,
+              color: AppColors.secondary,
+              optimizationMode: BlurHashOptimizationMode.approximation,
+            ),
+          );
+        },
+        errorWidget: (context, url, error) {
+          return ImageErrorWidget(
+            blur_hash: widget.model.images!.first.blur_hash,
+          );
+        },
+      );
+    }
+
     final imageContainer = ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(8.r),
       child: GestureDetector(
         onTap: () {
           if (widget.selectMode) {
@@ -265,28 +299,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             images: [widget.model.images!.first.provider],
           );
         },
-        child: CachedNetworkImage(
-          imageUrl: widget.model.images!.first.webp_url,
-          width: imageWidth,
-          height: carouselHeight,
-          fit: BoxFit.cover,
-          placeholder: (context, url) {
-            return SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: BlurHash(
-                hash: widget.model.images!.first.blur_hash,
-                color: AppColors.secondary,
-                optimizationMode: BlurHashOptimizationMode.approximation,
-              ),
-            );
-          },
-          errorWidget: (context, url, error) {
-            return ImageErrorWidget(
-              blur_hash: widget.model.images!.first.blur_hash,
-            );
-          },
-        ),
+        child: imageWidget,
       ),
     );
 
