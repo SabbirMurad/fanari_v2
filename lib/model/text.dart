@@ -1,11 +1,11 @@
+import 'package:fanari_v2/model/attachment.dart';
 import 'package:fanari_v2/model/audio.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
-import 'package:fanari_v2/model/attachment.dart';
-import 'package:flutter_link_previewer/flutter_link_previewer.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 
 enum TextType { Text, Emoji, Image, Audio, Video, Attachment }
 
@@ -46,38 +46,26 @@ class TextModel {
     Map<String, dynamic> json,
     String my_id,
   ) async {
-    List<String> seen_by = [];
-    for (var i = 0; i < json['seen_by'].length; i++) {
-      seen_by.add(json['seen_by'][i]);
-    }
+    final seen_by = List<String>.from(json['seen_by'] as List);
 
-    late TextType type;
-    if (json['type'] == 'Text') {
-      type = TextType.Text;
-    } else if (json['type'] == 'Emoji') {
-      type = TextType.Emoji;
-    } else if (json['type'] == 'Image') {
-      type = TextType.Image;
-    } else if (json['type'] == 'Audio') {
-      type = TextType.Audio;
-    } else if (json['type'] == 'Video') {
-      type = TextType.Video;
-    } else {
-      type = TextType.Attachment;
-    }
+    final type = switch (json['type'] as String) {
+      'Text' => TextType.Text,
+      'Emoji' => TextType.Emoji,
+      'Image' => TextType.Image,
+      'Audio' => TextType.Audio,
+      'Video' => TextType.Video,
+      _ => TextType.Attachment,
+    };
 
     List<ImageModel>? image_metadata;
-
     if (json['images'] != null) {
       final response = await utils.CustomHttp.post(
         endpoint: '/image/metadata',
         body: json['images'],
-        addApiPrefix: false,
+        add_api_prefix: false,
       );
 
-      if (!response.ok) {
-        throw Exception('Failed to get image metadata');
-      }
+      if (!response.ok) throw Exception('Failed to get image metadata');
 
       image_metadata = ImageModel.fromJsonList(response.data!);
     }
@@ -92,43 +80,41 @@ class TextModel {
       my_text: json['owner'] == my_id,
       seen_by: seen_by,
       created_at: json['created_at'],
-      //TODO: Add support for videos
-      videos: null,
-      attachment: json['attachment'] == null
-          ? null
-          : AttachmentModel.fromJson(json['attachment']),
-      audio: json['audio'] == null ? null : AudioModel.fromJson(json['audio']),
+      videos: null, // TODO: add video support
+      attachment: json['attachment'] != null
+          ? AttachmentModel.fromJson(json['attachment'])
+          : null,
+      audio: json['audio'] != null ? AudioModel.fromJson(json['audio']) : null,
     );
   }
 
-  Future<TextModel?> load3rdPartyInfos() async {
-    if (this.youtube_attachment == null &&
-        this.images == null &&
-        this.videos == null &&
+  Future<TextModel?> load_third_party_infos() async {
+    if (youtube_attachment == null &&
+        images == null &&
+        videos == null &&
         audio == null &&
-        this.text != null) {
-      final id = YoutubeModel.searchId(this.text!);
+        text != null) {
+      final id = YoutubeModel.searchId(text!);
       if (id != null) {
-        this.youtube_attachment = await YoutubeModel.load(id);
+        youtube_attachment = await YoutubeModel.load(id);
         return this;
       }
     }
 
-    if (this.link_preview == null &&
-        this.images == null &&
-        this.videos == null &&
-        this.audio == null &&
-        this.youtube_attachment == null &&
-        this.text != null) {
-      final arr = this.text!.split(' ');
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].startsWith('https://') ||
-            arr[i].startsWith('http://') ||
-            arr[i].startsWith('www.') ||
-            arr[i].endsWith('.com')) {
-          final preview = await getPreviewData(arr[i]);
+    if (link_preview == null &&
+        images == null &&
+        videos == null &&
+        audio == null &&
+        youtube_attachment == null &&
+        text != null) {
+      for (final word in text!.split(' ')) {
+        if (word.startsWith('https://') ||
+            word.startsWith('http://') ||
+            word.startsWith('www.') ||
+            word.endsWith('.com')) {
+          final preview = await getPreviewData(word);
           if (preview.title != null) {
-            this.link_preview = preview;
+            link_preview = preview;
             return this;
           }
         }

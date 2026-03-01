@@ -1,5 +1,5 @@
 import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/providers/author.dart';
+import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -132,7 +132,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   void _getAccountInformation() async {
     if (_emailController.text.isEmpty) {
-      utils.showCustomToast(text: 'Please enter your email or username.');
+      utils.show_custom_toast(text: 'Please enter your email or username.');
       return;
     }
 
@@ -144,14 +144,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     final response = await utils.CustomHttp.get(
       endpoint: '/auth/user/$email',
-      needAuth: false,
+      need_auth: false,
     );
 
     setState(() {
       _loading = false;
     });
 
-    if (response.statusCode == 200) {
+    if (response.ok) {
       setState(() {
         _selectedFirstName = response.data['first_name'];
         _selectedLastName = response.data['last_name'];

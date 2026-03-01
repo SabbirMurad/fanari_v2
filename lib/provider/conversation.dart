@@ -99,7 +99,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     // Only load 3rd party infos for non-temp messages
     if (!isTemp) {
       Future.microtask(() async {
-        final loaded = await message.load3rdPartyInfos();
+        final loaded = await message.load_third_party_infos();
         if (loaded == null) return;
 
         final updated2 = state.value!.map((conv) {

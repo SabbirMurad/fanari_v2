@@ -1,5 +1,5 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/view/chat/chat_texts.dart';

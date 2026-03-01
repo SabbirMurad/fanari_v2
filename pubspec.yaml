@@ -81,6 +81,7 @@ dependencies:
   google_maps_flutter: ^2.14.0
   geolocator: ^14.0.2
   extended_text_field: ^16.0.2
+  flutter_dotenv: ^5.2.1
   
 dev_dependencies:
   flutter_test:
@@ -130,7 +131,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets: 
+  assets:
+    - .env
     - assets/audios/
     - assets/icons/
     - assets/icons/bottom_nav/

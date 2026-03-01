@@ -326,7 +326,7 @@ class _ConversationItemState extends State<ConversationItem> {
                           ),
                         if (widget.model.texts.isNotEmpty)
                           Text(
-                            utils.timeAgo(
+                            utils.time_ago(
                               DateTime.fromMillisecondsSinceEpoch(
                                 widget.model.texts.last.created_at,
                               ),

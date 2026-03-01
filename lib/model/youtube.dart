@@ -1,7 +1,83 @@
 import 'dart:convert';
-import 'package:fanari_v2/constants/credential.dart';
+import 'package:fanari_v2/env.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+
+// ── Private sub-models ────────────────────────────────────────────────────────
+
+class _YoutubeModelThumbnail {
+  final String url;
+  final int width;
+  final int height;
+
+  const _YoutubeModelThumbnail({
+    required this.url,
+    required this.width,
+    required this.height,
+  });
+}
+
+class _YoutubeModelContentDetails {
+  final String duration;
+
+  const _YoutubeModelContentDetails({required this.duration});
+
+  factory _YoutubeModelContentDetails.fromJson(Map<String, dynamic> json) {
+    final raw = json['duration'] as String;
+
+    // Convert ISO 8601 duration (e.g. "PT4M13S") to "4:13"
+    final buffer = StringBuffer();
+    bool first_digit_found = false;
+
+    for (final char in raw.split('')) {
+      final code = char.codeUnitAt(0);
+      if (code >= 48 && code <= 57) {
+        first_digit_found = true;
+        buffer.write(char);
+      } else if (first_digit_found) {
+        buffer.write(':');
+      }
+    }
+
+    final result = buffer.toString();
+    return _YoutubeModelContentDetails(
+      duration: result.isNotEmpty ? result.substring(0, result.length - 1) : '',
+    );
+  }
+}
+
+class _YoutubeModelStatistics {
+  final int? view_count;
+  final int? like_count;
+  final int? favorite_count;
+  final int? comment_count;
+
+  const _YoutubeModelStatistics({
+    required this.view_count,
+    required this.like_count,
+    required this.favorite_count,
+    required this.comment_count,
+  });
+
+  factory _YoutubeModelStatistics.fromJson(Map<String, dynamic> json) {
+    return _YoutubeModelStatistics(
+      view_count: json['viewCount'] != null
+          ? int.parse(json['viewCount'])
+          : null,
+      like_count: json['likeCount'] != null
+          ? int.parse(json['likeCount'])
+          : null,
+      favorite_count: json['favoriteCount'] != null
+          ? int.parse(json['favoriteCount'])
+          : null,
+      comment_count: json['commentCount'] != null
+          ? int.parse(json['commentCount'])
+          : null,
+    );
+  }
+}
+
+// ── Public model ──────────────────────────────────────────────────────────────
 
 class YoutubeModel {
   final String id;
@@ -9,65 +85,66 @@ class YoutubeModel {
   final String published_at;
   final String title;
   final String channel_title;
-  final YoutubeModelThumbnail thumbnail;
-  final YoutubeModelContentDetails contentDetails;
-  final YoutubeModelStatistics statistics;
+  final _YoutubeModelThumbnail thumbnail;
+  final _YoutubeModelContentDetails content_details;
+  final _YoutubeModelStatistics statistics;
 
   const YoutubeModel({
     required this.id,
     required this.url,
-    required this.contentDetails,
-    required this.statistics,
     required this.published_at,
     required this.title,
     required this.channel_title,
     required this.thumbnail,
+    required this.content_details,
+    required this.statistics,
   });
 
-  factory YoutubeModel.fromJson(json) {
+  factory YoutubeModel.fromJson(Map<String, dynamic> json) {
+    final snippet = json['snippet'] as Map<String, dynamic>;
+    final standard = snippet['thumbnails']['standard'] as Map<String, dynamic>;
+
     return YoutubeModel(
       id: json['id'],
       url: 'https://www.youtube.com/watch?v=${json['id']}',
-      contentDetails: YoutubeModelContentDetails.fromJson(
+      published_at: snippet['publishedAt'],
+      title: snippet['title'],
+      channel_title: snippet['channelTitle'],
+      thumbnail: _YoutubeModelThumbnail(
+        url: standard['url'],
+        width: standard['width'],
+        height: standard['height'],
+      ),
+      content_details: _YoutubeModelContentDetails.fromJson(
         json['contentDetails'],
       ),
-      statistics: YoutubeModelStatistics.fromJson(json['statistics']),
-      published_at: json['snippet']['publishedAt'],
-      title: json['snippet']['title'],
-      channel_title: json['snippet']['channelTitle'],
-      thumbnail: YoutubeModelThumbnail(
-        url: json['snippet']['thumbnails']['standard']['url'],
-        width: json['snippet']['thumbnails']['standard']['width'],
-        height: json['snippet']['thumbnails']['standard']['height'],
-      ),
+      statistics: _YoutubeModelStatistics.fromJson(json['statistics']),
     );
   }
 
-  static String getYoutubeBasicDataUrl(String videoId) =>
-      "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&fields=items(id,snippet(publishedAt,title,channelTitle,thumbnails(standard)),contentDetails(duration),statistics)&id=$videoId&key=${AppCredentials.youtubeApiKey}";
+  static String _data_url(String video_id) {
+    final api_key = EnvHandler.load().youtube_api_key;
 
-  static Future<YoutubeModel?> load(attachment_id) async {
+    return "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&fields=items(id,snippet(publishedAt,title,channelTitle,thumbnails(standard)),contentDetails(duration),statistics)&id=$video_id&key=$api_key";
+  }
+
+  static Future<YoutubeModel?> load(String attachment_id) async {
     try {
-      final url = getYoutubeBasicDataUrl(attachment_id);
-
-      final uri = Uri.parse(url);
-      Map<String, String> headers = {'Content-Type': 'application/json'};
-      var response = await http.get(uri, headers: headers);
+      final response = await http.get(
+        Uri.parse(_data_url(attachment_id)),
+        headers: {'Content-Type': 'application/json'},
+      );
 
       if (response.statusCode == 200) {
-        return YoutubeModel.fromJson(jsonDecode(response.body)['items'][0]);
-      } else {
-        debugPrint('');
-        debugPrint('Error getting youtube attachment data');
-        debugPrint('${response.statusCode}');
-        debugPrint('');
-        return null;
+        return YoutubeModel.fromJson(
+          (jsonDecode(response.body)['items'] as List).first,
+        );
       }
+
+      debugPrint('Error fetching YouTube data: ${response.statusCode}');
+      return null;
     } catch (e) {
-      debugPrint('');
-      debugPrint('Error getting youtube attachment data');
-      debugPrint(e.toString());
-      debugPrint('');
+      debugPrint('Error fetching YouTube data: $e');
       return null;
     }
   }
@@ -81,81 +158,8 @@ class YoutubeModel {
   static String? searchId(String text) {
     for (final pattern in _patterns) {
       final match = pattern.firstMatch(text);
-      if (match != null && match.groupCount >= 1) {
-        return match.group(1);
-      }
+      if (match != null && match.groupCount >= 1) return match.group(1);
     }
     return null;
-  }
-}
-
-class YoutubeModelThumbnail {
-  final String url;
-  final int width;
-  final int height;
-
-  const YoutubeModelThumbnail({
-    required this.url,
-    required this.width,
-    required this.height,
-  });
-}
-
-class YoutubeModelContentDetails {
-  final String duration;
-
-  const YoutubeModelContentDetails({required this.duration});
-
-  factory YoutubeModelContentDetails.fromJson(json) {
-    final youtube_duration = json['duration'];
-
-    String new_str = "";
-
-    bool first_digit_found = false;
-    for (var char in youtube_duration.split('')) {
-      if (char.codeUnitAt(0) >= 48 && char.codeUnitAt(0) <= 57) {
-        first_digit_found = true;
-        new_str += char;
-      } else {
-        if (first_digit_found) {
-          new_str += ":";
-        }
-      }
-    }
-
-    new_str = new_str.substring(0, new_str.length - 1);
-
-    return YoutubeModelContentDetails(duration: new_str);
-  }
-}
-
-class YoutubeModelStatistics {
-  final int? viewCount;
-  final int? likeCount;
-  final int? favoriteCount;
-  final int? commentCount;
-
-  const YoutubeModelStatistics({
-    required this.viewCount,
-    required this.likeCount,
-    required this.favoriteCount,
-    required this.commentCount,
-  });
-
-  factory YoutubeModelStatistics.fromJson(json) {
-    return YoutubeModelStatistics(
-      viewCount: json['viewCount'] == null
-          ? null
-          : int.parse(json['viewCount']),
-      likeCount: json['likeCount'] == null
-          ? null
-          : int.parse(json['likeCount']),
-      favoriteCount: json['favoriteCount'] == null
-          ? null
-          : int.parse(json['favoriteCount']),
-      commentCount: json['commentCount'] == null
-          ? null
-          : int.parse(json['commentCount']),
-    );
   }
 }

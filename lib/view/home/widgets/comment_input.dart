@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
-import 'package:fanari_v2/providers/emoji.dart';
+import 'package:fanari_v2/provider/emoji.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -351,7 +351,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   }
 
   Future<void> _handleGalleryTap() async {
-    final images = await utils.pickImageFromGallery(context: context);
+    final images = await utils.pick_images_from_gallery(context: context);
 
     if (images == null) return;
 

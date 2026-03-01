@@ -13,7 +13,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fanari_v2/constants/credential.dart';
-import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/provider/conversation.dart';
 
 // ── Call Signal Models ────────────────────────────────────────────────────────
 

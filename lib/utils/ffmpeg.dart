@@ -1,109 +1,99 @@
 part of '../utils.dart';
 
-class CopyBinaryStatus {
-  final bool success;
-  final String? errorMessage;
+// ── Result types ──────────────────────────────────────────────────────────────
 
-  CopyBinaryStatus({required this.success, this.errorMessage});
+class FfmpegCopyResult {
+  final bool success;
+  final String? error_message;
+
+  const FfmpegCopyResult({required this.success, this.error_message});
 }
 
-class FfmpegExecuteStatus {
+class FfmpegExecuteResult {
   final bool success;
   final String? error;
   final String? output;
 
-  FfmpegExecuteStatus({required this.success, this.error, this.output});
+  const FfmpegExecuteResult({required this.success, this.error, this.output});
 }
 
-class FFmpegFlutter {
-  // Copy the correct FFmpeg binary to a writable directory and make it executable
-  static Future<CopyBinaryStatus> copyBinaryToInternalStorage() async {
+// ── FFmpeg helper ─────────────────────────────────────────────────────────────
+
+class FfmpegFlutter {
+  FfmpegFlutter._();
+
+  /// Returns the ABI directory name for the current device architecture.
+  static String _device_abi() =>
+      Platform.operatingSystemVersion.contains('x86') ? 'x86' : 'armeabi-v7a';
+
+  /// Returns the path where the binary is (or will be) stored.
+  static Future<String> _binary_path() async {
+    final dirs = await getExternalCacheDirectories();
+    return '${dirs!.first.path}/ffmpeg';
+  }
+
+  /// Copies the correct FFmpeg binary from assets to internal storage and
+  /// marks it executable. Safe to call repeatedly — skips if already present.
+  static Future<FfmpegCopyResult> copy_binary_to_internal_storage() async {
     try {
-      final String architecture = getDeviceArchitecture();
-      String assetName;
+      final abi = _device_abi();
+      final asset_path = switch (abi) {
+        'x86' => 'assets/binary/ffmpeg/x86',
+        _ => 'assets/binary/ffmpeg/armeabi-v7a',
+      };
 
-      // Select the appropriate binary based on architecture
-      switch (architecture) {
-        case 'x86':
-          assetName = 'assets/binary/ffmpeg/x86';
-          break;
-        case 'arm':
-          assetName = 'assets/binary/ffmpeg/armeabi-v7a';
-          break;
-        default:
-          print('Unsupported architecture: $architecture');
-          return CopyBinaryStatus(
-              success: false, errorMessage: 'Unsupported architecture');
+      final binary_path = await _binary_path();
+      final binary_file = File(binary_path);
+
+      if (await binary_file.exists()) {
+        return const FfmpegCopyResult(success: true);
       }
 
-      // Get the app's documents directory to store the binary
-      final directoryList = await getExternalCacheDirectories();
-      // final dir = directoryList![0].path.split('/cache')[0] + '/files';
+      final byte_data = await rootBundle.load(asset_path);
+      await binary_file.writeAsBytes(byte_data.buffer.asUint8List());
 
-
-      final ffmpegFile = File('${directoryList![0].path}/ffmpeg');
-
-      // if(await ffmpegFile.exists()) {
-      //   await ffmpegFile.delete();
-      // }
-
-      if (!await ffmpegFile.exists()) {
-        // Load the binary from assets and write it to the internal storage
-        final byteData = await rootBundle.load(assetName);
-        await ffmpegFile.writeAsBytes(byteData.buffer.asUint8List());
-        print('FFmpeg binary copied to: ${ffmpegFile.path}');
-
-        // Grant execution permission
-        final result = await Process.run('chmod', ['777', ffmpegFile.path]);
-        if (result.exitCode != 0) {
-          print('Failed to set executable permissions: ${result.stderr}');
-          return CopyBinaryStatus(
-            success: false,
-            errorMessage:
-                'Failed to set executable permissions: ${result.stderr}',
-          );
-        } else {
-          print('Permission set for ffmpeg');
-        }
+      final chmod = await Process.run('chmod', ['777', binary_path]);
+      if (chmod.exitCode != 0) {
+        return FfmpegCopyResult(
+          success: false,
+          error_message: 'Failed to set executable permissions: ${chmod.stderr}',
+        );
       }
 
-      return CopyBinaryStatus(success: true, errorMessage: null);
+      printLine('FFmpeg binary ready at $binary_path');
+      return const FfmpegCopyResult(success: true);
     } catch (e) {
-      print('Failed to copy FFmpeg binary: $e');
-      return CopyBinaryStatus(
-          success: false, errorMessage: 'Failed to copy FFmpeg binary: $e');
+      return FfmpegCopyResult(
+        success: false,
+        error_message: 'Failed to copy FFmpeg binary: $e',
+      );
     }
   }
 
-  // Detect the device architecture
-  static String getDeviceArchitecture() {
-    return Platform.operatingSystemVersion.contains('x86')
-        ? 'x86'
-        : 'arm'; // Default for modern Android devices
-  }
-
-  // Run FFmpeg command
-  static Future<FfmpegExecuteStatus> execute(String command) async {
+  /// Runs an FFmpeg [command] string using the binary in internal storage.
+  ///
+  /// Example: `await FfmpegFlutter.execute('-i input.mp4 output.mp3')`
+  static Future<FfmpegExecuteResult> execute(String command) async {
     try {
-      final directoryList = await getExternalCacheDirectories();
-      // final dir = directoryList![0].path.split('/cache')[0] + '/files';
-      final binaryPath = '${directoryList![0].path}/ffmpeg';
-      final process = await Process.run(binaryPath, command.split(' '));
-      final output =
-          await process.stdout.transform(SystemEncoding().decoder).join();
-      final error =
-          await process.stderr.transform(SystemEncoding().decoder).join();
-      final exitCode = await process.exitCode;
+      final binary_path = await _binary_path();
+      final process = await Process.run(binary_path, command.split(' '));
 
-      if (exitCode == 0) {
-        return FfmpegExecuteStatus(success: true, output: output);
-      } else {
-        print('FFmpeg error: $error');
-        return FfmpegExecuteStatus(success: false, error: error);
+      final output = await process.stdout
+          .transform(const SystemEncoding().decoder)
+          .join();
+      final error = await process.stderr
+          .transform(const SystemEncoding().decoder)
+          .join();
+
+      if (process.exitCode == 0) {
+        return FfmpegExecuteResult(success: true, output: output);
       }
+
+      printLine('FFmpeg error: $error');
+      return FfmpegExecuteResult(success: false, error: error);
     } catch (e) {
-      print('Error running FFmpeg command: $e');
-      return FfmpegExecuteStatus(success: false, error: e.toString());
+      printLine('FFmpeg exception: $e');
+      return FfmpegExecuteResult(success: false, error: e.toString());
     }
   }
 }

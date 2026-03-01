@@ -35,7 +35,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             fit: BoxFit.cover,
             height: double.infinity,
           ),
-          
+
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -122,12 +122,12 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
         if (widget.decoration == TextDirection.rtl) downloadBtn,
         GestureDetector(
           onTap: () {
-            utils.openImageViewer(
+            utils.open_image_viewer(
               context: context,
               images: widget.images
                   .map((e) => CachedNetworkImageProvider(e.webp_url))
                   .toList(),
-              preLoad: 2,
+              preload_count: 2,
             );
           },
           child: Container(

@@ -1,6 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
-import 'package:fanari_v2/providers/author.dart';
+import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';

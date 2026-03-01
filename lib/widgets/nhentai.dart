@@ -19,7 +19,7 @@
 //         headers: headers,
 //       );
 
-//       if (response.statusCode == 200) {
+//       if (response.ok) {
 //         return NhentaiBookModel.fromJson(jsonDecode(response.body));
 //       } else {
 //         print('');

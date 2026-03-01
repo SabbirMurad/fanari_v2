@@ -1,10 +1,10 @@
-import 'package:fanari_v2/model/mention.dart';
+import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';
-import 'package:fanari_v2/constants/credential.dart';
-import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 
 class CommentModel {
   String uuid;
@@ -13,13 +13,10 @@ class CommentModel {
   List<ImageModel> images;
   String? audio;
   int created_at;
-
   UserModel owner;
-
   bool liked;
   int like_count;
   int reply_count;
-
   YoutubeModel? youtube_attachment;
   PreviewData? link_preview;
 
@@ -42,10 +39,8 @@ class CommentModel {
     return CommentModel(
       uuid: json['uuid'],
       caption: json['caption'],
-      images: json['images'].map((item) => ImageModel.fromJson(item)).toList(),
-      mentions: json['mentions']
-          .map((item) => MentionModel.fromJson(item))
-          .toList(),
+      images: (json['images'] as List).map((i) => ImageModel.fromJson(i)).toList(),
+      mentions: (json['mentions'] as List).map((m) => MentionModel.fromJson(m)).toList(),
       audio: json['audio'] != null
           ? '${AppCredentials.domain}/upload/audio/${json['audio']}'
           : null,
@@ -61,31 +56,26 @@ class CommentModel {
     return json.map((item) => CommentModel.fromJson(item)).toList();
   }
 
-  load3rdPartyInfos() async {
-    // Must have a caption to work with
+  Future<void> load_third_party_infos() async {
     if (caption == null) return;
+    if (images.isNotEmpty || audio != null) return;
 
-    // If contains these datas then not showing the 3rd party infos
-    if (this.images.isNotEmpty || this.audio != null) return;
-
-    if (this.youtube_attachment == null) {
-      final id = YoutubeModel.searchId(this.caption!);
-
+    if (youtube_attachment == null) {
+      final id = YoutubeModel.searchId(caption!);
       if (id != null) {
-        this.youtube_attachment = await YoutubeModel.load(id);
+        youtube_attachment = await YoutubeModel.load(id);
       }
     }
 
-    if (this.link_preview == null && this.youtube_attachment == null) {
-      final arr = this.caption!.split(' '); 
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].startsWith('https://') ||
-            arr[i].startsWith('http://') ||
-            arr[i].startsWith('www.') ||
-            arr[i].endsWith('.com')) {
-          final preview = await getPreviewData(arr[i]);
+    if (link_preview == null && youtube_attachment == null) {
+      for (final word in caption!.split(' ')) {
+        if (word.startsWith('https://') ||
+            word.startsWith('http://') ||
+            word.startsWith('www.') ||
+            word.endsWith('.com')) {
+          final preview = await getPreviewData(word);
           if (preview.title != null) {
-            this.link_preview = preview;
+            link_preview = preview;
             return;
           }
         }

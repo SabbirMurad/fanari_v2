@@ -109,7 +109,7 @@ class _ProductCardState extends State<ProductCard> {
                 ),
                 Spacer(),
                 Text(
-                  '\$${utils.formatNumberMagnitude(widget.model.price / 100)}',
+                  '\$${utils.format_number_magnitude(widget.model.price / 100)}',
                   style: TextStyle(
                     color: AppColors.text,
                     fontSize: 18.sp,

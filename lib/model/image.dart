@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:fanari_v2/constants/credential.dart';
+import 'package:flutter/material.dart';
 
 class ImageModel {
   final String uuid;
@@ -42,12 +42,6 @@ class ImageModel {
   }
 
   static List<ImageModel> fromJsonList(List<dynamic> json) {
-    List<ImageModel> images = [];
-
-    for (var i = 0; i < json.length; i++) {
-      images.add(ImageModel.fromJson(json[i]));
-    }
-
-    return images;
+    return json.map((item) => ImageModel.fromJson(item)).toList();
   }
 }

@@ -29,7 +29,7 @@ class UserNotifier extends _$UserNotifier {
 
     final response = await utils.CustomHttp.post(
       endpoint: '/profile/list',
-      body: user_ids,
+      body: users_to_load,
     );
 
     if (!response.ok) {

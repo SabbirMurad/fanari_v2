@@ -81,7 +81,7 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           const SizedBox(width: 8),
           Text(
-            utils.formatNumberMagnitude(
+            utils.format_number_magnitude(
               widget.model.stat.like_count.toDouble(),
             ),
             style: TextStyle(
@@ -117,7 +117,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    utils.formatNumberMagnitude(
+                    utils.format_number_magnitude(
                       widget.model.stat.comment_count.toDouble(),
                     ),
                     style: TextStyle(
@@ -229,7 +229,7 @@ class _PostWidgetState extends State<PostWidget> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        utils.prettyDate(widget.model.core.created_at),
+                        utils.pretty_date(widget.model.core.created_at),
                         style: TextStyle(
                           color: AppColors.text,
                           fontSize: 12.sp,

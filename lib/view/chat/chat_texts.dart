@@ -3,8 +3,8 @@ import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/text.dart';
-import 'package:fanari_v2/providers/conversation.dart';
-import 'package:fanari_v2/providers/author.dart';
+import 'package:fanari_v2/provider/conversation.dart';
+import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
@@ -145,7 +145,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                               Text(
                                 model.single_metadata!.online
                                     ? 'Online'
-                                    : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
+                                    : 'Last seen - ${utils.time_ago(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
                                 style: TextStyle(
                                   color: AppColors.text,
                                   fontWeight: FontWeight.w400,
@@ -252,7 +252,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
               ),
               SizedBox(width: 12.w),
               Text(
-                utils.prettyDate(text.created_at),
+                utils.pretty_date(text.created_at),
                 style: TextStyle(
                   color: AppColors.border.withValues(alpha: .5),
                   fontWeight: FontWeight.w400,
@@ -377,7 +377,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           );
       printLine('after: ${message.images!.length}');
 
-      final images = await utils.uploadImages(
+      final images = await utils.upload_images(
         images: message.images!,
         used_at: utils.AssetUsedAt.Chat,
         temporary: false,

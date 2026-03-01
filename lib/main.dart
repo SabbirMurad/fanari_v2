@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -21,12 +22,18 @@ class MyHttpOverrides extends HttpOverrides {
 void main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
-  MediaStore.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
+  // To handle media outside allocated app folder
+  MediaStore.ensureInitialized();
+
+  // Initialize env
+  await dotenv.load(fileName: ".env");
+
+  // Initialize firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseApi().init_notification();
+
+  // Initialize sqlite
   await Sqlite.instance.init();
 
   SystemChrome.setPreferredOrientations([

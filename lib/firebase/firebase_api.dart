@@ -267,7 +267,7 @@ class FirebaseApi {
     FirebaseMessaging.onMessage.listen(handle_message);
 
     // Register FCM token with backend if user is logged in
-    if (!await utils.hasInternet()) return;
+    if (!await utils.has_internet()) return;
 
     final token = await _firebase_messaging.getToken();
     if (token == null) return;

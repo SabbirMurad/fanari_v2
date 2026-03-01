@@ -43,7 +43,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
   ''';
 
   void selectImage(ImageSource source) async {
-    Uint8List? img = await utils.pickSingleImage(
+    Uint8List? img = await utils.pick_single_image(
       context: context,
       source: source,
       // crop: false,
@@ -74,19 +74,19 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
                   onTap: () {
                     if (image != null || widget.currentImage != null) {
                       if (image != null) {
-                        utils.openImageViewer(
+                        utils.open_image_viewer(
                           context: context,
                           images: [MemoryImage(image!)],
                         );
                       } else {
-                        utils.openImageViewer(
+                        utils.open_image_viewer(
                           context: context,
                           images: [widget.currentImage!],
                         );
                       }
                     } else {
                       if (widget.enable) {
-                        utils.showImagePickerOptions(context, selectImage);
+                        utils.show_image_source_picker(context, selectImage);
                       }
                     }
                   },
@@ -163,7 +163,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
               child: GestureDetector(
                 onTap: () {
                   if (!widget.loading) {
-                    utils.showImagePickerOptions(context, selectImage);
+                    utils.show_image_source_picker(context, selectImage);
                   }
                 },
                 child: Container(

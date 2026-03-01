@@ -7,13 +7,7 @@ class UserCore {
 
   UserCore({required this.uuid, required this.username, required this.role});
 
-  UserCore copyWith({
-    String? uuid,
-    String? username,
-    String? role,
-    bool? two_a_factor_auth_enabled,
-    int? two_a_factor_auth_updated,
-  }) {
+  UserCore copyWith({String? uuid, String? username, String? role}) {
     return UserCore(
       uuid: uuid ?? this.uuid,
       username: username ?? this.username,
@@ -50,8 +44,6 @@ class UserProfile {
   UserProfile copyWith({
     String? first_name,
     String? last_name,
-    String? phone_number,
-    int? date_of_birth,
     String? gender,
     ImageModel? profile_picture,
     String? biography,
@@ -99,7 +91,6 @@ class UserSocial {
     int? follower_count,
     int? following_count,
     int? friend_count,
-    int? blocked_count,
   }) {
     return UserSocial(
       like_count: like_count ?? this.like_count,

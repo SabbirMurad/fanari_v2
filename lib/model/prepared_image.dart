@@ -1,10 +1,27 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:blurhash_ffi/blurhash_ffi.dart';
-import 'package:fanari_v2/utils.dart' as utils;
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
+import 'package:fanari_v2/utils.dart' as utils;
+
+class PreparedImageMeta {
+  final int width;
+  final int height;
+  final String blur_hash;
+  final Uint8List bytes;
+  final Uint8List compressed_bytes;
+
+  PreparedImageMeta({
+    required this.width,
+    required this.height,
+    required this.blur_hash,
+    required this.bytes,
+    required this.compressed_bytes,
+  });
+}
 
 class PreparedImage {
   String? uuid;
@@ -21,16 +38,14 @@ class PreparedImage {
 
   Future<PreparedImageMeta> get_prepare_meta() async {
     final bytes = file.readAsBytesSync();
-
-    final Uint8List compressed_bytes = await utils.compressImage(bytes, 400);
+    final compressed_bytes = await utils.compress_image(bytes, 400);
 
     final dir = await getTemporaryDirectory();
-    final newPath =
-        '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.${file.path.split('.').last}';
+    final ext = file.path.split('.').last;
+    final new_path = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.$ext';
 
-    final compressed_file = await File(newPath).create();
-
-    await compressed_file.writeAsBytes(compressed_bytes);
+    await File(new_path).create()
+      ..writeAsBytes(compressed_bytes);
 
     final decoded = img.decodeImage(compressed_bytes)!;
 
@@ -49,31 +64,11 @@ class PreparedImage {
     );
   }
 
-  static PreparedImage fromFile(File file) {
-    return PreparedImage(file: file);
-  }
+  static PreparedImage fromFile(File file) => PreparedImage(file: file);
 
-  static PreparedImage fromFileWithId(File file, String uuid) {
-    return PreparedImage(file: file, uuid: uuid);
-  }
+  static PreparedImage fromFileWithId(File file, String uuid) =>
+      PreparedImage(file: file, uuid: uuid);
 
-  static List<PreparedImage> fromFiles(List<File> files) {
-    return files.map((file) => PreparedImage(file: file)).toList();
-  }
-}
-
-class PreparedImageMeta {
-  final int width;
-  final int height;
-  final String blur_hash;
-  final Uint8List bytes;
-  final Uint8List compressed_bytes;
-
-  PreparedImageMeta({
-    required this.width,
-    required this.height,
-    required this.blur_hash,
-    required this.bytes,
-    required this.compressed_bytes,
-  });
+  static List<PreparedImage> fromFiles(List<File> files) =>
+      files.map((f) => PreparedImage(file: f)).toList();
 }

@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
-import 'package:fanari_v2/providers/author.dart';
-import 'package:fanari_v2/providers/post.dart';
+import 'package:fanari_v2/provider/author.dart';
+import 'package:fanari_v2/provider/post.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/custom_dropdown.dart';
@@ -588,7 +588,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   void _createPost() async {
     List<String> image_ids = [];
     if (_selectedImages.isNotEmpty) {
-      final ids = await utils.uploadImages(
+      final ids = await utils.upload_images(
         images: _selectedImages,
         used_at: utils.AssetUsedAt.Post,
       );
@@ -599,7 +599,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     List<String> video_ids = [];
     if (_selectedVideoPath != null) {
-      final video_id = await utils.uploadVideo(path: _selectedVideoPath!);
+      final video_id = await utils.upload_video(path: _selectedVideoPath!);
 
       if (video_id == null) {
         printLine('Failed to upload video');
@@ -696,7 +696,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       _loadingVideo = true;
     });
 
-    final videos = await utils.pickVideoFromGallery(context: context, limit: 1);
+    final videos = await utils.pick_videos_from_gallery(
+      context: context,
+      limit: 1,
+    );
 
     if (videos == null) {
       setState(() {
@@ -724,7 +727,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
 
     if (compressedVideo == null) {
-      utils.showCustomToast(
+      utils.show_custom_toast(
         text: 'Something went wrong, compressing the video',
       );
       setState(() {
@@ -753,7 +756,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Future<void> _handleGalleryTap() async {
-    final images = await utils.pickImageFromGallery(context: context);
+    final images = await utils.pick_images_from_gallery(context: context);
 
     if (images == null) return;
 

@@ -556,9 +556,9 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                             return _photoWidget(
                               photo: photo,
                               onTap: () {
-                                utils.openImageViewer(
+                                utils.open_image_viewer(
                                   context: context,
-                                  index: index,
+                                  initial_index: index,
                                   images: [
                                     ..._selectedPlaceDetails!['photos'].map((
                                       item,
