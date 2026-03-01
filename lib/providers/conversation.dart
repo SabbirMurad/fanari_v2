@@ -65,25 +65,56 @@ class ConversationNotifier extends _$ConversationNotifier {
     required String conversation_id,
     required TextModel message,
   }) async {
-    for (int i = 0; i < state.value!.length; i++) {
-      if (state.value![i].core.uuid == conversation_id) {
-        state.value![i].texts = [message, ...state.value![i].texts];
-        break;
-      }
-    }
+    final isTemp = message.uuid.startsWith('temp_');
 
-    Future.microtask(() async {
-      for (int i = 0; i < state.value!.length; i++) {
-        if (state.value![i].core.uuid == conversation_id) {
-          // Load third party data later so ui does not block
-          final loaded_data = await state.value![i].texts[0]
-              .load3rdPartyInfos();
-          if (loaded_data == null) return;
-          state.value![i].texts[0] = loaded_data;
-          break;
+    final updated = state.value!.map((conv) {
+      if (conv.core.uuid != conversation_id) return conv;
+
+      List<TextModel> newTexts;
+
+      if (!isTemp) {
+        // Check if there's a temp image message to replace
+        final tempIndex = conv.texts.indexWhere(
+          (t) => t.uuid.startsWith('temp_') && t.type == message.type,
+        );
+
+        if (tempIndex != -1) {
+          // Replace temp with real server message
+          newTexts = List.from(conv.texts);
+          newTexts[tempIndex] = message;
+        } else {
+          // Normal incoming message, prepend
+          newTexts = [message, ...conv.texts];
         }
+      } else {
+        // Temp message, just prepend
+        newTexts = [message, ...conv.texts];
       }
-    });
+
+      return conv.copyWith(texts: newTexts);
+    }).toList();
+
+    state = AsyncValue.data(updated);
+
+    // Only load 3rd party infos for non-temp messages
+    if (!isTemp) {
+      Future.microtask(() async {
+        final loaded = await message.load3rdPartyInfos();
+        if (loaded == null) return;
+
+        final updated2 = state.value!.map((conv) {
+          if (conv.core.uuid != conversation_id) return conv;
+
+          final newTexts = conv.texts.map((t) {
+            return t.uuid == message.uuid ? loaded : t;
+          }).toList();
+
+          return conv.copyWith(texts: newTexts);
+        }).toList();
+
+        state = AsyncValue.data(updated2);
+      });
+    }
   }
 
   Future<ConversationModel> getTargetConversation(

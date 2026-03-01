@@ -340,7 +340,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       List<ImageModel> temp_images = [];
       int now = DateTime.now().microsecondsSinceEpoch;
       for (int i = 0; i < message.images!.length; i++) {
-        final image = message.images![0];
+        final image = message.images![i];
 
         now++;
         temp_images.add(
@@ -436,7 +436,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                 children: [
                   SizedBox(height: 72.h),
                   ..._textWidgets(target_conversation.texts),
-                  SizedBox(height: 84.h),
+                  SizedBox(height: 124.h),
                 ],
               ),
             ),

@@ -23,8 +23,8 @@ class ToastTypesInfo {
         image = SvgPicture.string(
           successSvg,
           color: Colors.green,
-          height: 24.w,
-          width: 24.w,
+          height: 20.w,
+          width: 20.w,
         );
         break;
       case ToastTypes.error:
@@ -32,8 +32,8 @@ class ToastTypesInfo {
         image = SvgPicture.string(
           warningSvg,
           color: Colors.red,
-          height: 24.w,
-          width: 24.w,
+          height: 20.w,
+          width: 20.w,
         );
 
         break;
@@ -42,8 +42,8 @@ class ToastTypesInfo {
         image = SvgPicture.string(
           warningSvg,
           color: Colors.orange,
-          height: 24.w,
-          width: 24.w,
+          height: 20.w,
+          width: 20.w,
         );
         break;
       case ToastTypes.info:
@@ -51,8 +51,8 @@ class ToastTypesInfo {
         image = SvgPicture.string(
           infoSvg,
           color: Colors.blue,
-          height: 24.w,
-          width: 24.w,
+          height: 20.w,
+          width: 20.w,
         );
         break;
     }
@@ -140,30 +140,30 @@ class _CustomToastNotificationState extends State<CustomToastNotification>
       padding: const EdgeInsets.all(12.0),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        color: Color(0xff242424).withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           widget.toastType.image,
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: SizedBox(
               width: double.infinity,
               child: Text(
                 widget.text,
                 style: TextStyle(
-                  color: AppColors.surface,
-                  fontSize: 15,
+                  color: Colors.white,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12.0),
+          SizedBox(width: 12.w),
           GestureDetector(
             onTap: () {
               widget.onCloseClick?.call();
@@ -173,8 +173,8 @@ class _CustomToastNotificationState extends State<CustomToastNotification>
               children: [
                 Icon(Icons.close, color: widget.toastType.color, size: 16),
                 SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 20.w,
+                  height: 20.w,
                   child: CircularProgressIndicator(
                     color: widget.toastType.color,
                     value: progress,

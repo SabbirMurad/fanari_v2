@@ -745,7 +745,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                             _spacialTextController.text = '';
                             Future.delayed(Duration(milliseconds: 500), () {
                               setState(() {
-                                _selectedImages.clear();
+                                _selectedImages.clear(); 
                               });
                             });
                           },

@@ -3,11 +3,11 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
+import 'package:fanari_v2/widgets/image_placeholder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
-// import 'package:vector_math/vector_math.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class MultipleImageCard extends StatefulWidget {
   final TextDirection decoration;
@@ -25,6 +25,43 @@ class MultipleImageCard extends StatefulWidget {
 
 class _MultipleImageCardState extends State<MultipleImageCard> {
   Widget _image(ImageModel image) {
+    late Widget imageWidget;
+    if (image.local) {
+      imageWidget = Stack(
+        alignment: Alignment.center,
+        children: [
+          Image(
+            image: MemoryImage(image.local_bytes!),
+            fit: BoxFit.cover,
+            height: double.infinity,
+          ),
+          
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Color(0xff181818).withValues(alpha: 0.2),
+          ),
+          SizedBox(
+            width: 24.w,
+            height: 24.w,
+            child: SpinKitFoldingCube(color: AppColors.white, size: 24.w),
+          ),
+        ],
+      );
+    } else {
+      imageWidget = CachedNetworkImage(
+        imageUrl: image.webp_url,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        placeholder: (context, url) {
+          return ImagePlaceholder(blur_hash: image.blur_hash);
+        },
+        errorWidget: (context, url, error) {
+          return ImageErrorWidget(blur_hash: image.blur_hash);
+        },
+      );
+    }
+
     return Container(
       width: 146.w,
       height: 183.w,
@@ -40,25 +77,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        child: CachedNetworkImage(
-          imageUrl: image.webp_url,
-          height: double.infinity,
-          fit: BoxFit.cover,
-          placeholder: (context, url) {
-            return SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: BlurHash(
-                hash: image.blur_hash,
-                color: AppColors.secondary,
-                optimizationMode: BlurHashOptimizationMode.approximation,
-              ),
-            );
-          },
-          errorWidget: (context, url, error) {
-            return ImageErrorWidget(blur_hash: image.blur_hash);
-          },
-        ),
+        child: imageWidget,
       ),
     );
   }

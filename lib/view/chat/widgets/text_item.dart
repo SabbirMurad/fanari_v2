@@ -16,6 +16,7 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class TextItemWidget extends StatefulWidget {
   final TextModel model;
@@ -210,7 +211,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
   }
 
   Widget _singleImage() {
-    double carouselHeight = 236.h;
+    double carouselHeight = 172.h;
 
     double imageWidth =
         (carouselHeight * widget.model.images!.first.width) /
@@ -250,11 +251,26 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     late final Widget imageWidget;
 
     if (widget.model.images!.first.local) {
-      imageWidget = Image.memory(
-        widget.model.images!.first.local_bytes!,
-        width: imageWidth,
-        height: carouselHeight,
-        fit: BoxFit.cover,
+      imageWidget = Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.memory(
+            widget.model.images!.first.local_bytes!,
+            width: imageWidth,
+            height: carouselHeight,
+            fit: BoxFit.cover,
+          ),
+          Container(
+            width: imageWidth,
+            height: carouselHeight,
+            color: Color(0xff181818).withValues(alpha: 0.2),
+          ),
+          SizedBox(
+            width: 24.w,
+            height: 24.w,
+            child: SpinKitFoldingCube(color: AppColors.white, size: 24.w),
+          ),
+        ],
       );
     } else {
       imageWidget = CachedNetworkImage(
@@ -293,6 +309,8 @@ class _TextItemWidgetState extends State<TextItemWidget> {
             }
             return;
           }
+
+          if (widget.model.images!.first.local) return;
 
           utils.openImageViewer(
             context: context,
