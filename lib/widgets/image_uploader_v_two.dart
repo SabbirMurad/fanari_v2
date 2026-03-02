@@ -28,7 +28,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
   Uint8List? image;
 
   void selectImage(ImageSource source) async {
-    Uint8List? img = await utils.pickSingleImage(
+    Uint8List? img = await utils.pick_single_image(
       context: context,
       source: source,
     );
@@ -62,7 +62,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
           alignment: const Alignment(0, -1),
           child: GestureDetector(
             onTap: () {
-              utils.openImageViewer(context: context, images: [getImage()]);
+              utils.open_image_viewer(context: context, images: [getImage()]);
             },
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -83,7 +83,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
             alignment: const Alignment(0.95, -0.9),
             child: GestureDetector(
               onTap: () {
-                utils.showImagePickerOptions(context, selectImage);
+                utils.show_image_source_picker(context, selectImage);
               },
               child: CircleAvatar(
                 backgroundColor: const Color.fromRGBO(24, 24, 24, 0.2),

@@ -28,7 +28,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 
   void _loadPostExtras() async {
     for (final item in _comments) {
-      await item.load3rdPartyInfos();
+      await item.load_third_party_infos();
     }
 
     if (mounted) {

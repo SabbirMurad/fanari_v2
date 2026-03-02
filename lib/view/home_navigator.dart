@@ -1,7 +1,12 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
+<<<<<<< HEAD
 import 'package:fanari_v2/provider/socket.dart';
 import 'package:fanari_v2/socket/socket.dart';
+=======
+import 'package:fanari_v2/provider/author.dart';
+import 'package:fanari_v2/socket.dart';
+>>>>>>> 8b160472ef9c49c60b57f7c3ced8ed0ffe8eb436
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';
 import 'package:fanari_v2/view/search/search.dart';

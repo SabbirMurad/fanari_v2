@@ -332,9 +332,9 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
       _playClicked = true;
     });
 
-    final url = Uri.parse(widget.item.video!.videoUrl);
+    final url = Uri.parse(widget.item.video!.video_url);
 
-    printLine('Video URL: ${widget.item.video!.videoUrl}');
+    printLine('Video URL: ${widget.item.video!.video_url}');
 
     _videoPlayerController =
         VideoPlayerController.networkUrl(

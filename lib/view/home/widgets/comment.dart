@@ -97,7 +97,7 @@ class _CommentWidgetState extends State<CommentWidget> {
           ),
           const SizedBox(width: 8),
           Text(
-            utils.formatNumberMagnitude(widget.model.like_count.toDouble()),
+            utils.format_number_magnitude(widget.model.like_count.toDouble()),
             style: TextStyle(
               color: AppColors.text,
               fontSize: 15.sp,
@@ -121,7 +121,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    utils.formatNumberMagnitude(
+                    utils.format_number_magnitude(
                       widget.model.reply_count.toDouble(),
                     ),
                     style: TextStyle(
@@ -160,7 +160,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                utils.prettyDate(widget.model.created_at),
+                utils.pretty_date(widget.model.created_at),
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 10.sp,

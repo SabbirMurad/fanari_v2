@@ -24,11 +24,11 @@ class ConversationCore {
     );
   }
 
-  ConversationCore copyWith({String? uuid, ConversationType? type}) {
+  ConversationCore copyWith({String? uuid, ConversationType? type, int? last_message_at}) {
     return ConversationCore(
       uuid: uuid ?? this.uuid,
       type: type ?? this.type,
-      last_message_at: this.last_message_at,
+      last_message_at: last_message_at ?? this.last_message_at,
     );
   }
 }
@@ -83,7 +83,7 @@ class ConversationSingleMetadata {
   }
 
   ConversationSingleMetadata copyWith({
-    String? uuid,
+    String? user_id,
     String? first_name,
     String? last_name,
     ImageModel? image,
@@ -91,7 +91,7 @@ class ConversationSingleMetadata {
     int? last_seen,
   }) {
     return ConversationSingleMetadata(
-      user_id: uuid ?? this.user_id,
+      user_id: user_id ?? this.user_id,
       first_name: first_name ?? this.first_name,
       last_name: last_name ?? this.last_name,
       image: image ?? this.image,
@@ -108,7 +108,7 @@ class ConversationModel {
 
   bool typing;
   List<TextModel> texts;
-  bool initial_text_loaded = false;
+  bool initial_text_loaded;
 
   ConversationModel({
     required this.core,
@@ -119,7 +119,7 @@ class ConversationModel {
     this.initial_text_loaded = false,
   });
 
-  static ConversationModel fromJson(Map<String, dynamic> json) {
+  factory ConversationModel.fromJson(Map<String, dynamic> json) {
     return ConversationModel(
       core: ConversationCore.fromJson(json['core']),
       group_metadata: json['group_metadata'] != null
@@ -137,6 +137,7 @@ class ConversationModel {
     ConversationSingleMetadata? single_metadata,
     List<TextModel>? texts,
     bool? typing,
+    bool? initial_text_loaded,
   }) {
     return ConversationModel(
       core: core ?? this.core,
@@ -144,15 +145,11 @@ class ConversationModel {
       single_metadata: single_metadata ?? this.single_metadata,
       texts: texts ?? this.texts,
       typing: typing ?? this.typing,
+      initial_text_loaded: initial_text_loaded ?? this.initial_text_loaded,
     );
   }
 
-  static List<ConversationModel> fromJsonList(dynamic json) {
-    List<ConversationModel> newPosts = [];
-    for (var i = 0; i < json.length; i++) {
-      newPosts.add(ConversationModel.fromJson(json[i]));
-    }
-
-    return newPosts;
+  static List<ConversationModel> fromJsonList(List<dynamic> json) {
+    return json.map((item) => ConversationModel.fromJson(item)).toList();
   }
 }

@@ -1,33 +1,40 @@
 part of '../utils.dart';
 
-void showReportWidget({required BuildContext context}) {
+// ── Bottom-sheet launcher ─────────────────────────────────────────────────────
+
+void show_report_widget({required BuildContext context}) {
   showModalBottomSheet(
     backgroundColor: Colors.transparent,
     context: context,
     isScrollControlled: true,
     elevation: 0,
-    builder: (context) {
-      return GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: Colors.transparent,
-          child: Center(
-            child: GestureDetector(
-              onTap: () {
-                // Do nothing here, this prevents the gesture detector of the whole container
-              },
-              child: ReportWidget(),
-            ),
+    builder: (_) => GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.transparent,
+        child: Center(
+          child: GestureDetector(
+            onTap: () {},
+            child: const ReportWidget(),
           ),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
+
+// ── Report options ────────────────────────────────────────────────────────────
+
+const _report_options = [
+  'Spam or Misinformation',
+  'Hate Speech or Violence',
+  'Threats or Harassment',
+  'Others',
+];
+
+// ── Widget ────────────────────────────────────────────────────────────────────
 
 class ReportWidget extends StatefulWidget {
   const ReportWidget({super.key});
@@ -37,15 +44,9 @@ class ReportWidget extends StatefulWidget {
 }
 
 class _ReportWidgetState extends State<ReportWidget> {
-  final TextEditingController _controller = TextEditingController();
-  int charCount = 0;
-
-  String? _selectedOption;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final _controller = TextEditingController();
+  String? _selected_option;
+  int _char_count = 0;
 
   @override
   void dispose() {
@@ -53,15 +54,16 @@ class _ReportWidgetState extends State<ReportWidget> {
     super.dispose();
   }
 
-  TextStyle _reportOptionTextStyle() {
-    return TextStyle(
-      color: Theme.of(context).colorScheme.tertiary,
-      fontSize: 14,
-    );
-  }
+  TextStyle get _option_style => TextStyle(
+        color: Theme.of(context).colorScheme.tertiary,
+        fontSize: 14,
+      );
 
   @override
   Widget build(BuildContext context) {
+    final tertiary = Theme.of(context).colorScheme.tertiary;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Container(
       width: 1.sw - 24,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
@@ -76,223 +78,86 @@ class _ReportWidgetState extends State<ReportWidget> {
           Text(
             'Report',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.tertiary,
+              color: tertiary,
               fontSize: 21,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 12),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Radio(
-                    value: 'Spam or Misinformation',
-                    groupValue: _selectedOption,
-                    fillColor:
-                        _selectedOption == 'Spam or Misinformation'
-                            ? WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.primary,
-                            )
-                            : WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.tertiary,
-                            ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedOption = value!;
-                      });
-                    },
+          ..._report_options.map(
+            (option) => Row(
+              children: [
+                Radio<String>(
+                  value: option,
+                  groupValue: _selected_option,
+                  fillColor: WidgetStatePropertyAll(
+                    _selected_option == option ? primary : tertiary,
                   ),
-                  Text(
-                    'Spam or Misinformation',
-                    style: _reportOptionTextStyle(),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Radio(
-                    value: 'Hate Speech or Violence',
-                    groupValue: _selectedOption,
-                    fillColor:
-                        _selectedOption == 'Hate Speech or Violence'
-                            ? WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.primary,
-                            )
-                            : WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.tertiary,
-                            ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedOption = value!;
-                      });
-                    },
-                  ),
-                  Text(
-                    'Hate Speech or Violence',
-                    style: _reportOptionTextStyle(),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Radio(
-                    value: 'Threats or Harassment',
-                    groupValue: _selectedOption,
-                    fillColor:
-                        _selectedOption == 'Threats or Harassment'
-                            ? WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.primary,
-                            )
-                            : WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.tertiary,
-                            ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedOption = value!;
-                      });
-                    },
-                  ),
-                  Text(
-                    'Threats or Harassment',
-                    style: _reportOptionTextStyle(),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Radio(
-                    value: 'Others',
-                    groupValue: _selectedOption,
-                    fillColor:
-                        _selectedOption == 'Others'
-                            ? WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.primary,
-                            )
-                            : WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.tertiary,
-                            ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedOption = value!;
-                      });
-                    },
-                  ),
-                  Text('Others', style: _reportOptionTextStyle()),
-                ],
-              ),
-            ],
+                  onChanged: (value) =>
+                      setState(() => _selected_option = value),
+                ),
+                Text(option, style: _option_style),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _controller,
-            onChanged: (value) {
-              setState(() {
-                charCount = value.length;
-              });
-            },
+            onChanged: (value) =>
+                setState(() => _char_count = value.length),
             decoration: InputDecoration(
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.error,
-                  width: 21,
-                ),
-              ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 18,
                 vertical: 16,
               ),
               hintText: 'Give a brief description ...',
-              hintStyle: TextStyle(
-                color: Theme.of(
-                  context,
-                ).colorScheme.tertiary.withValues(alpha: .6),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.tertiary.withValues(alpha: .6),
-                  width: 1,
-                ),
-              ),
+              hintStyle: TextStyle(color: tertiary.withValues(alpha: .6)),
               border: OutlineInputBorder(
-                gapPadding: 4,
-                borderSide: BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.tertiary.withValues(alpha: .6),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: tertiary.withValues(alpha: .6)),
               ),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.tertiary.withValues(alpha: .6),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: tertiary.withValues(alpha: .6)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: tertiary.withValues(alpha: .6)),
               ),
             ),
             maxLines: 3,
             minLines: 3,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.tertiary,
-              fontSize: 15,
-            ),
+            style: TextStyle(color: tertiary, fontSize: 15),
           ),
-          SizedBox(height: 18),
+          const SizedBox(height: 8),
           Text(
-            '$charCount / 256',
+            '$_char_count / 256',
             style: TextStyle(
-              color: Theme.of(
-                context,
-              ).colorScheme.tertiary.withValues(alpha: .6),
+              color: tertiary.withValues(alpha: .6),
               fontSize: 14,
-              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.tertiary.withValues(alpha: .8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              _text_button('Cancel', on_tap: () => Navigator.of(context).pop()),
               const SizedBox(width: 6),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'Submit',
-                  style: TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.tertiary.withValues(alpha: .8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              _text_button('Submit', on_tap: () => Navigator.of(context).pop()),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _text_button(String label, {required VoidCallback on_tap}) {
+    return TextButton(
+      onPressed: on_tap,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.tertiary.withValues(alpha: .8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

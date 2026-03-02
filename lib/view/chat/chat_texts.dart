@@ -146,7 +146,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
                               Text(
                                 model.single_metadata!.online
                                     ? 'Online'
-                                    : 'Last seen - ${utils.timeAgo(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
+                                    : 'Last seen - ${utils.time_ago(DateTime.fromMillisecondsSinceEpoch(model.single_metadata!.last_seen))}',
                                 style: TextStyle(
                                   color: AppColors.text,
                                   fontWeight: FontWeight.w400,
@@ -253,7 +253,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
               ),
               SizedBox(width: 12.w),
               Text(
-                utils.prettyDate(text.created_at),
+                utils.pretty_date(text.created_at),
                 style: TextStyle(
                   color: AppColors.border.withValues(alpha: .5),
                   fontWeight: FontWeight.w400,
@@ -376,7 +376,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             message: temp_text,
           );
 
-      final images = await utils.uploadImages(
+      final images = await utils.upload_images(
         images: message.images!,
         used_at: utils.AssetUsedAt.Chat,
         temporary: false,

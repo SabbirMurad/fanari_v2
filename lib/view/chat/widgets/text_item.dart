@@ -312,7 +312,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
 
           if (widget.model.images!.first.local) return;
 
-          utils.openImageViewer(
+          utils.open_image_viewer(
             context: context,
             images: [widget.model.images!.first.provider],
           );

@@ -5,10 +5,10 @@ class AttachmentModel {
   int size;
 
   AttachmentModel({
-    required this.size,
     required this.type,
     required this.uuid,
     required this.name,
+    required this.size,
   });
 
   factory AttachmentModel.fromJson(Map<String, dynamic> json) {

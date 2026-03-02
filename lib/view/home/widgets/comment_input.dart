@@ -351,7 +351,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   }
 
   Future<void> _handleGalleryTap() async {
-    final images = await utils.pickImageFromGallery(context: context);
+    final images = await utils.pick_images_from_gallery(context: context);
 
     if (images == null) return;
 

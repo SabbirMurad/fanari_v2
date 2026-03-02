@@ -1,4 +1,19 @@
-enum PollType { Single, Multiple }
+enum PollType { single, multiple }
+
+class _PollOption {
+  final String text;
+  final int vote;
+
+  const _PollOption({required this.text, required this.vote});
+
+  factory _PollOption.fromJson(Map<String, dynamic> json) {
+    return _PollOption(text: json['text'], vote: json['vote']);
+  }
+
+  static List<_PollOption> fromJsonList(List<dynamic> json) {
+    return json.map((item) => _PollOption.fromJson(item)).toList();
+  }
+}
 
 class PollModel {
   final String uuid;
@@ -6,7 +21,7 @@ class PollModel {
   final PollType type;
   final bool can_add_option;
   final List<int> selected_options;
-  final List<PollOption> options;
+  final List<_PollOption> options;
   final int total_vote;
 
   const PollModel({
@@ -20,34 +35,16 @@ class PollModel {
   });
 
   factory PollModel.fromJson(Map<String, dynamic> json) {
-    List<int> selected_options = [];
-    for (var i = 0; i < json['selected_option'].length; i++) {
-      selected_options.add(json['selected_option'][i]);
-    }
+    final selected_options = List<int>.from(json['selected_option']);
 
     return PollModel(
       uuid: json['uuid'],
       question: json['question'],
-      type: json['type'] == 'Single' ? PollType.Single : PollType.Multiple,
+      type: json['type'] == 'Single' ? PollType.single : PollType.multiple,
       can_add_option: json['can_add_option'],
       selected_options: selected_options,
-      options: PollOption.fromJsonList(json['options']),
+      options: _PollOption.fromJsonList(json['options']),
       total_vote: json['total_vote'],
     );
-  }
-}
-
-class PollOption {
-  final String text;
-  final int vote;
-
-  const PollOption({required this.text, required this.vote});
-
-  factory PollOption.fromJson(Map<String, dynamic> json) {
-    return PollOption(text: json['text'], vote: json['vote']);
-  }
-
-  static List<PollOption> fromJsonList(List<dynamic> json) {
-    return json.map((item) => PollOption.fromJson(item)).toList();
   }
 }

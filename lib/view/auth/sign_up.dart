@@ -139,8 +139,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       final response = await utils.CustomHttp.get(
         endpoint: '/auth/user/${value}',
-        needAuth: false,
-        showFloatingError: false,
+        need_auth: false,
+        show_floating_error: false,
       );
 
       if (!response.ok) {
@@ -186,8 +186,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       final response = await utils.CustomHttp.get(
         endpoint: '/auth/user/${value}',
-        needAuth: false,
-        showFloatingError: false,
+        need_auth: false,
+        show_floating_error: false,
       );
 
       if (!response.ok) {
@@ -246,12 +246,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           text: 'Next',
           onTap: () {
             if (_firstNameController.text.isEmpty) {
-              utils.showCustomToast(text: 'Please enter your first name.');
+              utils.show_custom_toast(text: 'Please enter your first name.');
               return;
             }
 
             if (_lastNameController.text.isEmpty) {
-              utils.showCustomToast(text: 'Please enter your last name.');
+              utils.show_custom_toast(text: 'Please enter your last name.');
               return;
             }
 

@@ -41,6 +41,7 @@ class _localStorageAccessToken {
   }
 }
 
+
 class _localStorageAccessTokenValidTill {
   static const String key = 'access_token_valid_till';
 

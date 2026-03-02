@@ -1,48 +1,25 @@
 part of '../utils.dart';
 
-String getShortName(String name) {
-  final List<String> attributes = [
-    "md",
-    "Md",
-    "Md.",
-    "md.",
-    "MD",
-    "MD.",
-    "Mst",
-    "Mst.",
-    "mst.",
-    "MST",
-    "MST.",
-    "mst.",
-    "Dr",
-    "Dr.",
-    "dr.",
-    "DR",
-    "DR.",
-    "dr.",
-    "Prof",
-    "Prof.",
-    "prof.",
-    "PROF",
-    "PROF.",
-    "prof.",
-    "PhD",
-    "PhD.",
-    "phd.",
-    "PhD",
-    "PhD.",
-    "phd.",
-  ];
+/// Returns a display-friendly short version of a full [name].
+///
+/// If the name starts with a known title prefix (e.g. "Dr.", "Prof."), the
+/// first two tokens are kept; otherwise only the first name is returned.
+String get_short_name(String name) {
+  const title_prefixes = {
+    'md', 'md.', 'mst', 'mst.',
+    'dr', 'dr.',
+    'prof', 'prof.',
+    'phd', 'phd.',
+  };
 
-  List<String> split = name.split(" ");
+  final parts = name.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty) return name;
 
-  if (attributes.contains(split[0])) {
-    if (split.length < 2) {
-      return split[0];
-    } else {
-      return '${split[0]} ${split[1]}';
-    }
-  } else {
-    return split[0];
+  final first_lower = parts.first.toLowerCase();
+
+  if (title_prefixes.contains(first_lower)) {
+    return parts.length > 1 ? '${parts[0]} ${parts[1]}' : parts[0];
   }
+
+  return parts.first;
 }

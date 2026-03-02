@@ -1,10 +1,12 @@
 part of '../utils.dart';
 
-Future<List<File>?> pickAudioFromGallery({
+/// Opens the asset picker restricted to audio files.
+/// Returns up to [limit] (default 1) files, or null if the user cancelled.
+Future<List<File>?> pick_audio_from_gallery({
   required BuildContext context,
   int? limit,
 }) async {
-  final List<AssetEntity>? result = await AssetPicker.pickAssets(
+  final results = await AssetPicker.pickAssets(
     context,
     pickerConfig: AssetPickerConfig(
       themeColor: Theme.of(context).colorScheme.primary,
@@ -13,14 +15,12 @@ Future<List<File>?> pickAudioFromGallery({
     ),
   );
 
-  if (result == null) return null;
+  if (results == null) return null;
 
-  List<File> files = [];
-  for (final element in result) {
-    final file = await element.file;
-    if (file == null) continue;
-    files.add(file);
+  final files = <File>[];
+  for (final asset in results) {
+    final file = await asset.file;
+    if (file != null) files.add(file);
   }
-
   return files;
 }

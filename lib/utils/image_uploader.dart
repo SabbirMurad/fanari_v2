@@ -2,25 +2,24 @@ part of '../utils.dart';
 
 enum AssetUsedAt { ProfilePic, CoverPic, Post, Comment, Chat, VideoThumbnail }
 
-Future<List<String>?> uploadImages({
+/// Uploads [images] to the server and returns their assigned IDs.
+///
+/// Throws if any image in the list is still being prepared.
+Future<List<String>?> upload_images({
   required List<PreparedImage> images,
   required AssetUsedAt used_at,
   bool temporary = true,
 }) async {
-  for (int i = 0; i < images.length; i++) {
-    if (images[i].preparing) {
-      throw 'image still preparing';
-    }
+  for (final image in images) {
+    if (image.preparing) throw StateError('Image is still being prepared.');
   }
 
-  var uri = Uri.parse('${AppCredentials.domain}/image');
-  var request = http.MultipartRequest('POST', uri);
+  final uri = Uri.parse('${AppCredentials.domain}/image');
+  final request = http.MultipartRequest('POST', uri);
 
-  printLine(images.length);
   for (int i = 0; i < images.length; i++) {
-    final p = images[i];
-
-    final meta = p.meta!;
+    final prepared = images[i];
+    final meta = prepared.meta!;
 
     request.files.add(
       http.MultipartFile.fromBytes(
@@ -30,9 +29,7 @@ Future<List<String>?> uploadImages({
       ),
     );
 
-    if (p.uuid != null) {
-      request.fields['uuid_$i'] = p.uuid!;
-    }
+    if (prepared.uuid != null) request.fields['uuid_$i'] = prepared.uuid!;
 
     request.fields['width_$i'] = '${meta.width}';
     request.fields['height_$i'] = '${meta.height}';
@@ -41,22 +38,19 @@ Future<List<String>?> uploadImages({
     request.fields['temporary_$i'] = temporary.toString();
   }
 
-  printLine(request.fields);
+  printLine('Uploading ${images.length} image(s): ${request.fields}');
 
-  var response = await request.send();
+  final response = await request.send();
 
-  if (response.statusCode == 200) {
+  if (response.statusCode != 200) {
     final body = await response.stream.bytesToString();
-    final json = jsonDecode(body);
-    List<String> imageIds = [];
-
-    for (int i = 0; i < json.length; i++) {
-      imageIds.add(json[i]);
-    }
-    return imageIds;
-  } else {
-    printLine('Upload failed: ${response.statusCode}');
-    printLine('Upload failed: ${await response.stream.bytesToString()}');
-    return null;
+    final json = jsonDecode(body) as List<dynamic>;
+    return json.cast<String>();
   }
+
+  printLine(
+    'Image upload failed (${response.statusCode}): '
+    '${await response.stream.bytesToString()}',
+  );
+  return null;
 }

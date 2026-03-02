@@ -6,7 +6,7 @@ part of 'author.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authorNotifierHash() => r'42f0307bf54c0a3aec0f95a672cf317b08f92fda';
+String _$authorNotifierHash() => r'ddbf1f52f76e6b37182c6dddaec98265edf4b8bb';
 
 /// See also [AuthorNotifier].
 @ProviderFor(AuthorNotifier)

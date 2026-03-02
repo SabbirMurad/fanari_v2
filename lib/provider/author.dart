@@ -26,10 +26,10 @@ class AuthorNotifier extends _$AuthorNotifier {
   }
 
   Future<AuthorModel?> _getAuthorDetails() async {
-    if (!await utils.hasInternet()) {
+    if (!await utils.has_internet()) {
       // final cacheUser = await _userFromCache();
 
-      utils.showCustomToast(text: 'Please check your internet connection');
+      utils.show_custom_toast(text: 'Please check your internet connection');
       return null;
     }
 
@@ -49,7 +49,7 @@ class AuthorNotifier extends _$AuthorNotifier {
     final response = await utils.CustomHttp.post(
       endpoint: '/auth/sign-in',
       body: {'email_or_username': email_or_username, 'password': password},
-      needAuth: false,
+      need_auth: false,
     );
 
     if (!response.ok) return false;
@@ -91,7 +91,7 @@ class AuthorNotifier extends _$AuthorNotifier {
         'password': password,
         'confirm_password': confirm_password,
       },
-      needAuth: false,
+      need_auth: false,
     );
 
     if (response.ok) {
@@ -108,10 +108,10 @@ class AuthorNotifier extends _$AuthorNotifier {
     final response = await utils.CustomHttp.post(
       endpoint: '/auth/validate-email',
       body: {'user_id': user_id, 'verification_code': otp},
-      needAuth: false,
+      need_auth: false,
     );
 
-    if (response.statusCode == 200) {
+    if (response.ok) {
       final data = response.data;
 
       await LocalStorage.access_token.set(data['access_token']);

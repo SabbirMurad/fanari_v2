@@ -81,7 +81,7 @@ class _YoutubeAttachmentWidgetState extends State<YoutubeAttachmentWidget> {
             ),
             Spacer(),
             Text(
-              widget.model.contentDetails.duration,
+              widget.model.content_details.duration,
               style: TextStyle(
                 color: widget.textColor ?? AppColors.text,
                 fontWeight: FontWeight.w500,
@@ -234,11 +234,11 @@ class _YoutubeAttachmentWidgetState extends State<YoutubeAttachmentWidget> {
                   ),
                 ),
               ),
-              if (widget.model.statistics.viewCount != null)
+              if (widget.model.statistics.view_count != null)
                 Padding(
                   padding: EdgeInsets.only(left: 8.w, top: 4.h),
                   child: Text(
-                    '${utils.formatNumberMagnitude(widget.model.statistics.viewCount!.toDouble()).toString()} Views',
+                    '${utils.format_number_magnitude(widget.model.statistics.view_count!.toDouble()).toString()} Views',
                     style: TextStyle(
                       color: widget.textColor ?? AppColors.text,
                       fontWeight: FontWeight.w500,
