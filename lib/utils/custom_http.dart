@@ -106,7 +106,7 @@ class CustomHttp {
 
   static Future<CustomHttpResult> post({
     required String endpoint,
-    bool addApiPrefix = true,
+    bool add_api_prefix = true,
     Map<String, String>? headers,
     dynamic body,
     bool showFloatingError = true,
@@ -116,7 +116,7 @@ class CustomHttp {
     return commonRequests(
       endpoint: endpoint,
       headers: headers,
-      addApiPrefix: addApiPrefix,
+      add_api_prefix: add_api_prefix,
       body: body,
       showFloatingError: showFloatingError,
       needAuth: needAuth,
@@ -127,7 +127,7 @@ class CustomHttp {
 
   static Future<CustomHttpResult> commonRequests({
     required String endpoint,
-    required bool addApiPrefix,
+    required bool add_api_prefix,
     Map<String, String>? headers,
     dynamic body,
     bool showFloatingError = true,
@@ -177,7 +177,7 @@ class CustomHttp {
       }
 
       var url =
-          '${AppCredentials.domain}${addApiPrefix ? '/api' : ''}$endpoint';
+          '${AppCredentials.domain}${add_api_prefix ? '/api' : ''}$endpoint';
 
       if (queries != null) {
         url += '?';

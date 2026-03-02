@@ -1,5 +1,5 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/author.dart';
+import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';

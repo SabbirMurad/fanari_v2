@@ -2,11 +2,12 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/outgoing_text.dart';
 import 'package:fanari_v2/model/text.dart';
-import 'package:fanari_v2/providers/conversation.dart';
-import 'package:fanari_v2/providers/author.dart';
+import 'package:fanari_v2/provider/conversation.dart';
+import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/socket.dart';
+import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
@@ -42,7 +43,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   void dispose() {
     _scrollController.dispose();
 
-    CustomSocket.instance.opened_conversation_id = null;
+    CustomSocket.instance.leave_conversation();
 
     super.dispose();
   }
@@ -325,7 +326,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   void _onMessageSend(CommentInputSubmitValue message) async {
     if (message.text != null && message.text!.isNotEmpty) {
       CustomSocket.instance.send_text(
-        SocketOutgoingTextModel(
+        SocketOutgoingText(
           conversation_id: widget.conversation_id,
           type: TextType.Text,
           text: message.text,
@@ -335,7 +336,6 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
     if (message.images != null && message.images!.length > 0) {
       final my_id = await LocalStorage.user_id.get();
-      printLine('before: ${message.images!.length}');
 
       List<ImageModel> temp_images = [];
       int now = DateTime.now().microsecondsSinceEpoch;
@@ -371,11 +371,10 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
       ref
           .read(conversationNotifierProvider.notifier)
-          .addMessage(
+          .add_message(
             conversation_id: widget.conversation_id,
             message: temp_text,
           );
-      printLine('after: ${message.images!.length}');
 
       final images = await utils.uploadImages(
         images: message.images!,
@@ -389,7 +388,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       }
 
       CustomSocket.instance.send_text(
-        SocketOutgoingTextModel(
+        SocketOutgoingText(
           conversation_id: widget.conversation_id,
           type: TextType.Image,
           images: images,
@@ -412,8 +411,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         .where((element) => element.core.uuid == widget.conversation_id)
         .first;
 
-    CustomSocket.instance.opened_conversation_id =
-        target_conversation.core.uuid;
+    CustomSocket.instance.enter_conversation(target_conversation.core.uuid);
 
     final myself = ref
         .watch(authorNotifierProvider)

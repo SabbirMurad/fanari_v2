@@ -1,7 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
-import 'package:fanari_v2/providers/author.dart';
-import 'package:fanari_v2/socket.dart';
+import 'package:fanari_v2/provider/socket.dart';
+import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/view/home/home.dart';
 import 'package:fanari_v2/view/market/market.dart';
 import 'package:fanari_v2/view/search/search.dart';
@@ -40,8 +40,7 @@ class _HomeNavigatorState extends ConsumerState<HomeNavigator> {
 
   void _loadUserAndConnectSocket() async {
     final access_token = await LocalStorage.access_token.get();
-
-    CustomSocket.instance.connect(ref, access_token: access_token!);
+    initialize_socket(ref, access_token: access_token!);
   }
 
   @override

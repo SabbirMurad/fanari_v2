@@ -1,6 +1,6 @@
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/post.dart';
-import 'package:fanari_v2/providers/user.dart';
+import 'package:fanari_v2/provider/user.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

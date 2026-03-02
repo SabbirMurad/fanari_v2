@@ -1,7 +1,7 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/providers/conversation.dart';
+import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/routes.dart';
-import 'package:fanari_v2/socket.dart';
+import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/view/chat/chat_texts.dart';
 import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/horizontal_options.dart';
@@ -75,12 +75,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
     });
 
-    CustomSocket.instance.in_chat_page = true;
+    CustomSocket.instance.enter_chat_list_page();
   }
 
   @override
   void dispose() {
-    CustomSocket.instance.in_chat_page = false;
+    CustomSocket.instance.leave_chat_list_page();
     super.dispose();
   }
 
