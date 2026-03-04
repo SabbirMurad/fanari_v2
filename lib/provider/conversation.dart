@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fanari_v2/model/conversation.dart';
+import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/socket/socket_events.dart';
 import 'package:fanari_v2/utils.dart' as utils;
@@ -52,7 +53,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
 
     for (final conv in existing) {
-      if (conv.core.type == ConversationType.Single) continue;
+      if (conv.core.type == ConversationType.Group) continue;
       if (conv.single_metadata?.user_id == target_user) {
         return conv.core.uuid;
       }
@@ -61,6 +62,47 @@ class ConversationNotifier extends _$ConversationNotifier {
     final response = await utils.CustomHttp.post(
       endpoint: '/conversation/single',
       body: {'other_user': target_user},
+    );
+
+    if (!response.ok) return null;
+
+    final conv = ConversationModel.fromJson(response.data);
+    state = AsyncValue.data([conv, ...state.value!]);
+    return conv.core.uuid;
+  }
+
+  Future<String?> create_group_conversation({
+    required String group_name,
+    required List<String> members,
+    required PreparedImage? group_image,
+  }) async {
+    var existing = state.value;
+
+    if (existing == null) {
+      final loaded = await _load();
+      if (loaded == null) return null;
+      state = AsyncValue.data(loaded);
+      existing = loaded;
+    }
+
+    String? image_id;
+
+    final image_ids = await utils.upload_images(
+      images: [group_image!],
+      used_at: utils.AssetUsedAt.Chat,
+    );
+
+    if (image_ids == null) {
+      throw Exception('Failed to upload group image');
+    }
+
+    image_id = image_ids.first;
+
+    final body = {'name': group_name, 'members': members, 'image': image_id};
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/conversation/single',
+      body: body,
     );
 
     if (!response.ok) return null;
@@ -110,9 +152,9 @@ class ConversationNotifier extends _$ConversationNotifier {
 
         final refreshed = state.value!.map((conv) {
           if (conv.core.uuid != conversation_id) return conv;
-          final new_texts = conv.texts.map(
-            (t) => t.uuid == message.uuid ? loaded : t,
-          ).toList();
+          final new_texts = conv.texts
+              .map((t) => t.uuid == message.uuid ? loaded : t)
+              .toList();
           return conv.copyWith(texts: new_texts);
         }).toList();
 
@@ -134,8 +176,8 @@ class ConversationNotifier extends _$ConversationNotifier {
       if (conv.core.uuid != event.conversation_id) continue;
 
       final is_group = conv.core.type == ConversationType.Group;
-      final is_other_user = !is_group &&
-          conv.single_metadata?.user_id == event.user_id;
+      final is_other_user =
+          !is_group && conv.single_metadata?.user_id == event.user_id;
 
       if (!is_group && !is_other_user) break; // typing event is from myself
 

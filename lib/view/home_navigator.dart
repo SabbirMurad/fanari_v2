@@ -26,7 +26,7 @@ class _HomeNavigatorState extends ConsumerState<HomeNavigator> {
   List<Widget> _pages = [
     HomeScreen(),
     SearchScreen(),
-    MarketScreen(),
+    MarketScreen(), 
     SettingsScreen(),
   ];
 

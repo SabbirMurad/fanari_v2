@@ -118,9 +118,26 @@ class CustomSocket {
     _schedule_reconnect();
   }
 
-  void _schedule_reconnect() {
+  void _schedule_reconnect() async {
     if (_last_token == null) return; // disconnect() was intentional
     _set_state(SocketState.reconnecting);
+
+    final access_token_valid_till = await LocalStorage.access_token_valid_till
+        .get();
+
+    if (access_token_valid_till! < DateTime.now().millisecondsSinceEpoch) {
+      final success = await utils.CustomHttp.refresh_access_token();
+
+      if (!success) {
+        printLine('Failed to refresh access token');
+        _set_state(SocketState.disconnected);
+        return;
+      }
+
+      final access_token = await LocalStorage.access_token.get();
+      _last_token = access_token!;
+    }
+
     Future.delayed(const Duration(seconds: 3), () {
       if (_last_token != null) connect(access_token: _last_token!);
     });

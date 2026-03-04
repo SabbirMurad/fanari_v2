@@ -38,7 +38,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
 
     final success = await ref
         .read(authorNotifierProvider.notifier)
-        .loadAuthorDetails();
+        .load_author_details();
 
     if (success) {
       setState(() {

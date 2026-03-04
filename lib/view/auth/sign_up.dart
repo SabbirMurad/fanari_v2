@@ -605,7 +605,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     final success = await ref
         .read(authorNotifierProvider.notifier)
-        .validateEmail(user_id: _createdAccountId, otp: _otp);
+        .validate_email(user_id: _createdAccountId, otp: _otp);
     setState(() {
       _loading = false;
     });

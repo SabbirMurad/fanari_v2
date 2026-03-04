@@ -3,6 +3,7 @@ import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/view/chat/chat_texts.dart';
+import 'package:fanari_v2/view/chat/create_group_members.dart';
 import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/chat/widgets/horizontal_options.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -274,7 +275,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 alignment: Alignment.bottomRight,
                 child: GestureDetector(
                   onTap: () {
-                    // TODO:
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return CreateGroupMembers();
+                        },
+                      ),
+                    );
                   },
                   child: Container(
                     width: 48.w,

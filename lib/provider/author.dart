@@ -1,6 +1,7 @@
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/author.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 
@@ -13,8 +14,8 @@ class AuthorNotifier extends _$AuthorNotifier {
     return null;
   }
 
-  Future<bool> loadAuthorDetails() async {
-    final authorDetails = await _getAuthorDetails();
+  Future<bool> load_author_details() async {
+    final authorDetails = await _get_author_details();
 
     if (authorDetails == null) {
       throw 'Failed to load author details';
@@ -25,7 +26,7 @@ class AuthorNotifier extends _$AuthorNotifier {
     return true;
   }
 
-  Future<AuthorModel?> _getAuthorDetails() async {
+  Future<AuthorModel?> _get_author_details() async {
     if (!await utils.has_internet()) {
       // final cacheUser = await _userFromCache();
 
@@ -64,7 +65,7 @@ class AuthorNotifier extends _$AuthorNotifier {
     await LocalStorage.role.set(data['role']);
     await LocalStorage.user_id.set(data['user_id']);
 
-    final authorDetails = await _getAuthorDetails();
+    final authorDetails = await _get_author_details();
 
     if (authorDetails == null) return false;
 
@@ -101,7 +102,7 @@ class AuthorNotifier extends _$AuthorNotifier {
     return null;
   }
 
-  Future<bool> validateEmail({
+  Future<bool> validate_email({
     required String user_id,
     required String otp,
   }) async {
@@ -122,7 +123,7 @@ class AuthorNotifier extends _$AuthorNotifier {
       await LocalStorage.role.set(data['role']);
       await LocalStorage.user_id.set(data['user_id']);
 
-      final authorDetails = await _getAuthorDetails();
+      final authorDetails = await _get_author_details();
 
       if (authorDetails == null) return false;
 
@@ -134,7 +135,7 @@ class AuthorNotifier extends _$AuthorNotifier {
     return false;
   }
 
-  void updateProfilePicture(ImageModel imageModel) async {
+  void update_profile_picture(ImageModel imageModel) async {
     AuthorModel myself = state.value!;
 
     state = AsyncData(

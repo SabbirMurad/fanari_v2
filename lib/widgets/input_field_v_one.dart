@@ -10,10 +10,13 @@ class InputFieldVOne extends StatefulWidget {
   final InputBorder? border;
   final TextStyle? hintStyle;
   final FloatingLabelBehavior? floatingLabelBehavior;
+  final EdgeInsetsGeometry? contentPadding;
 
   const InputFieldVOne({
     super.key,
+
     required this.hintText,
+    this.contentPadding,
     required this.controller,
     this.isPasswordField = false,
     this.border,
@@ -66,6 +69,7 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
             obscureText: _obscureText,
             focusNode: _focusNode,
             controller: widget.controller,
+          
             decoration: InputDecoration(
               isDense: true,
               errorText: widget.error,
@@ -75,10 +79,9 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
                   width: 1,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 16,
-              ),
+              contentPadding:
+                  widget.contentPadding ??
+                  EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.w),
               hintText: _hasFocus ? '' : widget.hintText,
               border:
                   widget.border ??

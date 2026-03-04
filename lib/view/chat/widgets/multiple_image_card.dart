@@ -34,6 +34,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
             image: MemoryImage(image.local_bytes!),
             fit: BoxFit.cover,
             height: double.infinity,
+            width: double.infinity,
           ),
 
           Container(
@@ -52,6 +53,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
       imageWidget = CachedNetworkImage(
         imageUrl: image.webp_url,
         height: double.infinity,
+        width: double.infinity,
         fit: BoxFit.cover,
         placeholder: (context, url) {
           return ImagePlaceholder(blur_hash: image.blur_hash);

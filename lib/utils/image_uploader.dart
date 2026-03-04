@@ -42,7 +42,7 @@ Future<List<String>?> upload_images({
 
   final response = await request.send();
 
-  if (response.statusCode != 200) {
+  if (response.statusCode == 200) {
     final body = await response.stream.bytesToString();
     final json = jsonDecode(body) as List<dynamic>;
     return json.cast<String>();

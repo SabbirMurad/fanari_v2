@@ -30,6 +30,7 @@ class CustomHttp {
   static Future<CustomHttpResult> get({
     required String endpoint,
     bool show_floating_error = true,
+    bool add_api_prefix = true,
     bool need_auth = true,
     Map<String, String>? headers,
     Map<String, dynamic>? queries,
@@ -55,7 +56,11 @@ class CustomHttp {
         );
       }
 
-      final url = _build_url('/api$endpoint', queries);
+      final prefix = add_api_prefix ? '/api' : '';
+      final url = _build_url(
+        '${AppCredentials.domain}$prefix$endpoint',
+        queries,
+      );
 
       _log_request('GET', url, resolved_headers);
 
@@ -227,7 +232,7 @@ class CustomHttp {
           valid_till == null ||
           valid_till < DateTime.now().millisecondsSinceEpoch;
 
-      if (is_expired && !await _refresh_access_token()) {
+      if (is_expired && !await refresh_access_token()) {
         AppRoutes.go(AppRoutes.landing);
         return null;
       }
@@ -246,7 +251,7 @@ class CustomHttp {
 
   /// Attempts to get a new access token using the refresh token.
   /// Returns true on success.
-  static Future<bool> _refresh_access_token() async {
+  static Future<bool> refresh_access_token() async {
     final refresh_token = await LocalStorage.refresh_token.get();
     final user_id = await LocalStorage.user_id.get();
     final role = await LocalStorage.role.get();
