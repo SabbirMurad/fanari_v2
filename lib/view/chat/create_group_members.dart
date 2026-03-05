@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/user_search.dart';
 import 'package:fanari_v2/routes.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/create_group_details.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils.dart' as utils;
 
 class CreateGroupMembers extends StatefulWidget {
   const CreateGroupMembers({super.key});
@@ -16,56 +21,66 @@ class CreateGroupMembers extends StatefulWidget {
 }
 
 class _CreateGroupMembersState extends State<CreateGroupMembers> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool _isSearching = false;
+
+  List<UserSearchModel> _selectedUsers = [];
+  List<UserSearchModel> _searchResults = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  List<UserSearchModel> _selectedUsers = [];
+  void _onSearchChanged() {
+    _debounce?.cancel();
+    final query = _searchController.text.trim();
 
-  List<UserSearchModel> _searchResults = [
-    UserSearchModel(
-      uuid: '01',
-      username: 'sabbir',
-      first_name: 'Sabbir',
-      last_name: 'Hassan',
-    ),
-    UserSearchModel(
-      uuid: '02',
-      username: 'sabbir',
-      first_name: 'Murad',
-      last_name: 'Islam',
-    ),
-    UserSearchModel(
-      uuid: '03',
-      username: 'sabbir',
-      first_name: 'Joy Sorkar',
-      last_name: 'Hassan',
-    ),
-    UserSearchModel(
-      uuid: '04',
-      username: 'sabbir',
-      first_name: 'Ibrahim',
-      last_name: 'Kalil',
-    ),
-    UserSearchModel(
-      uuid: '05',
-      username: 'sabbir',
-      first_name: 'Akash',
-      last_name: 'vai',
-    ),
-    UserSearchModel(
-      uuid: '06',
-      username: 'sabbir',
-      first_name: 'Munjur',
-      last_name: 'Alom',
-    ),
-  ];
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _isSearching = false;
+      });
+      return;
+    }
 
-  List<UserSearchModel> _availableUsers = [];
+    setState(() => _isSearching = true);
+
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      _searchUsers(query);
+    });
+  }
+
+  Future<void> _searchUsers(String query) async {
+    final response = await utils.CustomHttp.get(
+      endpoint: '/profile/search',
+      queries: {'q': query, 'exclude_self': true},
+    );
+
+    if (!mounted) return;
+
+    if (response.ok) {
+      final results = UserSearchModel.fromJsonList(response.data['results']);
+      setState(() {
+        _searchResults = results
+            .where((u) => !_selectedUsers.any((s) => s.uuid == u.uuid))
+            .toList();
+        _isSearching = false;
+      });
+    } else {
+      setState(() => _isSearching = false);
+    }
+  }
 
   Widget _selectedUserWidget(UserSearchModel user) {
     return Container(
@@ -102,7 +117,9 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedUsers.add(user);
+          if (!_selectedUsers.any((s) => s.uuid == user.uuid)) {
+            _selectedUsers.add(user);
+          }
           _searchResults.remove(user);
         });
       },
@@ -131,6 +148,55 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
     );
   }
 
+  Widget _header() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => AppRoutes.pop(),
+          child: Icon(
+            Icons.arrow_back_ios_rounded,
+            size: 20.w,
+            color: AppColors.text,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Text(
+          'Create new Group',
+          style: TextStyle(color: AppColors.text, fontSize: 19.sp),
+        ),
+        Spacer(),
+        GestureDetector(
+          onTap: () {
+            if (_selectedUsers.isNotEmpty) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) {
+                    return CreateGroupDetails(
+                      members: _selectedUsers.map((u) => u.uuid).toList(),
+                    );
+                  },
+                ),
+              );
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: _selectedUsers.isEmpty
+                  ? AppColors.secondary
+                  : AppColors.primary,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Text(
+              'Next',
+              style: TextStyle(fontSize: 14.sp, color: AppColors.text),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,59 +209,8 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SafeArea(
-                bottom: false,
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => AppRoutes.pop(),
-                      child: Icon(
-                        Icons.arrow_back_ios_rounded,
-                        size: 20.w,
-                        color: AppColors.text,
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Text(
-                      'Create new Group',
-                      style: TextStyle(color: AppColors.text, fontSize: 19.sp),
-                    ),
-                    Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        if (_selectedUsers.isNotEmpty) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) {
-                                return CreateGroupDetails();
-                              },
-                            ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _selectedUsers.isEmpty
-                              ? AppColors.secondary
-                              : AppColors.primary,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Text(
-                          'Next',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppColors.text,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              SafeArea(bottom: false, child: SizedBox(height: 12.h)),
+              _header(),
               SizedBox(height: 24.h),
               Row(
                 children: [
@@ -236,6 +251,7 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
                 ),
                 child: Row(
                   spacing: 6.w,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CustomSvg(
                       'assets/icons/search.svg',
@@ -244,10 +260,8 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
                     ),
                     Expanded(
                       child: InputFieldVOne(
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 10.w,
-                        ),
+                        height: 50.h,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
                         hintText: 'Search people ...',
                         controller: _searchController,
                         floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -258,15 +272,63 @@ class _CreateGroupMembersState extends State<CreateGroupMembers> {
                 ),
               ),
               SizedBox(height: 12.h),
-              ..._searchResults.asMap().entries.map((entry) {
-                final UserSearchModel item = entry.value;
-                final int index = entry.key;
+              if (_isSearching)
+                ...List.generate(
+                  4,
+                  (index) => Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 16.h,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: index < 3
+                            ? BorderSide(color: AppColors.secondary, width: 1.w)
+                            : BorderSide.none,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        ColorFadeBox(
+                          width: 32.w,
+                          height: 32.w,
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        SizedBox(width: 12.w),
+                        ColorFadeBox(
+                          width: [140.w, 100.w, 170.w, 120.w][index],
+                          height: 14.h,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (!_isSearching &&
+                  _searchResults.isEmpty &&
+                  _searchController.text.trim().isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32.h),
+                  child: Center(
+                    child: Text(
+                      'No users found',
+                      style: TextStyle(
+                        color: AppColors.text.withValues(alpha: 0.5),
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                ),
+              if (!_isSearching)
+                ..._searchResults.asMap().entries.map((entry) {
+                  final UserSearchModel item = entry.value;
+                  final int index = entry.key;
 
-                return _searchItemWidget(
-                  item,
-                  bottom_border: index < _searchResults.length - 1,
-                );
-              }).toList(),
+                  return _searchItemWidget(
+                    item,
+                    bottom_border: index < _searchResults.length - 1,
+                  );
+                }).toList(),
             ],
           ),
         ),

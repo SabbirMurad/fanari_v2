@@ -71,6 +71,12 @@ class PostNotifier extends _$PostNotifier {
     return posts;
   }
 
+  Future<void> reload() async {
+    offset = 1;
+    state = const AsyncLoading();
+    state = AsyncData(await initialLoad() ?? []);
+  }
+
   Future<void> createPost({
     String? page_id,
     String? caption,

@@ -69,7 +69,12 @@ class _ImageVideoCarouselState extends State<ImageVideoCarousel> {
     setState(() {});
   }
 
-  late double carouselHeight = widget.height ?? _calculateCarouselHeight();
+  final double maxHeight = 0.5.sh;
+  late double carouselHeight =
+      widget.height ??
+      (_calculateCarouselHeight() < maxHeight
+          ? _calculateCarouselHeight()
+          : maxHeight);
 
   double _calculateCarouselHeight() {
     double biggestHeight = 0;
@@ -365,11 +370,17 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
       child: Stack(
         alignment: Alignment.center,
         children: [
+          ImagePlaceholder(
+            blur_hash: widget.item.video!.thumbnail.blur_hash,
+            width: widget.width,
+            height: widget.height,
+          ),
           if (!_videoLoaded)
             CachedNetworkImage(
               imageUrl: widget.item.video!.thumbnail.webp_url,
               width: widget.width,
-              fit: BoxFit.contain,
+              height: widget.height,
+              fit: BoxFit.cover,
               placeholder: (context, url) {
                 return ImagePlaceholder(
                   blur_hash: widget.item.video!.thumbnail.blur_hash,
@@ -431,8 +442,9 @@ class CarouselSingleVideoItemState extends State<CarouselSingleVideoItem> {
               autoPlay: true,
               transparentBackground: true,
               controller: _videoPlayerController!,
-              aspectRatio: widget.width / widget.height,
-              width: 1.sw,
+              aspectRatio: _videoPlayerController!.value.aspectRatio,
+              width: widget.width,
+              height: widget.height,
             ),
         ],
       ),

@@ -1,15 +1,18 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/text.dart';
+import 'package:fanari_v2/provider/conversation.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ConversationItem extends StatefulWidget {
+class ConversationItem extends ConsumerStatefulWidget {
   final bool bottomBorder;
   final ConversationModel model;
   final void Function()? onTap;
@@ -68,10 +71,10 @@ class ConversationItem extends StatefulWidget {
   }
 
   @override
-  State<ConversationItem> createState() => _ConversationItemState();
+  ConsumerState<ConversationItem> createState() => _ConversationItemState();
 }
 
-class _ConversationItemState extends State<ConversationItem> {
+class _ConversationItemState extends ConsumerState<ConversationItem> {
   Color? _bgColor() {
     if (widget.selected) return AppColors.primary.withValues(alpha: 0.2);
     if (widget.model.texts.isEmpty) return null;
@@ -97,6 +100,142 @@ class _ConversationItemState extends State<ConversationItem> {
     return FontWeight.w600;
   }
 
+  _openMoreOptions() {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      elevation: 0,
+      // barrierColor: Colors.transparent,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.transparent,
+            child: GestureDetector(
+              onTap: () {
+                // Do nothing here, this prevents the gesture detector of the whole container
+              },
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: SafeArea(
+                  top: false,
+                  child: Container(
+                    width: 1.sw - 40.w,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 35.w,
+                    ),
+                    margin: EdgeInsets.only(bottom: 20.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/select.svg',
+                          text: 'Select',
+                          onTap: () {
+                            widget.onSelect?.call(widget.model.core.uuid);
+                          },
+                          padding: EdgeInsets.only(bottom: 14.h),
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/favorite.svg',
+                          text: widget.model.common_metadata.is_favorite
+                              ? 'Unfavorite'
+                              : 'Favorite',
+                          onTap: () {
+                            ref
+                                .read(conversationNotifierProvider.notifier)
+                                .toggle_favorite(widget.model.core.uuid);
+                          },
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/mute.svg',
+                          text: widget.model.common_metadata.is_muted
+                              ? 'Unmute'
+                              : 'Mute',
+                          color: !widget.model.common_metadata.is_muted
+                              ? Colors.red[400]
+                              : null,
+                          onTap: () {
+                            ref
+                                .read(conversationNotifierProvider.notifier)
+                                .toggle_mute(widget.model.core.uuid);
+                          },
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/delete.svg',
+                          text: 'Delete conversation',
+                          color: Colors.red[400],
+                          onTap: () {},
+                        ),
+                        _moreOptionItem(
+                          icon: 'assets/icons/more_options/not_allowed.svg',
+                          text: 'Block Sabbir',
+                          onTap: () {},
+                          color: Colors.red[400],
+                          padding: EdgeInsets.only(top: 14.h),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _moreOptionItem({
+    required String icon,
+    required String text,
+    required VoidCallback onTap,
+    Color? color,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pop();
+        onTap();
+      },
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: padding ?? EdgeInsets.symmetric(vertical: 14.h),
+        child: Row(
+          children: [
+            Container(
+              width: 20.w,
+              height: 20.w,
+              child: CustomSvg(
+                icon,
+                height: 20.w,
+                width: 20.w,
+                fit: BoxFit.contain,
+                color: color ?? AppColors.text,
+              ),
+            ),
+            SizedBox(width: 18.w),
+            Text(
+              text,
+              style: TextStyle(fontSize: 14.sp, color: color ?? AppColors.text),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -113,8 +252,8 @@ class _ConversationItemState extends State<ConversationItem> {
         widget.onTap?.call();
       },
       onLongPress: () {
-        if (widget.selected) return;
-        widget.onSelect?.call(widget.model.core.uuid);
+        if (widget.selected || widget.selectMode) return;
+        _openMoreOptions();
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -138,16 +277,40 @@ class _ConversationItemState extends State<ConversationItem> {
                       tag: 'conversation_image_' + widget.model.core.uuid,
                       child: Material(
                         color: Colors.transparent,
-                        child: NamedAvatar(
-                          loading: false,
-                          image:
-                              widget.model.core.type == ConversationType.Group
-                              ? widget.model.group_metadata!.image
-                              : widget.model.single_metadata!.image,
-                          name: widget.model.core.type == ConversationType.Group
-                              ? widget.model.group_metadata!.name
-                              : widget.model.single_metadata!.first_name,
-                          size: 56.w,
+                        child: Stack(
+                          children: [
+                            NamedAvatar(
+                              loading: false,
+                              image:
+                                  widget.model.core.type ==
+                                      ConversationType.Group
+                                  ? widget.model.group_metadata!.image
+                                  : widget.model.single_metadata!.image,
+                              name: widget.model.common_metadata.is_muted
+                                  ? ' '
+                                  : widget.model.core.type ==
+                                        ConversationType.Group
+                                  ? widget.model.group_metadata!.name
+                                  : widget.model.single_metadata!.first_name,
+                              size: 56.w,
+                            ),
+                            if (widget.model.common_metadata.is_muted)
+                              Container(
+                                width: 56.w,
+                                height: 56.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                ),
+                                child: Center(
+                                  child: CustomSvg(
+                                    'assets/icons/more_options/mute.svg',
+                                    width: 24.w,
+                                    height: 24.w,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -183,24 +346,51 @@ class _ConversationItemState extends State<ConversationItem> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Hero(
-                      tag: 'conversation_name_' + widget.model.core.uuid,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          widget.model.core.type == ConversationType.Group
-                              ? widget.model.group_metadata!.name
-                              : widget.model.single_metadata!.first_name +
-                                    ' ' +
-                                    widget.model.single_metadata!.last_name,
-                          style: TextStyle(
-                            color: AppColors.text,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w500,
+                    Container(
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              width: double.infinity,
+                              child: Hero(
+                                tag:
+                                    'conversation_name_' +
+                                    widget.model.core.uuid,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Text(
+                                    widget.model.core.type ==
+                                            ConversationType.Group
+                                        ? widget.model.group_metadata!.name
+                                        : widget
+                                                  .model
+                                                  .single_metadata!
+                                                  .first_name +
+                                              ' ' +
+                                              widget
+                                                  .model
+                                                  .single_metadata!
+                                                  .last_name,
+                                    style: TextStyle(
+                                      color: AppColors.text,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
+                          if (widget.model.common_metadata.is_favorite)
+                            Icon(
+                              Icons.star_rate_rounded,
+                              size: 24.w,
+                              color: AppColors.primary,
+                            ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 2.w),

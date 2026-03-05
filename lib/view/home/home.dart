@@ -87,9 +87,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() {
       _refreshing = true;
     });
-    // await ref.read(postsNotifierProvider.notifier).refresh();
-    //TODO: change wait time back to 300ms
-    Future.delayed(const Duration(milliseconds: 4000), () {
+
+    await ref.read(postNotifierProvider.notifier).reload();
+    Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _refreshing = false;
       });
@@ -102,7 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return LiquidPullToRefresh(
       onRefresh: _onRefresh,
-      height: 172,
+      height: 124.h,
       showChildOpacityTransition: false,
       animSpeedFactor: 2.0,
       color: AppColors.surface,
@@ -131,7 +131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 delegate: posts.when(
                   loading: () {
                     return SliverChildBuilderDelegate((context, index) {
-                      return Container();
+                      return PostWidget.skeleton();
                     }, childCount: 5);
                   },
                   error: (obj, stack) {
@@ -152,7 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 delegate: SliverChildBuilderDelegate((context, index) {
                   return Padding(
                     padding: EdgeInsets.only(top: index == 0 ? 36 : 0),
-                    child: Container(),
+                    child: PostWidget.skeleton(),
                   );
                 }, childCount: 5),
               ),

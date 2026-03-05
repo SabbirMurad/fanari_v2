@@ -11,10 +11,12 @@ class InputFieldVOne extends StatefulWidget {
   final TextStyle? hintStyle;
   final FloatingLabelBehavior? floatingLabelBehavior;
   final EdgeInsetsGeometry? contentPadding;
+  final double? height;
 
   const InputFieldVOne({
     super.key,
 
+    this.height,
     required this.hintText,
     this.contentPadding,
     required this.controller,
@@ -64,12 +66,12 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
       alignment: Alignment.topRight,
       children: [
         Container(
-          height: 56.h,
+          height: widget.height ?? 56.h,
           child: TextField(
             obscureText: _obscureText,
             focusNode: _focusNode,
             controller: widget.controller,
-          
+
             decoration: InputDecoration(
               isDense: true,
               errorText: widget.error,

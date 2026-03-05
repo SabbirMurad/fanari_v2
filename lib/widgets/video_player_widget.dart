@@ -142,136 +142,140 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       ],
                     ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 2,
-                          overlayShape: const RoundSliderOverlayShape(
-                            overlayRadius: 8,
-                          ),
-                          thumbShape: const RoundSliderThumbShape(
-                            disabledThumbRadius: 3,
-                            enabledThumbRadius: 3,
-                            elevation: 0,
-                            pressedElevation: 2,
-                          ),
-                          trackShape: const RectangularSliderTrackShape(),
-                        ),
-                        child: Slider(
-                          value: _videoPosition,
-                          min: 0,
-                          max: _videoDuration,
-                          activeColor: AppColors.primary,
-                          thumbColor: AppColors.primary,
-                          inactiveColor: Colors.white.withValues(alpha: .8),
-                          onChanged: (value) {
-                            widget.controller.seekTo(
-                              Duration(seconds: value.toInt()),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: _rotated ? 24 : 12,
-                          right: _rotated ? 24 : 12,
-                          bottom: _rotated ? 12 : 6,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                widget.controller.setVolume(_soundOn ? 0 : 1);
-
-                                setState(() {
-                                  _soundOn = !_soundOn;
-                                });
-                              },
-                              child: AnimatedCrossFade(
-                                firstChild: const Icon(
-                                  Icons.volume_up,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                secondChild: const Icon(
-                                  Icons.volume_off,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                crossFadeState: _soundOn
-                                    ? CrossFadeState.showFirst
-                                    : CrossFadeState.showSecond,
-                                duration: const Duration(milliseconds: 300),
-                              ),
+                  child: SafeArea(
+                    top: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 2,
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 8,
                             ),
-                            SizedBox(width: 12),
-                            Text(
-                              "${_secondsToTime(_videoPosition)} / ${_secondsToTime(_videoDuration)}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.end,
+                            thumbShape: const RoundSliderThumbShape(
+                              disabledThumbRadius: 3,
+                              enabledThumbRadius: 3,
+                              elevation: 0,
+                              pressedElevation: 2,
                             ),
-                            Spacer(),
-                            if (widget.fullScreen)
+                            trackShape: const RectangularSliderTrackShape(),
+                          ),
+                          child: Slider(
+                            value: _videoPosition,
+                            min: 0,
+                            max: _videoDuration,
+                            activeColor: AppColors.primary,
+                            thumbColor: AppColors.primary,
+                            inactiveColor: Colors.white.withValues(alpha: .8),
+                            onChanged: (value) {
+                              widget.controller.seekTo(
+                                Duration(seconds: value.toInt()),
+                              );
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: _rotated ? 24.w : 12.w,
+                            right: _rotated ? 24.w : 12.w,
+                            bottom: _rotated ? 12.w : 6.w,
+                            top: 6.w,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
                               GestureDetector(
                                 onTap: () {
-                                  if (_rotated) {
-                                    SystemChrome.setPreferredOrientations([
-                                      DeviceOrientation.portraitUp,
-                                      DeviceOrientation.portraitDown,
-                                    ]);
-                                  } else {
-                                    SystemChrome.setPreferredOrientations([
-                                      DeviceOrientation.landscapeLeft,
-                                      DeviceOrientation.landscapeRight,
-                                    ]);
-                                  }
+                                  widget.controller.setVolume(_soundOn ? 0 : 1);
 
                                   setState(() {
-                                    _rotated = !_rotated;
+                                    _soundOn = !_soundOn;
                                   });
                                 },
-                                child: Icon(
-                                  Icons.screen_rotation_rounded,
-                                  color: Colors.white,
-                                  size: 18,
+                                child: AnimatedCrossFade(
+                                  firstChild: const Icon(
+                                    Icons.volume_up,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  secondChild: const Icon(
+                                    Icons.volume_off,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  crossFadeState: _soundOn
+                                      ? CrossFadeState.showFirst
+                                      : CrossFadeState.showSecond,
+                                  duration: const Duration(milliseconds: 300),
                                 ),
                               ),
-                            SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () {
-                                if (widget.fullScreen) {
-                                  Navigator.of(context).pop();
-                                } else {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return FullScreenVidePlayer(
-                                          controller: widget.controller,
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Icon(
-                                widget.fullScreen
-                                    ? Icons.fullscreen_exit
-                                    : Icons.fullscreen,
-                                color: Colors.white,
-                                size: 20,
+                              SizedBox(width: 12),
+                              Text(
+                                "${_secondsToTime(_videoPosition)} / ${_secondsToTime(_videoDuration)}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.end,
                               ),
-                            ),
-                          ],
+                              Spacer(),
+                              if (widget.fullScreen)
+                                GestureDetector(
+                                  onTap: () {
+                                    if (_rotated) {
+                                      SystemChrome.setPreferredOrientations([
+                                        DeviceOrientation.portraitUp,
+                                        DeviceOrientation.portraitDown,
+                                      ]);
+                                    } else {
+                                      SystemChrome.setPreferredOrientations([
+                                        DeviceOrientation.landscapeLeft,
+                                        DeviceOrientation.landscapeRight,
+                                      ]);
+                                    }
+
+                                    setState(() {
+                                      _rotated = !_rotated;
+                                    });
+                                  },
+                                  child: Icon(
+                                    Icons.screen_rotation_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                              SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  if (widget.fullScreen) {
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return FullScreenVidePlayer(
+                                            controller: widget.controller,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Icon(
+                                  widget.fullScreen
+                                      ? Icons.fullscreen_exit
+                                      : Icons.fullscreen,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

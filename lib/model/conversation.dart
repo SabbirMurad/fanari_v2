@@ -17,14 +17,18 @@ class ConversationCore {
   factory ConversationCore.fromJson(Map<String, dynamic> json) {
     return ConversationCore(
       uuid: json['uuid'],
-      type: json['type'] == 'group'
+      type: json['type'] == 'Group'
           ? ConversationType.Group
           : ConversationType.Single,
       last_message_at: json['last_message_at'],
     );
   }
 
-  ConversationCore copyWith({String? uuid, ConversationType? type, int? last_message_at}) {
+  ConversationCore copyWith({
+    String? uuid,
+    ConversationType? type,
+    int? last_message_at,
+  }) {
     return ConversationCore(
       uuid: uuid ?? this.uuid,
       type: type ?? this.type,
@@ -101,10 +105,35 @@ class ConversationSingleMetadata {
   }
 }
 
+class ConversationCommonMetadata {
+  bool is_favorite;
+  bool is_muted;
+
+  ConversationCommonMetadata({
+    required this.is_favorite,
+    required this.is_muted,
+  });
+
+  factory ConversationCommonMetadata.fromJson(Map<String, dynamic> json) {
+    return ConversationCommonMetadata(
+      is_favorite: json['is_favorite'],
+      is_muted: json['is_muted'],
+    );
+  }
+
+  ConversationCommonMetadata copyWith({bool? is_favorite, bool? is_muted}) {
+    return ConversationCommonMetadata(
+      is_favorite: is_favorite ?? this.is_favorite,
+      is_muted: is_muted ?? this.is_muted,
+    );
+  }
+}
+
 class ConversationModel {
   final ConversationCore core;
   final ConversationGroupMetadata? group_metadata;
   final ConversationSingleMetadata? single_metadata;
+  final ConversationCommonMetadata common_metadata;
 
   bool typing;
   List<TextModel> texts;
@@ -112,6 +141,7 @@ class ConversationModel {
 
   ConversationModel({
     required this.core,
+    required this.common_metadata,
     this.group_metadata,
     this.single_metadata,
     this.texts = const [],
@@ -122,6 +152,9 @@ class ConversationModel {
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     return ConversationModel(
       core: ConversationCore.fromJson(json['core']),
+      common_metadata: ConversationCommonMetadata.fromJson(
+        json['common_metadata'],
+      ),
       group_metadata: json['group_metadata'] != null
           ? ConversationGroupMetadata.fromJson(json['group_metadata'])
           : null,
@@ -133,6 +166,7 @@ class ConversationModel {
 
   ConversationModel copyWith({
     ConversationCore? core,
+    ConversationCommonMetadata? common_metadata,
     ConversationGroupMetadata? group_metadata,
     ConversationSingleMetadata? single_metadata,
     List<TextModel>? texts,
@@ -141,6 +175,7 @@ class ConversationModel {
   }) {
     return ConversationModel(
       core: core ?? this.core,
+      common_metadata: common_metadata ?? this.common_metadata,
       group_metadata: group_metadata ?? this.group_metadata,
       single_metadata: single_metadata ?? this.single_metadata,
       texts: texts ?? this.texts,

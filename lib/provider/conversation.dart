@@ -87,21 +87,23 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     String? image_id;
 
-    final image_ids = await utils.upload_images(
-      images: [group_image!],
-      used_at: utils.AssetUsedAt.Chat,
-    );
+    if (group_image != null) {
+      final image_ids = await utils.upload_images(
+        images: [group_image],
+        used_at: utils.AssetUsedAt.Chat,
+      );
 
-    if (image_ids == null) {
-      throw Exception('Failed to upload group image');
+      if (image_ids == null) {
+        throw Exception('Failed to upload group image');
+      }
+
+      image_id = image_ids.first;
     }
-
-    image_id = image_ids.first;
 
     final body = {'name': group_name, 'members': members, 'image': image_id};
 
     final response = await utils.CustomHttp.post(
-      endpoint: '/conversation/single',
+      endpoint: '/conversation/group',
       body: body,
     );
 
@@ -221,6 +223,54 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
 
     state = AsyncValue.data(conversations);
+  }
+
+  // ── Favorite ─────────────────────────────────────────────────────────────
+
+  Future<void> toggle_favorite(String conversation_id) async {
+    final conversations = state.value ?? [];
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1) return;
+
+    final was_favorite = conversations[index].common_metadata.is_favorite;
+    conversations[index].common_metadata.is_favorite = !was_favorite;
+    state = AsyncValue.data([...conversations]);
+
+    final response = await utils.CustomHttp.patch(
+      endpoint: '/conversation/favorite',
+      body: {'conversation_id': conversation_id},
+    );
+
+    if (!response.ok) {
+      conversations[index].common_metadata.is_favorite = was_favorite;
+      state = AsyncValue.data([...conversations]);
+    }
+  }
+
+  // ── Mute ────────────────────────────────────────────────────────────────
+
+  Future<void> toggle_mute(String conversation_id) async {
+    final conversations = state.value ?? [];
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1) return;
+
+    final was_muted = conversations[index].common_metadata.is_muted;
+    conversations[index].common_metadata.is_muted = !was_muted;
+    state = AsyncValue.data([...conversations]);
+
+    final response = await utils.CustomHttp.patch(
+      endpoint: '/conversation/mute',
+      body: {'conversation_id': conversation_id},
+    );
+
+    if (!response.ok) {
+      conversations[index].common_metadata.is_muted = was_muted;
+      state = AsyncValue.data([...conversations]);
+    }
   }
 
   // ── Lookup ─────────────────────────────────────────────────────────────────

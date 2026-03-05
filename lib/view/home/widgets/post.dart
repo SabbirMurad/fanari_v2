@@ -5,6 +5,7 @@ import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/view/home/post_details.dart';
 import 'package:fanari_v2/view/home/widgets/poll.dart';
 import 'package:fanari_v2/view/profile/profile.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/heart_beat_animation.dart';
 import 'package:fanari_v2/widgets/image_video_carousel.dart';
@@ -25,6 +26,120 @@ class PostWidget extends StatefulWidget {
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
+
+  static Widget skeleton({bool showMedia = true}) {
+    final contentWidth = 1.sw - 40.w;
+    return Container(
+      width: 1.sw - 20.w,
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top bar: avatar + name + date
+          Padding(
+            padding: EdgeInsets.only(bottom: 18.h, top: 24.h),
+            child: Row(
+              children: [
+                ColorFadeBox(
+                  width: 40.w,
+                  height: 40.w,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                SizedBox(width: 12.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ColorFadeBox(
+                      width: 120.w,
+                      height: 14.h,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    SizedBox(height: 8.h),
+                    ColorFadeBox(
+                      width: 72.w,
+                      height: 11.h,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Caption lines
+          ColorFadeBox(
+            width: contentWidth,
+            height: 13.h,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+          SizedBox(height: 8.h),
+          ColorFadeBox(
+            width: contentWidth * 0.75,
+            height: 13.h,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+          SizedBox(height: 8.h),
+          ColorFadeBox(
+            width: contentWidth * 0.5,
+            height: 13.h,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+          // Media placeholder
+          if (showMedia)
+            Padding(
+              padding: EdgeInsets.only(top: 12.h),
+              child: ColorFadeBox(
+                width: contentWidth,
+                height: 240.h,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+          // Interactions bar
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.h),
+            child: Row(
+              children: [
+                ColorFadeBox(
+                  width: 20.w,
+                  height: 20.w,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(width: 8.w),
+                ColorFadeBox(
+                  width: 28.w,
+                  height: 14.h,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(width: 24.w),
+                ColorFadeBox(
+                  width: 20.w,
+                  height: 20.w,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(width: 8.w),
+                ColorFadeBox(
+                  width: 28.w,
+                  height: 14.h,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                Spacer(),
+                ColorFadeBox(
+                  width: 20.w,
+                  height: 20.w,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(width: 24.w),
+                ColorFadeBox(
+                  width: 20.w,
+                  height: 20.w,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _PostWidgetState extends State<PostWidget> {
