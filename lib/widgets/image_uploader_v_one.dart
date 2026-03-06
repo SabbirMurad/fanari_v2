@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +13,7 @@ class ImageUploaderVOne extends StatefulWidget {
   final ImageProvider? currentImage;
   final bool enable;
   final bool loading;
-  final void Function(Uint8List)? onImageSelected;
+  final void Function(File)? onImageSelected;
 
   const ImageUploaderVOne({
     super.key,
@@ -29,7 +30,7 @@ class ImageUploaderVOne extends StatefulWidget {
 }
 
 class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
-  Uint8List? image;
+  File? image;
 
   static String userIcon = '''
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +44,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
   ''';
 
   void selectImage(ImageSource source) async {
-    Uint8List? img = await utils.pick_single_image(
+    File? img = await utils.pick_single_image(
       context: context,
       source: source,
       // crop: false,
@@ -76,7 +77,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
                       if (image != null) {
                         utils.open_image_viewer(
                           context: context,
-                          images: [MemoryImage(image!)],
+                          images: [FileImage(image!)],
                         );
                       } else {
                         utils.open_image_viewer(
@@ -126,7 +127,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
                               height: double.infinity,
                               fit: BoxFit.cover,
                               image: image != null
-                                  ? MemoryImage(image!)
+                                  ? FileImage(image!)
                                   : widget.currentImage!,
                               color: AppColors.secondary,
                             ),

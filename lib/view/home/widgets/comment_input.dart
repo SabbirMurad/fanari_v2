@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
@@ -9,11 +10,15 @@ import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/social_voice_recorder.dart';
+import 'package:fanari_v2/widgets/video_player_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:extended_text_field/extended_text_field.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 
 class Mention {
   final String id;
@@ -80,9 +85,29 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
 
   bool _typingSent = false;
 
+  VideoPlayerController? _videoController;
+
+  String? _selectedVideoPath;
+  String _loadingVideoText = 'Loading video';
+  Subscription? _subscription;
+  double _videoCompressProgress = 0.00;
+  int _videoSize = 0;
+  bool _loadingVideo = false;
+  bool _videoError = false;
+  File? _videoThumbnail;
+
   @override
   void initState() {
     super.initState();
+
+    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
+      print('');
+      print('Video compress progress: $progress');
+      print('');
+      setState(() {
+        _videoCompressProgress = progress;
+      });
+    });
 
     _spacialTextController.addListener(() {
       if (_hasInputText) {
@@ -141,6 +166,10 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   @override
   void dispose() {
     _spacialTextController.dispose();
+
+    _videoController?.dispose();
+    _subscription?.unsubscribe();
+    VideoCompress.deleteAllCache();
 
     super.dispose();
   }
@@ -361,11 +390,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       _selectedImages.addAll(prepared_images);
     });
 
-    setState(() {
-      _attachmentsOptionsVisible = false;
-    });
-
     for (int i = 0; i < _selectedImages.length; i++) {
+      if (!_selectedImages[i].preparing) continue;
       final image_meta = await _selectedImages[i].get_prepare_meta();
 
       setState(() {
@@ -375,72 +401,166 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     }
   }
 
+  Future<void> _handleCameraTap() async {
+    final images = await utils.pick_single_image(
+      context: context,
+      source: ImageSource.camera,
+    );
+
+    if (images == null) return;
+
+    PreparedImage prepared_images = PreparedImage.fromFile(images);
+
+    setState(() {
+      _selectedImages.add(prepared_images);
+    });
+
+    for (int i = 0; i < _selectedImages.length; i++) {
+      if (!_selectedImages[i].preparing) continue;
+      final image_meta = await _selectedImages[i].get_prepare_meta();
+
+      setState(() {
+        _selectedImages[i].meta = image_meta;
+        _selectedImages[i].preparing = false;
+      });
+    }
+  }
+
+  void _handlePollTap() {}
+
   bool _attachmentsOptionsVisible = false;
+
+  Widget _attachmentsOptionItemWidget({
+    required String icon,
+    VoidCallback? onTap,
+    required int index,
+  }) {
+    return AnimatedPositioned(
+      duration: Duration(milliseconds: 272),
+      bottom: _attachmentsOptionsVisible ? (40.h + 12.h) * (index + 1) : 0,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _attachmentsOptionsVisible = false;
+          });
+
+          onTap?.call();
+        },
+        child: Container(
+          width: 40.w,
+          height: 40.w,
+          decoration: BoxDecoration(
+            color: widget.colorTheme.primaryColor,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: CustomSvg(
+              'assets/icons/post/$icon.svg',
+              width: 20.w,
+              height: 20.w,
+              color: widget.colorTheme.textColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleVideoTap() async {
+    setState(() {
+      _videoController = null;
+      _selectedVideoPath = null;
+      _videoThumbnail = null;
+      _loadingVideo = true;
+    });
+
+    final videos = await utils.pick_videos_from_gallery(
+      context: context,
+      limit: 1,
+    );
+
+    if (videos == null) {
+      setState(() {
+        _loadingVideo = false;
+      });
+      return;
+    }
+
+    final file = videos[0];
+
+    final thumbnail = await VideoCompress.getFileThumbnail(
+      file.path,
+      quality: 80,
+    );
+
+    setState(() {
+      _videoThumbnail = thumbnail;
+    });
+
+    final compressedVideo = await VideoCompress.compressVideo(
+      file.path,
+      quality: VideoQuality.DefaultQuality,
+      frameRate: 29,
+      includeAudio: true,
+    );
+
+    if (compressedVideo == null) {
+      utils.show_custom_toast(
+        text: 'Something went wrong, compressing the video',
+      );
+      setState(() {
+        _loadingVideo = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _videoSize = compressedVideo.filesize!;
+    });
+
+    _videoController =
+        VideoPlayerController.file(
+            compressedVideo.file!,
+            closedCaptionFile: null,
+          )
+          ..initialize().then((_) {
+            setState(() {
+              _videoController;
+              _loadingVideo = false;
+              _videoCompressProgress = 0.0;
+              _selectedVideoPath = compressedVideo.file!.path;
+            });
+          });
+  }
 
   Widget _attachmentOptionsWidget() {
     return AnimatedContainer(
       duration: Duration(milliseconds: 272),
       height: _attachmentsOptionsVisible
-          ? 40.w + 12.h + 40.w + 12.h + 40.h
+          ? 40.h + 12.h + 40.h + 12.h + 40.h + 12.h + 40.h + 12.h + 40.h
           : 40.w,
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 272),
-            bottom: _attachmentsOptionsVisible ? 40.w + 12.h + 40.w + 12.h : 0,
-            child: GestureDetector(
-              onTap: () async {
-                // final images = await utils.pickSingleImage(
-                //   context: context,
-                //   source: ImageSource.camera,
-                // );
-                // if (images == null) return;
-
-                // setState(() {
-                //   _selectedImages.add(images);
-                // });
-              },
-              child: Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: widget.colorTheme.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: CustomSvg(
-                    'assets/icons/camera.svg',
-                    width: 20.w,
-                    height: 20.w,
-                    color: widget.colorTheme.textColor,
-                  ),
-                ),
-              ),
-            ),
+          _attachmentsOptionItemWidget(
+            icon: 'poll',
+            index: 3,
+            onTap: _handlePollTap,
           ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 272),
-            bottom: _attachmentsOptionsVisible ? 40.w + 12.h : 0,
-            child: GestureDetector(
-              onTap: _handleGalleryTap,
-              child: Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: widget.colorTheme.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: CustomSvg(
-                    'assets/icons/gallery.svg',
-                    width: 20.w,
-                    height: 20.w,
-                    color: widget.colorTheme.textColor,
-                  ),
-                ),
-              ),
-            ),
+          _attachmentsOptionItemWidget(
+            icon: 'video',
+            index: 2,
+            onTap: _handleVideoTap,
+          ),
+          _attachmentsOptionItemWidget(
+            icon: 'camera',
+            index: 1,
+            onTap: _handleCameraTap,
+          ),
+          _attachmentsOptionItemWidget(
+            icon: 'gallery',
+            index: 0,
+            onTap: _handleGalleryTap,
           ),
           GestureDetector(
             onTap: () {
@@ -675,6 +795,123 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
+  Widget _videoWidget() {
+    return Padding(
+      padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Stack(
+              alignment: Alignment.topRight,
+              children: [
+                VideoPlayerWidget(
+                  width: 0.7.sw - 24.w,
+                  height: (0.7.sw - 24.w) * 9 / 16,
+                  controller: _videoController!,
+                  aspectRatio: _videoController!.value.aspectRatio,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _videoController?.pause();
+                      _videoController?.dispose();
+                      _selectedVideoPath = null;
+                      _videoController = null;
+                    });
+                  },
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    margin: EdgeInsets.only(top: 6, right: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: Color(0xFF181818).withValues(alpha: .45),
+                    ),
+                    child: Center(
+                      child: Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.identity()..rotateZ(pi / 4),
+                        child: Icon(Icons.add, size: 24, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // if (_videoSize != 0)
+          //   Padding(
+          //     padding: const EdgeInsets.only(top: 12, left: 6),
+          //     child: Text(
+          //       '${_videoSize / 1024 > 1024 ? '${(_videoSize / 1024 / 1024).toStringAsFixed(2)} MB' : '${(_videoSize / 1024).toStringAsFixed(2)} KB'} / 50MB',
+          //       style: TextStyle(color: AppColors.text, fontSize: 14),
+          //     ),
+          //   ),
+        ],
+      ),
+    );
+  }
+
+  Widget _videoProcessingWidget() {
+    return Container(
+      margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image(
+              height: (1.sw - 24.w) * 9 / 16,
+              width: 1.sw - 24.w,
+              fit: BoxFit.cover,
+              image: FileImage(_videoThumbnail!),
+            ),
+          ),
+          Container(
+            width: 0.7.sw - 24.w,
+            height: (0.7.sw - 24.w) * 9 / 16,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              color: Color(0xFF181818).withValues(alpha: .35),
+            ),
+            child: Center(
+              child: _videoError
+                  ? Text(
+                      'Failed to compress video',
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : Container(
+                      width: 100,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Color(0xffffffff).withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _videoCompressProgress.toString().length < 5
+                              ? _videoCompressProgress.toString() + '%'
+                              : _videoCompressProgress.toString().substring(
+                                      0,
+                                      5,
+                                    ) +
+                                    '%',
+                          style: TextStyle(
+                            color: AppColors.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final emojis = ref
@@ -694,6 +931,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           padding: EdgeInsets.only(top: 8.h, bottom: 8.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.showTyping)
                 Padding(
@@ -716,16 +954,23 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   ),
                 ),
               _imageContainer(),
+              if (_loadingVideo && _videoThumbnail != null)
+                _videoProcessingWidget(),
+              if (_selectedVideoPath != null) _videoWidget(),
               _emojiContainer(emojis),
               Padding(
                 padding: EdgeInsets.only(left: 20.w, right: 20.w),
                 child: Stack(
-                  alignment: Alignment.bottomRight,
+                  clipBehavior: Clip.none,
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        _attachmentOptionsWidget(),
+                        Container(
+                          width: 40.w,
+                          height: 40.w,
+                          color: Colors.transparent,
+                        ),
                         SizedBox(width: 12.w),
                         Expanded(child: _inputContainer(emojis)),
                         SizedBox(width: 12.w),
@@ -745,7 +990,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                             _spacialTextController.text = '';
                             Future.delayed(Duration(milliseconds: 500), () {
                               setState(() {
-                                _selectedImages.clear(); 
+                                _selectedImages.clear();
                               });
                             });
                           },
@@ -769,11 +1014,20 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                       ],
                     ),
                     if (!_hasInputText && _selectedImages.isEmpty)
-                      SocialVoiceRecorder(
-                        barWidth: 1.sw - 40.w - 40.w - 12.w,
-                        barHeight: 40.w,
-                        buttonSize: 40.w,
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: SocialVoiceRecorder(
+                          barWidth: 1.sw - 40.w - 40.w - 12.w,
+                          barHeight: 40.w,
+                          buttonSize: 40.w,
+                        ),
                       ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: _attachmentOptionsWidget(),
+                    ),
                   ],
                 ),
               ),

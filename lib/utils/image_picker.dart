@@ -23,10 +23,9 @@ Future<Uint8List> compress_image(Uint8List bytes, int target_kb) async {
 
 /// Picks a single image from [source] (camera or gallery) and optionally
 /// compresses it to ≤ 400 KB.
-Future<Uint8List?> pick_single_image({
+Future<File?> pick_single_image({
   required BuildContext context,
   required ImageSource source,
-  bool compress = true,
 }) async {
   String? file_path;
 
@@ -48,8 +47,7 @@ Future<Uint8List?> pick_single_image({
 
   if (file_path == null) return null;
 
-  final bytes = await File(file_path).readAsBytes();
-  return compress ? await compress_image(bytes, 400) : bytes;
+  return File(file_path);
 }
 
 // ── Multiple images ───────────────────────────────────────────────────────────

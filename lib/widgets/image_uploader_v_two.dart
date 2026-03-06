@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fanari_v2/utils.dart' as utils;
@@ -9,7 +8,7 @@ class ImageUploaderVTwo extends StatefulWidget {
   final double height;
   final ImageProvider? currentImage;
   final bool enable;
-  final void Function(Uint8List)? onImageSelected;
+  final void Function(File)? onImageSelected;
 
   const ImageUploaderVTwo({
     super.key,
@@ -25,10 +24,10 @@ class ImageUploaderVTwo extends StatefulWidget {
 }
 
 class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
-  Uint8List? image;
+  File? image;
 
   void selectImage(ImageSource source) async {
-    Uint8List? img = await utils.pick_single_image(
+    File? img = await utils.pick_single_image(
       context: context,
       source: source,
     );
@@ -44,7 +43,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
 
   ImageProvider getImage() {
     if (image != null) {
-      return MemoryImage(image!);
+      return FileImage(image!);
     } else {
       if (widget.currentImage != null) {
         return widget.currentImage!;

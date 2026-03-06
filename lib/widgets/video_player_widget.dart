@@ -144,6 +144,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   ),
                   child: SafeArea(
                     top: false,
+                    bottom: widget.fullScreen,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
