@@ -441,23 +441,43 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                     maxLines: 1,
                                   ),
                                 if (widget.model.texts.last.type ==
-                                    TextType.Image)
+                                    TextType.Video)
                                   Row(
                                     children: [
                                       CustomSvg(
-                                        'assets/icons/gallery.svg',
+                                        'assets/icons/post/video.svg',
                                         size: 18.w,
                                         fit: BoxFit.fitWidth,
                                         color: AppColors.text,
                                       ),
                                       SizedBox(width: 6.w),
-                                      // Text(
-                                      //   '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
-                                      //   style: TextStyle(
-                                      //     color: AppColors.text,
-                                      //     fontSize: 13.sp,
-                                      //   ),
-                                      // ),
+                                      Text(
+                                        'Video',
+                                        style: TextStyle(
+                                          color: AppColors.text,
+                                          fontSize: 13.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if (widget.model.texts.last.type ==
+                                    TextType.Image)
+                                  Row(
+                                    children: [
+                                      CustomSvg(
+                                        'assets/icons/post/gallery.svg',
+                                        size: 18.w,
+                                        fit: BoxFit.fitWidth,
+                                        color: AppColors.text,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        '${widget.model.texts.last.images!.length} image${widget.model.texts.last.images!.length > 1 ? 's' : ''}',
+                                        style: TextStyle(
+                                          color: AppColors.text,
+                                          fontSize: 13.sp,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 if (widget.model.texts.last.type ==

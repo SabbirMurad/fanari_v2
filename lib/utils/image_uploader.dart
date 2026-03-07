@@ -11,7 +11,7 @@ Future<List<String>?> upload_images({
   bool temporary = true,
 }) async {
   for (final image in images) {
-    if (image.preparing) throw StateError('Image is still being prepared.');
+    if (!image.prepared) throw StateError('Image is not prepared.');
   }
 
   final uri = Uri.parse('${AppCredentials.domain}/image');

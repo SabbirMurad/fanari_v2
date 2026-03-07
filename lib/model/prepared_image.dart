@@ -26,12 +26,12 @@ class PreparedImageMeta {
 class PreparedImage {
   String? uuid;
   final File file;
-  bool preparing;
+  bool prepared;
   PreparedImageMeta? meta;
 
   PreparedImage({
     required this.file,
-    this.preparing = true,
+    this.prepared = false,
     this.meta,
     this.uuid,
   });
@@ -42,7 +42,8 @@ class PreparedImage {
 
     final dir = await getTemporaryDirectory();
     final ext = file.path.split('.').last;
-    final new_path = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.$ext';
+    final new_path =
+        '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.$ext';
 
     await File(new_path).create()
       ..writeAsBytes(compressed_bytes);

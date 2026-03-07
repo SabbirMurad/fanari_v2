@@ -120,7 +120,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 alignment: Alignment.topRight,
                 children: [
                   imageWidget,
-                  if (image.preparing)
+                  if (!image.prepared)
                     Container(
                       height: 148.h,
                       decoration: BoxDecoration(
@@ -139,7 +139,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         ),
                       ),
                     ),
-                  if (!image.preparing)
+                  if (image.prepared)
                     GestureDetector(
                       onTap: () {
                         setState(() {

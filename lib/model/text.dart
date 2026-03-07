@@ -14,7 +14,7 @@ class TextModel {
   final String conversation_id;
   final String? text;
   final List<ImageModel>? images;
-  final List<VideoModel>? videos;
+  final VideoModel? video;
   final AttachmentModel? attachment;
   final AudioModel? audio;
   final TextType type;
@@ -33,7 +33,7 @@ class TextModel {
     this.images,
     required this.seen_by,
     required this.created_at,
-    this.videos,
+    this.video,
     required this.type,
     this.attachment,
     this.audio,
@@ -47,6 +47,7 @@ class TextModel {
     Map<String, dynamic> json, {
     required String my_id,
     List<ImageModel>? images,
+    VideoModel? video,
   }) {
     final type = switch (json['type'] as String) {
       'Text' => TextType.Text,
@@ -67,7 +68,7 @@ class TextModel {
       my_text: json['owner'] == my_id,
       seen_by: List<String>.from(json['seen_by'] as List),
       created_at: json['created_at'] as int,
-      videos: null, // TODO: add video support
+      video: video,
       attachment: json['attachment'] != null
           ? AttachmentModel.fromJson(json['attachment'])
           : null,
@@ -78,7 +79,7 @@ class TextModel {
   Future<TextModel?> load_third_party_infos() async {
     if (youtube_attachment == null &&
         images == null &&
-        videos == null &&
+        video == null &&
         audio == null &&
         text != null) {
       final id = YoutubeModel.searchId(text!);
@@ -90,7 +91,7 @@ class TextModel {
 
     if (link_preview == null &&
         images == null &&
-        videos == null &&
+        video == null &&
         audio == null &&
         youtube_attachment == null &&
         text != null) {

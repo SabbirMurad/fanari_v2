@@ -6,6 +6,7 @@ import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/image.dart';
 import 'package:fanari_v2/model/outgoing_text.dart';
+import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/socket/call_signal.dart';
 import 'package:fanari_v2/socket/socket_events.dart';
@@ -205,10 +206,26 @@ class CustomSocket {
         images = ImageModel.fromJsonList(response.data!);
       }
 
+      VideoModel? video;
+      if (payload['video'] != null) {
+        final video_id = payload['video'] is String
+            ? payload['video'] as String
+            : (payload['video'] as List).first as String;
+        final response = await utils.CustomHttp.post(
+          endpoint: '/image/metadata',
+          body: [video_id],
+          add_api_prefix: false,
+        );
+        if (response.ok && response.data != null) {
+          video = VideoModel.fromJson(response.data![0]);
+        }
+      }
+
       final text = TextModel.from_payload(
         payload,
         my_id: _my_user_id!,
         images: images,
+        video: video,
       );
 
       _text_controller.add(IncomingTextEvent(text: text));

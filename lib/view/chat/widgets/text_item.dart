@@ -3,6 +3,7 @@ import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/attachment.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -419,6 +420,91 @@ class _TextItemWidgetState extends State<TextItemWidget> {
     );
   }
 
+  Widget _videoWidget() {
+    final video = widget.model.video!;
+    double videoWidth = _maxTextWidth;
+    double videoHeight = videoWidth * 9 / 16;
+
+    late final Widget videoContent;
+
+    if (video.local) {
+      videoContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.memory(
+            video.local_thumbnail_bytes!,
+            width: videoWidth,
+            height: videoHeight,
+            fit: BoxFit.cover,
+          ),
+          Container(
+            width: videoWidth,
+            height: videoHeight,
+            color: Color(0xff181818).withValues(alpha: 0.3),
+          ),
+          SizedBox(
+            width: 24.w,
+            height: 24.w,
+            child: SpinKitFoldingCube(color: AppColors.white, size: 24.w),
+          ),
+        ],
+      );
+    } else {
+      videoContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          CachedNetworkImage(
+            imageUrl: video.thumbnail.webp_url,
+            width: videoWidth,
+            height: videoHeight,
+            fit: BoxFit.cover,
+            placeholder: (context, url) {
+              return SizedBox(
+                width: videoWidth,
+                height: videoHeight,
+                child: video.thumbnail.blur_hash.isNotEmpty
+                    ? BlurHash(
+                        hash: video.thumbnail.blur_hash,
+                        color: AppColors.secondary,
+                      )
+                    : Container(color: AppColors.secondary),
+              );
+            },
+            errorWidget: (context, url, error) {
+              return Container(
+                width: videoWidth,
+                height: videoHeight,
+                color: AppColors.secondary,
+                child: Icon(Icons.error_outline, color: AppColors.text),
+              );
+            },
+          ),
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              color: Color(0xff181818).withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.play_arrow_rounded,
+              size: 32.w,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      transform: Matrix4.translationValues(_swipeOffset, 0, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.r),
+        child: videoContent,
+      ),
+    );
+  }
+
   Widget _typeHandler() {
     if (widget.model.type == TextType.Text) return _text();
     if (widget.model.type == TextType.Image) {
@@ -434,12 +520,10 @@ class _TextItemWidgetState extends State<TextItemWidget> {
 
     if (widget.model.type == TextType.Audio) return _audioWidget();
 
-    // : widget.model.type == TextType.Emoji
-    // ? emoji != null
-    //       ? _emoji(emoji)
-    //       : Container()
-    // : widget.model.type == TextType.Audio
-    // ? _audioWidget(maxTextWidth)
+    if (widget.model.type == TextType.Video && widget.model.video != null) {
+      return _videoWidget();
+    }
+
     return Container(width: 50, height: 50, color: Colors.red);
   }
 

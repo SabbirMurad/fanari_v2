@@ -8,6 +8,7 @@ import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
+import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/chat/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
@@ -392,6 +393,72 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           conversation_id: widget.conversation_id,
           type: TextType.Image,
           images: images,
+        ),
+      );
+    }
+
+    if (message.videoPath != null) {
+      final my_id = await LocalStorage.user_id.get();
+      final now = DateTime.now().microsecondsSinceEpoch;
+
+      final thumbnail_bytes = message.videoThumbnail!.readAsBytesSync();
+
+      final temp_thumbnail = ImageModel(
+        uuid: 'temp_$now',
+        webp_url: 'temp',
+        original_url: 'temp',
+        blur_hash: '',
+        width: 16,
+        height: 9,
+        provider: MemoryImage(thumbnail_bytes),
+        local_bytes: thumbnail_bytes,
+        local: true,
+      );
+
+      final temp_video = VideoModel(
+        uuid: 'temp_$now',
+        video_url: '',
+        thumbnail: temp_thumbnail,
+        local: true,
+        local_thumbnail_bytes: thumbnail_bytes,
+      );
+
+      final temp_text = TextModel(
+        uuid: 'temp_$now',
+        owner: my_id!,
+        conversation_id: widget.conversation_id,
+        my_text: true,
+        seen_by: [],
+        created_at: DateTime.now().millisecondsSinceEpoch,
+        type: TextType.Video,
+        video: temp_video,
+      );
+
+      ref
+          .read(conversationNotifierProvider.notifier)
+          .add_message(
+            conversation_id: widget.conversation_id,
+            message: temp_text,
+          );
+
+      final video_id = await utils.upload_video(path: message.videoPath!);
+
+      if (video_id == null) {
+        printLine('Failed to upload video');
+        return;
+      }
+
+      final uploaded_video = VideoModel(
+        uuid: video_id,
+        video_url: '',
+        thumbnail: temp_thumbnail,
+      );
+
+      CustomSocket.instance.send_text(
+        SocketOutgoingText(
+          conversation_id: widget.conversation_id,
+          type: TextType.Video,
+          video: uploaded_video,
         ),
       );
     }

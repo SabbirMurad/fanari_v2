@@ -35,7 +35,7 @@ class SocketOutgoingText {
       'mentions': mentions,
       'images': images,
       'audio': audio,
-      'videos': video,
+      'video': video?.uuid,
       'type': type.name,
       'attachment': attachment,
       'reply_to': reply_to,

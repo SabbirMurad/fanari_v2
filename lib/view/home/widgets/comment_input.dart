@@ -1,11 +1,13 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/emoji.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/provider/emoji.dart';
+import 'package:fanari_v2/view/home/widgets/comment_input_models.dart';
+import 'package:fanari_v2/view/home/widgets/special_text_builders.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -20,47 +22,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 
-class Mention {
-  final String id;
-  final String display;
-
-  Mention(this.id, this.display);
-}
-
-class CommentInputColorTheme {
-  final Color primaryColor;
-  final Color textColor;
-  final Color secondaryColor;
-  final Color borderColor;
-  final Color hintTextColor;
-  final Color emojiBackgroundColor;
-  final Gradient bgGradient;
-
-  const CommentInputColorTheme({
-    this.primaryColor = const Color(0xff7D9FFE),
-    this.secondaryColor = const Color(0xff3A3A3A),
-    this.textColor = const Color(0xffF9F9F9),
-    this.borderColor = const Color(0xffF4F7E4),
-    this.hintTextColor = const Color(0xFFa3a3a3),
-    this.emojiBackgroundColor = const Color.fromRGBO(24, 24, 24, 0.2),
-    this.bgGradient = const LinearGradient(
-      colors: [
-        const Color.fromRGBO(24, 24, 24, 0.1),
-        const Color.fromRGBO(24, 24, 24, 0.95),
-      ],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    ),
-  });
-}
-
-class CommentInputSubmitValue {
-  final String? text;
-  final String? audioPath;
-  final List<PreparedImage>? images;
-
-  const CommentInputSubmitValue({this.text, this.audioPath, this.images});
-}
+export 'package:fanari_v2/view/home/widgets/comment_input_models.dart';
 
 class CommentInputWidget extends ConsumerStatefulWidget {
   final void Function(CommentInputSubmitValue)? onSend;
@@ -81,154 +43,187 @@ class CommentInputWidget extends ConsumerStatefulWidget {
 }
 
 class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
-  final _spacialTextController = TextEditingController();
+  // ── Text input ──────────────────────────────────────────────────────────
 
+  final _textController = TextEditingController();
+  final LayerLink _mentionLayerLink = LayerLink();
+  OverlayEntry? _mentionOverlayEntry;
+  bool _hasInputText = false;
   bool _typingSent = false;
 
-  VideoPlayerController? _videoController;
+  // ── Images ──────────────────────────────────────────────────────────────
 
+  List<PreparedImage> _selectedImages = [];
+
+  // ── Video ───────────────────────────────────────────────────────────────
+
+  VideoPlayerController? _videoController;
   String? _selectedVideoPath;
-  String _loadingVideoText = 'Loading video';
-  Subscription? _subscription;
-  double _videoCompressProgress = 0.00;
-  int _videoSize = 0;
+  File? _videoThumbnail;
   bool _loadingVideo = false;
   bool _videoError = false;
-  File? _videoThumbnail;
+  double _videoCompressProgress = 0.0;
+  Subscription? _videoCompressSubscription;
+
+  // ── Emojis ──────────────────────────────────────────────────────────────
+
+  bool _showEmojis = false;
+  final double _emojiCountPerRow = 7;
+  final double _spaceBetweenEmoji = 8.w;
+  late final double _emojiWidth =
+      (1.sw - 40.w - 24.w - (_spaceBetweenEmoji * (_emojiCountPerRow - 1))) /
+      _emojiCountPerRow;
+
+  // ── Attachment overlay ──────────────────────────────────────────────────
+
+  bool _attachmentsOptionsVisible = false;
+  final LayerLink _attachmentLayerLink = LayerLink();
+  OverlayEntry? _attachmentOverlayEntry;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Lifecycle
+  // ═══════════════════════════════════════════════════════════════════════
 
   @override
   void initState() {
     super.initState();
 
-    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
-      print('');
-      print('Video compress progress: $progress');
-      print('');
-      setState(() {
-        _videoCompressProgress = progress;
-      });
+    _videoCompressSubscription =
+        VideoCompress.compressProgress$.subscribe((progress) {
+      setState(() => _videoCompressProgress = progress);
     });
 
-    _spacialTextController.addListener(() {
-      if (_hasInputText) {
-        if (_spacialTextController.text.isEmpty) {
-          setState(() {
-            _hasInputText = false;
-          });
-        }
-        // return;
-      } else {
-        if (_spacialTextController.text.isNotEmpty) {
-          setState(() {
-            _hasInputText = true;
-          });
-        }
-      }
-
-      if (!_typingSent) {
-        _typingSent = true;
-        widget.onTyping?.call();
-
-        Future.delayed(const Duration(seconds: 3), () {
-          _typingSent = false;
-        });
-      }
-
-      final text = _spacialTextController.text;
-      final cursor = _spacialTextController.selection.baseOffset;
-
-      print('');
-      print('Text: $text');
-      print('');
-      if (cursor <= 0) return;
-
-      final lastAt = text.lastIndexOf('@', cursor - 1);
-
-      print('');
-      print('Last At: $lastAt');
-      print('');
-      if (lastAt != -1) {
-        final query = text.substring(lastAt + 1, cursor);
-
-        print('');
-        print('Query: $query');
-        print('');
-        if (!query.contains(' ') && query.isNotEmpty) {
-          showMentionOverlay(query);
-          return;
-        }
-      }
-
-      removeOverlay();
-    });
+    _textController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
-    _spacialTextController.dispose();
-
+    _removeAttachmentOverlay();
+    _removeMentionOverlay();
+    _textController.dispose();
     _videoController?.dispose();
-    _subscription?.unsubscribe();
+    _videoCompressSubscription?.unsubscribe();
     VideoCompress.deleteAllCache();
-
     super.dispose();
   }
 
-  void insertMention(Mention user) {
-    final text = _spacialTextController.text;
-    final cursor = _spacialTextController.selection.baseOffset;
+  // ═══════════════════════════════════════════════════════════════════════
+  // Text input handling
+  // ═══════════════════════════════════════════════════════════════════════
 
+  void _onTextChanged() {
+    final isEmpty = _textController.text.isEmpty;
+    if (_hasInputText && isEmpty) {
+      setState(() => _hasInputText = false);
+    } else if (!_hasInputText && !isEmpty) {
+      setState(() => _hasInputText = true);
+    }
+
+    _emitTyping();
+    _handleMentionDetection();
+  }
+
+  void _emitTyping() {
+    if (_typingSent) return;
+    _typingSent = true;
+    widget.onTyping?.call();
+    Future.delayed(const Duration(seconds: 3), () => _typingSent = false);
+  }
+
+  void _handleMentionDetection() {
+    final text = _textController.text;
+    final cursor = _textController.selection.baseOffset;
+    if (cursor <= 0) return;
+
+    final lastAt = text.lastIndexOf('@', cursor - 1);
+    if (lastAt != -1) {
+      final query = text.substring(lastAt + 1, cursor);
+      if (!query.contains(' ') && query.isNotEmpty) {
+        _showMentionOverlay(query);
+        return;
+      }
+    }
+
+    _removeMentionOverlay();
+  }
+
+  void _onSendTap() {
+    for (final image in _selectedImages) {
+      if (!image.prepared) return;
+    }
+
+    widget.onSend?.call(
+      CommentInputSubmitValue(
+        text: _textController.text,
+        images: _selectedImages,
+        videoPath: _selectedVideoPath,
+        videoThumbnail: _videoThumbnail,
+      ),
+    );
+
+    _textController.text = '';
+
+    if (_selectedVideoPath != null) {
+      _videoController?.pause();
+      _videoController?.dispose();
+      setState(() {
+        _selectedVideoPath = null;
+        _videoController = null;
+        _videoThumbnail = null;
+      });
+    } 
+
+    Future.delayed(Duration(milliseconds: 500), () {
+      setState(() => _selectedImages.clear());
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Mention overlay
+  // ═══════════════════════════════════════════════════════════════════════
+
+  Future<List<Mention>> _searchUsers(String query) async {
+    final all = [
+      Mention("1", "Sabbir"),
+      Mention("2", "Sabina"),
+      Mention("3", "Sabit"),
+    ];
+    return all
+        .where((u) => u.display.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
+
+  void _insertMention(Mention user) {
+    final text = _textController.text;
+    final cursor = _textController.selection.baseOffset;
     final lastAt = text.lastIndexOf('@', cursor - 1);
 
     final beforeRaw = text.substring(0, lastAt);
     final after = text.substring(cursor);
-
-    // ensure space before @
     final needsSpaceBefore = beforeRaw.isNotEmpty && !beforeRaw.endsWith(' ');
-
     final before = needsSpaceBefore ? '$beforeRaw ' : beforeRaw;
-
     final mentionText = '@${user.display} ';
-
     final newText = '$before$mentionText$after';
 
-    _spacialTextController.text = newText;
-    _spacialTextController.selection = TextSelection.collapsed(
+    _textController.text = newText;
+    _textController.selection = TextSelection.collapsed(
       offset: (before + mentionText).length,
     );
   }
 
-  void showMentionOverlay(String query) async {
-    print('');
-    print('Overlay called');
-    print('');
-    // Fake search — replace with API / local search
-    final users = await searchUsers(query);
-
-    print('');
-    print('User count: ${users.length}');
-    print('');
-
-    removeOverlay();
+  void _showMentionOverlay(String query) async {
+    final users = await _searchUsers(query);
+    _removeMentionOverlay();
     if (users.isEmpty) return;
 
-    // if (_overlayEntry != null) {
-    //   _overlayEntry!.markNeedsBuild();
-    //   return;
-    // }
+    final negativeOffset = -18.w - (users.length * 40.w).toDouble();
 
-    double negativeOffset = -18.w - (users.length * 40.w).toDouble();
-
-    print('');
-    print('Called here to');
-    print('');
-
-    _overlayEntry = OverlayEntry(
+    _mentionOverlayEntry = OverlayEntry(
       builder: (context) {
         return Align(
           alignment: Alignment.topLeft,
           child: CompositedTransformFollower(
-            link: _layerLink,
+            link: _mentionLayerLink,
             offset: Offset(-32.w, negativeOffset),
             showWhenUnlinked: false,
             child: Material(
@@ -245,19 +240,19 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: users.asMap().entries.map((entry) {
                     final user = entry.value;
-                    final index = entry.key;
+                    final isLast = entry.key == users.length - 1;
 
                     return GestureDetector(
                       onTap: () {
-                        insertMention(user);
-                        removeOverlay();
+                        _insertMention(user);
+                        _removeMentionOverlay();
                       },
                       behavior: HitTestBehavior.translucent,
                       child: Container(
                         height: 40.h,
                         padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          border: index == users.length - 1
+                          border: isLast
                               ? null
                               : Border(
                                   bottom: BorderSide(
@@ -290,35 +285,214 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       },
     );
 
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    Overlay.of(context, rootOverlay: true).insert(_mentionOverlayEntry!);
   }
 
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _overlayEntry;
-
-  void removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+  void _removeMentionOverlay() {
+    _mentionOverlayEntry?.remove();
+    _mentionOverlayEntry = null;
   }
 
-  Future<List<Mention>> searchUsers(String query) async {
-    final all = [
-      Mention("1", "Sabbir"),
-      Mention("2", "Sabina"),
-      Mention("3", "Sabit"),
+  // ═══════════════════════════════════════════════════════════════════════
+  // Emoji handling
+  // ═══════════════════════════════════════════════════════════════════════
+
+  void _insertEmoji(String key) {
+    final cursor = _textController.selection.baseOffset;
+    final text = _textController.text;
+
+    _textController.text = text.replaceRange(cursor, cursor, ':$key:');
+    _textController.selection = TextSelection.collapsed(
+      offset: cursor + key.length + 2,
+    );
+
+    setState(() => _showEmojis = false);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Image handling
+  // ═══════════════════════════════════════════════════════════════════════
+
+  Future<void> _handleGalleryTap() async {
+    final images = await utils.pick_images_from_gallery(context: context);
+    if (images == null) return;
+
+    final prepared = PreparedImage.fromFiles(images);
+    setState(() => _selectedImages.addAll(prepared));
+
+    for (int i = 0; i < _selectedImages.length; i++) {
+      if (_selectedImages[i].prepared) continue;
+      final meta = await _selectedImages[i].get_prepare_meta();
+      setState(() {
+        _selectedImages[i].meta = meta;
+        _selectedImages[i].prepared = true;
+      });
+    }
+  }
+
+  Future<void> _handleCameraTap() async {
+    final image = await utils.pick_single_image(
+      context: context,
+      source: ImageSource.camera,
+    );
+    if (image == null) return;
+
+    final prepared = PreparedImage.fromFile(image);
+    setState(() => _selectedImages.add(prepared));
+
+    for (int i = 0; i < _selectedImages.length; i++) {
+      if (_selectedImages[i].prepared) continue;
+      final meta = await _selectedImages[i].get_prepare_meta();
+      setState(() {
+        _selectedImages[i].meta = meta;
+        _selectedImages[i].prepared = true;
+      });
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Video handling
+  // ═══════════════════════════════════════════════════════════════════════
+
+  Future<void> _handleVideoTap() async {
+    setState(() {
+      _videoController = null;
+      _selectedVideoPath = null;
+      _videoThumbnail = null;
+      _loadingVideo = true;
+    });
+
+    final videos = await utils.pick_videos_from_gallery(
+      context: context,
+      limit: 1,
+    );
+
+    if (videos == null) {
+      setState(() => _loadingVideo = false);
+      return;
+    }
+
+    final file = videos[0];
+
+    final thumbnail = await VideoCompress.getFileThumbnail(
+      file.path,
+      quality: 80,
+    );
+    setState(() => _videoThumbnail = thumbnail);
+
+    final compressedVideo = await VideoCompress.compressVideo(
+      file.path,
+      quality: VideoQuality.DefaultQuality,
+      frameRate: 29,
+      includeAudio: true,
+    );
+
+    if (compressedVideo == null) {
+      utils.show_custom_toast(
+        text: 'Something went wrong, compressing the video',
+      );
+      setState(() => _loadingVideo = false);
+      return;
+    }
+
+    _videoController = VideoPlayerController.file(
+      compressedVideo.file!,
+      closedCaptionFile: null,
+    )..initialize().then((_) {
+        setState(() {
+          _loadingVideo = false;
+          _videoCompressProgress = 0.0;
+          _selectedVideoPath = compressedVideo.file!.path;
+        });
+      });
+  }
+
+  void _removeSelectedVideo() {
+    _videoController?.pause();
+    _videoController?.dispose();
+    setState(() {
+      _selectedVideoPath = null;
+      _videoController = null;
+      _videoThumbnail = null;
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Attachment overlay
+  // ═══════════════════════════════════════════════════════════════════════
+
+  void _handlePollTap() {}
+
+  void _toggleAttachmentOptions() {
+    if (_attachmentsOptionsVisible) {
+      _removeAttachmentOverlay();
+    } else {
+      _showAttachmentOverlay();
+    }
+  }
+
+  void _showAttachmentOverlay() {
+    _removeAttachmentOverlay();
+
+    final options = [
+      {'icon': 'poll', 'onTap': _handlePollTap},
+      {'icon': 'video', 'onTap': _handleVideoTap},
+      {'icon': 'camera', 'onTap': _handleCameraTap},
+      {'icon': 'gallery', 'onTap': _handleGalleryTap},
     ];
 
-    return all
-        .where((u) => u.display.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final itemHeight = 40.w;
+    final itemSpacing = 12.h;
+    final totalHeight =
+        options.length * itemHeight + (options.length - 1) * itemSpacing;
+
+    _attachmentOverlayEntry = OverlayEntry(
+      builder: (context) {
+        return CompositedTransformFollower(
+          link: _attachmentLayerLink,
+          offset: Offset(0, -(totalHeight + itemSpacing)),
+          showWhenUnlinked: false,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((opt) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: itemSpacing),
+                    child: _buildAttachmentOptionButton(
+                      icon: opt['icon'] as String,
+                      onTap: opt['onTap'] as VoidCallback,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(context, rootOverlay: true).insert(_attachmentOverlayEntry!);
+    setState(() => _attachmentsOptionsVisible = true);
   }
 
-  bool _hasInputText = false;
+  void _removeAttachmentOverlay() {
+    _attachmentOverlayEntry?.remove();
+    _attachmentOverlayEntry = null;
+    if (_attachmentsOptionsVisible) {
+      setState(() => _attachmentsOptionsVisible = false);
+    }
+  }
 
-  Widget _inputContainer(List<EmojiModel> emojis) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // Widget builders
+  // ═══════════════════════════════════════════════════════════════════════
+
+  Widget _buildInputContainer(List<EmojiModel> emojis) {
     return Container(
       width: double.infinity,
-      // height: 40.w,
       decoration: BoxDecoration(
         color: widget.colorTheme.secondaryColor,
         borderRadius: BorderRadius.circular(20.r),
@@ -333,17 +507,13 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
               'assets/icons/emoji.svg',
               width: 20.w,
               height: 20.w,
-              onTap: () {
-                setState(() {
-                  _showEmojis = !_showEmojis;
-                });
-              },
+              onTap: () => setState(() => _showEmojis = !_showEmojis),
             ),
           ),
           SizedBox(width: 12.w),
           Expanded(
             child: CompositedTransformTarget(
-              link: _layerLink,
+              link: _mentionLayerLink,
               child: ExtendedTextField(
                 autocorrect: false,
                 decoration: InputDecoration(
@@ -364,7 +534,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   color: widget.colorTheme.textColor,
                   fontSize: 14.sp,
                 ),
-                controller: _spacialTextController,
+                controller: _textController,
                 specialTextSpanBuilder: MySpecialTextSpanBuilder(
                   emojis: emojis,
                   mentionColor: widget.colorTheme.primaryColor,
@@ -379,239 +549,99 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
-  Future<void> _handleGalleryTap() async {
-    final images = await utils.pick_images_from_gallery(context: context);
-
-    if (images == null) return;
-
-    List<PreparedImage> prepared_images = PreparedImage.fromFiles(images);
-
-    setState(() {
-      _selectedImages.addAll(prepared_images);
-    });
-
-    for (int i = 0; i < _selectedImages.length; i++) {
-      if (!_selectedImages[i].preparing) continue;
-      final image_meta = await _selectedImages[i].get_prepare_meta();
-
-      setState(() {
-        _selectedImages[i].meta = image_meta;
-        _selectedImages[i].preparing = false;
-      });
-    }
-  }
-
-  Future<void> _handleCameraTap() async {
-    final images = await utils.pick_single_image(
-      context: context,
-      source: ImageSource.camera,
-    );
-
-    if (images == null) return;
-
-    PreparedImage prepared_images = PreparedImage.fromFile(images);
-
-    setState(() {
-      _selectedImages.add(prepared_images);
-    });
-
-    for (int i = 0; i < _selectedImages.length; i++) {
-      if (!_selectedImages[i].preparing) continue;
-      final image_meta = await _selectedImages[i].get_prepare_meta();
-
-      setState(() {
-        _selectedImages[i].meta = image_meta;
-        _selectedImages[i].preparing = false;
-      });
-    }
-  }
-
-  void _handlePollTap() {}
-
-  bool _attachmentsOptionsVisible = false;
-
-  Widget _attachmentsOptionItemWidget({
-    required String icon,
-    VoidCallback? onTap,
-    required int index,
-  }) {
-    return AnimatedPositioned(
-      duration: Duration(milliseconds: 272),
-      bottom: _attachmentsOptionsVisible ? (40.h + 12.h) * (index + 1) : 0,
+  Widget _buildAttachmentToggleButton() {
+    return CompositedTransformTarget(
+      link: _attachmentLayerLink,
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _attachmentsOptionsVisible = false;
-          });
-
-          onTap?.call();
-        },
-        child: Container(
+        onTap: _toggleAttachmentOptions,
+        child: AnimatedContainer(
           width: 40.w,
           height: 40.w,
+          duration: Duration(milliseconds: 272),
           decoration: BoxDecoration(
-            color: widget.colorTheme.primaryColor,
+            color: _attachmentsOptionsVisible
+                ? widget.colorTheme.secondaryColor
+                : widget.colorTheme.primaryColor,
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: CustomSvg(
-              'assets/icons/post/$icon.svg',
-              width: 20.w,
-              height: 20.w,
-              color: widget.colorTheme.textColor,
-            ),
+            child: _attachmentsOptionsVisible
+                ? Icon(
+                    Icons.close_rounded,
+                    size: 24.w,
+                    color: widget.colorTheme.textColor,
+                  )
+                : CustomSvg(
+                    'assets/icons/attachment.svg',
+                    width: 18.w,
+                    height: 18.w,
+                    color: widget.colorTheme.textColor,
+                  ),
           ),
         ),
       ),
     );
   }
 
-  void _handleVideoTap() async {
-    setState(() {
-      _videoController = null;
-      _selectedVideoPath = null;
-      _videoThumbnail = null;
-      _loadingVideo = true;
-    });
-
-    final videos = await utils.pick_videos_from_gallery(
-      context: context,
-      limit: 1,
-    );
-
-    if (videos == null) {
-      setState(() {
-        _loadingVideo = false;
-      });
-      return;
-    }
-
-    final file = videos[0];
-
-    final thumbnail = await VideoCompress.getFileThumbnail(
-      file.path,
-      quality: 80,
-    );
-
-    setState(() {
-      _videoThumbnail = thumbnail;
-    });
-
-    final compressedVideo = await VideoCompress.compressVideo(
-      file.path,
-      quality: VideoQuality.DefaultQuality,
-      frameRate: 29,
-      includeAudio: true,
-    );
-
-    if (compressedVideo == null) {
-      utils.show_custom_toast(
-        text: 'Something went wrong, compressing the video',
-      );
-      setState(() {
-        _loadingVideo = false;
-      });
-      return;
-    }
-
-    setState(() {
-      _videoSize = compressedVideo.filesize!;
-    });
-
-    _videoController =
-        VideoPlayerController.file(
-            compressedVideo.file!,
-            closedCaptionFile: null,
-          )
-          ..initialize().then((_) {
-            setState(() {
-              _videoController;
-              _loadingVideo = false;
-              _videoCompressProgress = 0.0;
-              _selectedVideoPath = compressedVideo.file!.path;
-            });
-          });
-  }
-
-  Widget _attachmentOptionsWidget() {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 272),
-      height: _attachmentsOptionsVisible
-          ? 40.h + 12.h + 40.h + 12.h + 40.h + 12.h + 40.h + 12.h + 40.h
-          : 40.w,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          _attachmentsOptionItemWidget(
-            icon: 'poll',
-            index: 3,
-            onTap: _handlePollTap,
+  Widget _buildAttachmentOptionButton({
+    required String icon,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        _removeAttachmentOverlay();
+        onTap?.call();
+      },
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        decoration: BoxDecoration(
+          color: widget.colorTheme.primaryColor,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: CustomSvg(
+            'assets/icons/post/$icon.svg',
+            width: 20.w,
+            height: 20.w,
+            color: widget.colorTheme.textColor,
           ),
-          _attachmentsOptionItemWidget(
-            icon: 'video',
-            index: 2,
-            onTap: _handleVideoTap,
-          ),
-          _attachmentsOptionItemWidget(
-            icon: 'camera',
-            index: 1,
-            onTap: _handleCameraTap,
-          ),
-          _attachmentsOptionItemWidget(
-            icon: 'gallery',
-            index: 0,
-            onTap: _handleGalleryTap,
-          ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _attachmentsOptionsVisible = !_attachmentsOptionsVisible;
-              });
-            },
-            child: AnimatedContainer(
-              width: 40.w,
-              height: 40.w,
-              duration: Duration(milliseconds: 272),
-              decoration: BoxDecoration(
-                color: _attachmentsOptionsVisible
-                    ? widget.colorTheme.secondaryColor
-                    : widget.colorTheme.primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: _attachmentsOptionsVisible
-                    ? Icon(
-                        Icons.close_rounded,
-                        size: 24.w,
-                        color: widget.colorTheme.textColor,
-                      )
-                    : CustomSvg(
-                        'assets/icons/attachment.svg',
-                        width: 18.w,
-                        height: 18.w,
-                        color: widget.colorTheme.textColor,
-                      ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  bool _showEmojis = false;
+  Widget _buildSendButton() {
+    return GestureDetector(
+      onTap: _onSendTap,
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        decoration: BoxDecoration(
+          color: widget.colorTheme.primaryColor,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: CustomSvg(
+            'assets/icons/send.svg',
+            width: 18.w,
+            height: 18.w,
+            color: widget.colorTheme.textColor,
+          ),
+        ),
+      ),
+    );
+  }
 
-  double _emojiCountParRow = 7;
-  double _spaceBetweenEmoji = 8.w;
-  late double _emojiWidth =
-      (1.sw - 40.w - 24.w - (_spaceBetweenEmoji * (_emojiCountParRow - 1))) /
-      _emojiCountParRow;
-
-  Widget _emojiContainer(List<EmojiModel> emojis) {
+  Widget _buildEmojiContainer(List<EmojiModel> emojis) {
     return AnimatedContainer(
       width: 1.sw - 40.w,
       height: _showEmojis ? ((1.sw - 40.w) * 9) / 16 : 0,
-      margin: EdgeInsets.only(bottom: _showEmojis ? 12.h : 0),
+      margin: EdgeInsets.only(
+        bottom: _showEmojis ? 12.h : 0,
+        left: 20.w,
+        right: 20.w,
+      ),
       duration: Duration(milliseconds: 272),
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
@@ -624,9 +654,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           runSpacing: _spaceBetweenEmoji,
           children: emojis.map((emoji) {
             return GestureDetector(
-              onTap: () {
-                insertEmoji(emoji.name);
-              },
+              onTap: () => _insertEmoji(emoji.name),
               child: Container(
                 width: _emojiWidth,
                 height: 40.w,
@@ -649,26 +677,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
-  void insertEmoji(String key) {
-    final cursor = _spacialTextController.selection.baseOffset;
-
-    final text = _spacialTextController.text;
-    final newText = text.replaceRange(cursor, cursor, ':$key:');
-
-    _spacialTextController.text = newText;
-
-    _spacialTextController.selection = TextSelection.collapsed(
-      offset: cursor + key.length + 2,
-    );
-
-    setState(() {
-      _showEmojis = false;
-    });
-  }
-
-  List<PreparedImage> _selectedImages = [];
-
-  Widget _imageContainer() {
+  Widget _buildImageContainer() {
     return AnimatedContainer(
       duration: Duration(milliseconds: 372),
       height: _selectedImages.isEmpty ? 0 : 112.h,
@@ -681,7 +690,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           children: [
             SizedBox(width: 20.w),
             ..._selectedImages.asMap().entries.map((entry) {
-              int index = entry.key;
+              final index = entry.key;
               final image = entry.value;
 
               return LongPressDraggable<int>(
@@ -705,7 +714,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     padding: const EdgeInsets.only(right: 12),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image(image: FileImage(image.file), height: 112.h),
+                      child:
+                          Image(image: FileImage(image.file), height: 112.h),
                     ),
                   ),
                 ),
@@ -713,7 +723,6 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   onAcceptWithDetails: (details) {
                     final item = _selectedImages.removeAt(details.data);
                     _selectedImages.insert(index, item);
-
                     setState(() {});
                   },
                   builder: (context, candidateData, rejectedData) {
@@ -730,7 +739,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                                 height: 112.h,
                               ),
                             ),
-                            if (image.preparing)
+                            if (!image.prepared)
                               Container(
                                 height: 112.h,
                                 decoration: BoxDecoration(
@@ -749,12 +758,11 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                                   ),
                                 ),
                               ),
-                            if (!image.preparing)
+                            if (image.prepared)
                               GestureDetector(
                                 onTap: () {
-                                  setState(() {
-                                    _selectedImages.removeAt(index);
-                                  });
+                                  setState(
+                                      () => _selectedImages.removeAt(index));
                                 },
                                 child: Container(
                                   width: 24,
@@ -762,9 +770,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                                   margin: EdgeInsets.only(top: 6, right: 6),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
-                                    color: Color(
-                                      0xFF181818,
-                                    ).withValues(alpha: .45),
+                                    color: Color(0xFF181818)
+                                        .withValues(alpha: .45),
                                   ),
                                   child: Center(
                                     child: Transform(
@@ -787,7 +794,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                   },
                 ),
               );
-            }).toList(),
+            }),
             SizedBox(width: 20.w),
           ],
         ),
@@ -795,66 +802,51 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
-  Widget _videoWidget() {
+  Widget _buildVideoPreview() {
     return Padding(
       padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Stack(
-              alignment: Alignment.topRight,
-              children: [
-                VideoPlayerWidget(
-                  width: 0.7.sw - 24.w,
-                  height: (0.7.sw - 24.w) * 9 / 16,
-                  controller: _videoController!,
-                  aspectRatio: _videoController!.value.aspectRatio,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            VideoPlayerWidget(
+              width: 0.7.sw - 24.w,
+              height: (0.7.sw - 24.w) * 9 / 16,
+              controller: _videoController!,
+              aspectRatio: _videoController!.value.aspectRatio,
+            ),
+            GestureDetector(
+              onTap: _removeSelectedVideo,
+              child: Container(
+                width: 28,
+                height: 28,
+                margin: EdgeInsets.only(top: 6, right: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: Color(0xFF181818).withValues(alpha: .45),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _videoController?.pause();
-                      _videoController?.dispose();
-                      _selectedVideoPath = null;
-                      _videoController = null;
-                    });
-                  },
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    margin: EdgeInsets.only(top: 6, right: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      color: Color(0xFF181818).withValues(alpha: .45),
-                    ),
-                    child: Center(
-                      child: Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.identity()..rotateZ(pi / 4),
-                        child: Icon(Icons.add, size: 24, color: Colors.white),
-                      ),
-                    ),
+                child: Center(
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateZ(pi / 4),
+                    child: Icon(Icons.add, size: 24, color: Colors.white),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-          // if (_videoSize != 0)
-          //   Padding(
-          //     padding: const EdgeInsets.only(top: 12, left: 6),
-          //     child: Text(
-          //       '${_videoSize / 1024 > 1024 ? '${(_videoSize / 1024 / 1024).toStringAsFixed(2)} MB' : '${(_videoSize / 1024).toStringAsFixed(2)} KB'} / 50MB',
-          //       style: TextStyle(color: AppColors.text, fontSize: 14),
-          //     ),
-          //   ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _videoProcessingWidget() {
+  Widget _buildVideoProcessing() {
+    final videoWidth = 0.7.sw - 24.w;
+    final videoHeight = videoWidth * 9 / 16;
+
+    final progressText = _videoCompressProgress.toStringAsFixed(1);
+
     return Container(
       margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12),
       child: Stack(
@@ -862,15 +854,15 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image(
-              height: (1.sw - 24.w) * 9 / 16,
-              width: 1.sw - 24.w,
+              height: videoHeight,
+              width: videoWidth,
               fit: BoxFit.cover,
               image: FileImage(_videoThumbnail!),
             ),
           ),
           Container(
-            width: 0.7.sw - 24.w,
-            height: (0.7.sw - 24.w) * 9 / 16,
+            width: videoWidth,
+            height: videoHeight,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               color: Color(0xFF181818).withValues(alpha: .35),
@@ -890,13 +882,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                       ),
                       child: Center(
                         child: Text(
-                          _videoCompressProgress.toString().length < 5
-                              ? _videoCompressProgress.toString() + '%'
-                              : _videoCompressProgress.toString().substring(
-                                      0,
-                                      5,
-                                    ) +
-                                    '%',
+                          '$progressText%',
                           style: TextStyle(
                             color: AppColors.text,
                             fontSize: 16,
@@ -912,6 +898,32 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
     );
   }
 
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: EdgeInsets.only(left: 20.w, bottom: 12.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            'Typing',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(width: 6),
+          BouncingDots(dotSize: 3, gap: 4),
+        ],
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Build
+  // ═══════════════════════════════════════════════════════════════════════
+
   @override
   Widget build(BuildContext context) {
     final emojis = ref
@@ -921,6 +933,11 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
           error: (error, stackTrace) => <EmojiModel>[],
           loading: () => <EmojiModel>[],
         );
+
+    final showVoiceRecorder =
+        !_hasInputText &&
+        _selectedImages.isEmpty &&
+        _selectedVideoPath == null;
 
     return Container(
       width: double.infinity,
@@ -933,31 +950,12 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.showTyping)
-                Padding(
-                  padding: EdgeInsets.only(left: 20.w, bottom: 12.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Typing',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(width: 6),
-                      BouncingDots(dotSize: 3, gap: 4),
-                    ],
-                  ),
-                ),
-              _imageContainer(),
+              if (widget.showTyping) _buildTypingIndicator(),
+              _buildImageContainer(),
               if (_loadingVideo && _videoThumbnail != null)
-                _videoProcessingWidget(),
-              if (_selectedVideoPath != null) _videoWidget(),
-              _emojiContainer(emojis),
+                _buildVideoProcessing(),
+              if (_selectedVideoPath != null) _buildVideoPreview(),
+              _buildEmojiContainer(emojis),
               Padding(
                 padding: EdgeInsets.only(left: 20.w, right: 20.w),
                 child: Stack(
@@ -972,48 +970,12 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                           color: Colors.transparent,
                         ),
                         SizedBox(width: 12.w),
-                        Expanded(child: _inputContainer(emojis)),
+                        Expanded(child: _buildInputContainer(emojis)),
                         SizedBox(width: 12.w),
-                        GestureDetector(
-                          onTap: () {
-                            for (int i = 0; i < _selectedImages.length; i++) {
-                              if (_selectedImages[i].preparing) return;
-                            }
-
-                            widget.onSend?.call(
-                              CommentInputSubmitValue(
-                                text: _spacialTextController.text,
-                                images: _selectedImages,
-                              ),
-                            );
-
-                            _spacialTextController.text = '';
-                            Future.delayed(Duration(milliseconds: 500), () {
-                              setState(() {
-                                _selectedImages.clear();
-                              });
-                            });
-                          },
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: widget.colorTheme.primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: CustomSvg(
-                                'assets/icons/send.svg',
-                                width: 18.w,
-                                height: 18.w,
-                                color: widget.colorTheme.textColor,
-                              ),
-                            ),
-                          ),
-                        ),
+                        _buildSendButton(),
                       ],
                     ),
-                    if (!_hasInputText && _selectedImages.isEmpty)
+                    if (showVoiceRecorder)
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -1021,12 +983,13 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                           barWidth: 1.sw - 40.w - 40.w - 12.w,
                           barHeight: 40.w,
                           buttonSize: 40.w,
+                          onRecordEnd: (audioFile, path) {},
                         ),
                       ),
                     Positioned(
                       bottom: 0,
                       left: 0,
-                      child: _attachmentOptionsWidget(),
+                      child: _buildAttachmentToggleButton(),
                     ),
                   ],
                 ),
@@ -1036,101 +999,5 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
         ),
       ),
     );
-  }
-}
-
-class AtText extends SpecialText {
-  static const String flag = "@";
-  final Color mentionColor;
-
-  AtText(
-    TextStyle? textStyle,
-    SpecialTextGestureTapCallback? onTap, {
-    required this.start,
-    required this.mentionColor,
-  }) : super(flag, ' ', textStyle, onTap: onTap);
-
-  final int start;
-
-  @override
-  InlineSpan finishText() {
-    final mentionText = getContent();
-
-    return SpecialTextSpan(
-      text: '@$mentionText',
-      actualText: '@$mentionText',
-      start: start,
-      style: TextStyle(
-        color: mentionColor, // your app primary color
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-}
-
-class EmojiText extends SpecialText {
-  static const String beginFlag = " :";
-  static const String finishFlag = ":";
-
-  final int start;
-  final List<EmojiModel> emojis;
-
-  EmojiText(
-    TextStyle? textStyle,
-    SpecialTextGestureTapCallback? onTap, {
-    required this.start,
-    required this.emojis,
-  }) : super(beginFlag, finishFlag, textStyle, onTap: onTap);
-
-  @override
-  InlineSpan finishText() {
-    final key = getContent(); // smile
-
-    EmojiModel? emojiModel;
-
-    for (final emoji in emojis) {
-      if (emoji.name == key) {
-        emojiModel = emoji;
-        break;
-      }
-    }
-
-    if (emojiModel == null) {
-      return TextSpan(text: ':$key:', style: super.textStyle);
-    }
-
-    return WidgetSpan(
-      alignment: PlaceholderAlignment.middle,
-      child: CachedNetworkImage(
-        imageUrl: emojis.firstWhere((element) => element.name == key).webp_url,
-        width: 20.w,
-        height: 20.w,
-      ),
-    );
-  }
-}
-
-class MySpecialTextSpanBuilder extends SpecialTextSpanBuilder {
-  final List<EmojiModel> emojis;
-  final Color mentionColor;
-
-  MySpecialTextSpanBuilder({required this.emojis, required this.mentionColor});
-
-  @override
-  SpecialText? createSpecialText(
-    String flag, {
-    TextStyle? textStyle,
-    SpecialTextGestureTapCallback? onTap,
-    required int index,
-  }) {
-    if (flag == "@") {
-      return AtText(textStyle, onTap, start: index, mentionColor: mentionColor);
-    }
-
-    if (flag == ":") {
-      return EmojiText(textStyle, onTap, start: index, emojis: emojis);
-    }
-
-    return null;
   }
 }

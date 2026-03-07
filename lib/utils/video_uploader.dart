@@ -5,6 +5,8 @@ part of '../utils.dart';
 ///
 /// Returns null on failure.
 Future<String?> upload_video({required String path}) async {
+  await CustomHttp.refresh_access_token();
+
   final file = File(path);
   final filename = path.split('/').last;
   final video_bytes = await file.readAsBytes();
@@ -39,6 +41,7 @@ Future<String?> upload_video({required String path}) async {
   final thumbnail = await VideoCompress.getFileThumbnail(path, quality: 80);
   final prepared = PreparedImage.fromFileWithId(thumbnail, video_id);
   prepared.meta = await prepared.get_prepare_meta();
+  prepared.prepared = true;
 
   final image_ids = await upload_images(
     images: [prepared],

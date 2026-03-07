@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/model/image.dart';
 
@@ -5,11 +7,15 @@ class VideoModel {
   final String uuid;
   final String video_url;
   final ImageModel thumbnail;
+  final bool local;
+  final Uint8List? local_thumbnail_bytes;
 
   const VideoModel({
     required this.uuid,
     required this.video_url,
     required this.thumbnail,
+    this.local = false,
+    this.local_thumbnail_bytes,
   });
 
   factory VideoModel.fromJson(Map<String, dynamic> json) {
