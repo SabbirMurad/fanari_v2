@@ -245,6 +245,142 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
     );
   }
 
+  Widget _avatarWidget() {
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: 4.w),
+          child: Hero(
+            tag: 'conversation_image_' + widget.model.core.uuid,
+            child: Material(
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  NamedAvatar(
+                    loading: false,
+                    image: widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.image
+                        : widget.model.single_metadata!.image,
+                    name: widget.model.common_metadata.is_muted
+                        ? ' '
+                        : widget.model.core.type == ConversationType.Group
+                        ? widget.model.group_metadata!.name
+                        : widget.model.single_metadata!.first_name,
+                    size: 56.w,
+                  ),
+                  if (widget.model.common_metadata.is_muted)
+                    Container(
+                      width: 56.w,
+                      height: 56.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withValues(alpha: 0.4),
+                      ),
+                      child: Center(
+                        child: CustomSvg(
+                          'assets/icons/more_options/mute.svg',
+                          width: 24.w,
+                          height: 24.w,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (widget.model.core.type == ConversationType.Single)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: widget.model.single_metadata!.online
+                  ? Colors.green[400]!.withValues(alpha: 0.5)
+                  : Color.fromARGB(255, 102, 105, 103),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              widget.model.single_metadata!.online ? 'Online' : 'Offline',
+              style: TextStyle(
+                fontSize: 8.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _textWidget(TextModel? preview) {
+    if (preview == null) {
+      return Text(
+        'You can now start a conversation',
+        style: TextStyle(
+          color: AppColors.text,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w400,
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      );
+    }
+
+    String text = 'Default';
+
+    if (preview.type == TextType.Text) {
+      text = preview.text!;
+    } else if (preview.type == TextType.Video) {
+      text = 'Video';
+    } else if (preview.type == TextType.Image) {
+      text =
+          '${preview.images!.length} image${preview.images!.length > 1 ? 's' : ''}';
+    } else if (preview.type == TextType.Audio) {
+      text = 'Voice message';
+    } else if (preview.type == TextType.Attachment) {
+      text = 'Attachment';
+    } else {
+      return SizedBox.shrink();
+    }
+
+    return Text(
+      text,
+      style: TextStyle(
+        color: AppColors.text,
+        fontSize: 13.sp,
+        fontWeight: _textWeight(),
+      ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    );
+  }
+
+  Widget _textIconWidget(TextModel preview) {
+    String icon = 'default';
+
+    if (preview.type == TextType.Image) {
+      icon = 'assets/icons/post/gallery.svg';
+    } else if (preview.type == TextType.Video) {
+      icon = 'assets/icons/post/video.svg';
+    } else if (preview.type == TextType.Audio) {
+      icon = 'assets/icons/audio.svg';
+    } else if (preview.type == TextType.Attachment) {
+      icon = 'assets/icons/attachment.svg';
+    } else {
+      return SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(right: 6.w),
+      child: CustomSvg(
+        icon,
+        size: 18.w,
+        fit: BoxFit.fitWidth,
+        color: AppColors.text,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -277,78 +413,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
           ),
           child: Row(
             children: [
-              Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 4.w),
-                    child: Hero(
-                      tag: 'conversation_image_' + widget.model.core.uuid,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Stack(
-                          children: [
-                            NamedAvatar(
-                              loading: false,
-                              image:
-                                  widget.model.core.type ==
-                                      ConversationType.Group
-                                  ? widget.model.group_metadata!.image
-                                  : widget.model.single_metadata!.image,
-                              name: widget.model.common_metadata.is_muted
-                                  ? ' '
-                                  : widget.model.core.type ==
-                                        ConversationType.Group
-                                  ? widget.model.group_metadata!.name
-                                  : widget.model.single_metadata!.first_name,
-                              size: 56.w,
-                            ),
-                            if (widget.model.common_metadata.is_muted)
-                              Container(
-                                width: 56.w,
-                                height: 56.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.black.withValues(alpha: 0.4),
-                                ),
-                                child: Center(
-                                  child: CustomSvg(
-                                    'assets/icons/more_options/mute.svg',
-                                    width: 24.w,
-                                    height: 24.w,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.model.core.type == ConversationType.Single)
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.model.single_metadata!.online
-                            ? Colors.green[400]!.withValues(alpha: 0.5)
-                            : Color.fromARGB(255, 102, 105, 103),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        widget.model.single_metadata!.online
-                            ? 'Online'
-                            : 'Offline',
-                        style: TextStyle(
-                          fontSize: 8.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              _avatarWidget(),
               SizedBox(width: 12.w),
               Container(
                 width: 1.sw - 40.w - 56.w - 12.w,
@@ -403,159 +468,66 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                       ),
                     ),
                     SizedBox(height: 2.w),
-                    Builder(builder: (context) {
-                      final preview = _preview_text;
-                      return Row(
-                        children: [
-                          Row(
-                            children: [
-                              if (widget.model.typing)
-                                Row(
+                    Builder(
+                      builder: (context) {
+                        final preview = _preview_text;
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'Typing',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
+                                    if (widget.model.typing) ...[
+                                      Text(
+                                        'Typing',
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: 6),
-                                    BouncingDots(dotSize: 3, gap: 4),
+                                      SizedBox(width: 6),
+                                      BouncingDots(dotSize: 3, gap: 4),
+                                    ],
+                                    if (!widget.model.typing) ...[
+                                      if (preview != null)
+                                        _textIconWidget(preview),
+                                      _textWidget(preview),
+                                    ],
                                   ],
                                 ),
-                              if (!widget.model.typing) ...[
-                                if (preview == null)
-                                  Text(
-                                    'You can now start a conversation',
-                                    style: TextStyle(
-                                      color: AppColors.text,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                if (preview != null) ...[
-                                  if (preview.type == TextType.Text)
-                                    Text(
-                                      preview.text!,
-                                      style: TextStyle(
-                                        color: AppColors.text,
-                                        fontSize: 13.sp,
-                                        fontWeight: _textWeight(),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  if (preview.type == TextType.Video)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/post/video.svg',
-                                          size: 18.w,
-                                          fit: BoxFit.fitWidth,
-                                          color: AppColors.text,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          'Video',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (preview.type == TextType.Image)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/post/gallery.svg',
-                                          size: 18.w,
-                                          fit: BoxFit.fitWidth,
-                                          color: AppColors.text,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          '${preview.images!.length} image${preview.images!.length > 1 ? 's' : ''}',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (preview.type == TextType.Audio)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/audio.svg',
-                                          size: 18.w,
-                                          fit: BoxFit.fitWidth,
-                                          color: AppColors.text,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          'Voice message',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (preview.type == TextType.Attachment)
-                                    Row(
-                                      children: [
-                                        CustomSvg(
-                                          'assets/icons/attachment.svg',
-                                          size: 14.w,
-                                          fit: BoxFit.fitWidth,
-                                          color: AppColors.text,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          'Attachment',
-                                          style: TextStyle(
-                                            color: AppColors.text,
-                                            fontSize: 13.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ],
-                            ],
-                          ),
-                          if (preview != null)
-                            Container(
-                              margin: EdgeInsets.only(left: 6, right: 6),
-                              width: 6.w,
-                              height: 6.w,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.text.withValues(alpha: .8),
                               ),
                             ),
-                          if (preview != null)
-                            Text(
-                              utils.time_ago(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                  preview.created_at,
+                            if (preview != null)
+                              Container(
+                                margin: EdgeInsets.only(left: 6, right: 6),
+                                width: 6.w,
+                                height: 6.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.text.withValues(alpha: .8),
                                 ),
                               ),
-                              style: TextStyle(
-                                color: AppColors.text.withValues(alpha: .8),
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
+                            if (preview != null)
+                              Text(
+                                utils.time_ago(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    preview.created_at,
+                                  ),
+                                ),
+                                style: TextStyle(
+                                  color: AppColors.text.withValues(alpha: .8),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                        ],
-                      );
-                    }),
+                          ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

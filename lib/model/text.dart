@@ -125,12 +125,9 @@ class TextModel {
     List<dynamic> json, {
     required String my_id,
   }) {
-    return json
-        .map(
-          (item) =>
-              TextModel.fromJson(item as Map<String, dynamic>, my_id: my_id),
-        )
-        .toList();
+    return json.map((item) {
+      return TextModel.fromJson(item as Map<String, dynamic>, my_id: my_id);
+    }).toList();
   }
 
   Future<TextModel?> load_third_party_infos() async {

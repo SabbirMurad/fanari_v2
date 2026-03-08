@@ -59,7 +59,7 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     final my_id = await LocalStorage.user_id.get();
     final response = await utils.CustomHttp.get(
-      endpoint: '/conversation/texts',
+      endpoint: '/conversation/text/list',
       queries: {
         'conversation_id': conversation_id,
         'limit': _texts_per_page,
@@ -68,7 +68,9 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
 
     if (!response.ok || my_id == null) {
-      printLine('Failed to load texts for conversation $conversation_id');
+      printLine(
+        'Failed to load texts for conversation $conversation_id, code: ${response.status_code}',
+      );
       final current = state.value ?? [];
       final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
       if (idx != -1) {
@@ -111,7 +113,7 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     final my_id = await LocalStorage.user_id.get();
     final response = await utils.CustomHttp.get(
-      endpoint: '/conversation/texts',
+      endpoint: '/conversation/text/list',
       queries: {
         'conversation_id': conversation_id,
         'limit': _texts_per_page,
