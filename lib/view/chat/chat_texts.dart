@@ -29,7 +29,7 @@ class ChatTextsScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   bool _selectMode = false;
   List<String> _selectedTexts = [];
@@ -38,10 +38,30 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Load initial texts for this conversation
+    Future.microtask(() {
+      ref
+          .read(conversationNotifierProvider.notifier)
+          .load_initial_texts(widget.conversation_id);
+    });
+
+    // Listen for scroll to load more (reverse list: top = older messages)
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(conversationNotifierProvider.notifier)
+          .load_more_texts(widget.conversation_id);
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
 
     CustomSocket.instance.leave_conversation();
@@ -494,16 +514,36 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              child: ListView(
-                padding: EdgeInsets.all(0),
-                reverse: true,
-                controller: _scrollController,
-                children: [
-                  SizedBox(height: 72.h),
-                  ..._textWidgets(target_conversation.texts),
-                  SizedBox(height: 124.h),
-                ],
-              ),
+              child: target_conversation.initial_text_loaded
+                  ? ListView(
+                      padding: EdgeInsets.all(0),
+                      reverse: true,
+                      controller: _scrollController,
+                      children: [
+                        SizedBox(height: 72.h),
+                        ..._textWidgets(target_conversation.texts),
+                        if (target_conversation.texts_loading)
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16.h),
+                            child: Center(
+                              child: SizedBox(
+                                width: 24.w,
+                                height: 24.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        SizedBox(height: 124.h),
+                      ],
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
             ),
             Align(
               alignment: Alignment.topCenter,

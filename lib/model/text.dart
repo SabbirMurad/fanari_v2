@@ -76,6 +76,63 @@ class TextModel {
     );
   }
 
+  /// For parsing texts from API responses (e.g. /conversation/texts)
+  /// where image/video data is already resolved inline.
+  factory TextModel.fromJson(
+    Map<String, dynamic> json, {
+    required String my_id,
+  }) {
+    final type = switch (json['type'] as String) {
+      'Text' => TextType.Text,
+      'Emoji' => TextType.Emoji,
+      'Image' => TextType.Image,
+      'Audio' => TextType.Audio,
+      'Video' => TextType.Video,
+      _ => TextType.Attachment,
+    };
+
+    List<ImageModel>? images;
+    if (json['images'] != null && (json['images'] as List).isNotEmpty) {
+      images = (json['images'] as List)
+          .map((img) => ImageModel.fromJson(img as Map<String, dynamic>))
+          .toList();
+    }
+
+    VideoModel? video;
+    if (json['video'] != null) {
+      video = VideoModel.fromJson(json['video'] as Map<String, dynamic>);
+    }
+
+    return TextModel(
+      uuid: json['uuid'] as String,
+      owner: json['owner'] as String,
+      conversation_id: json['conversation_id'] as String,
+      text: json['text'] as String?,
+      type: type,
+      images: images,
+      video: video,
+      my_text: json['owner'] == my_id,
+      seen_by: List<String>.from(json['seen_by'] as List? ?? []),
+      created_at: json['created_at'] as int,
+      attachment: json['attachment'] != null
+          ? AttachmentModel.fromJson(json['attachment'])
+          : null,
+      audio: json['audio'] != null ? AudioModel.fromJson(json['audio']) : null,
+    );
+  }
+
+  static List<TextModel> fromJsonList(
+    List<dynamic> json, {
+    required String my_id,
+  }) {
+    return json
+        .map(
+          (item) =>
+              TextModel.fromJson(item as Map<String, dynamic>, my_id: my_id),
+        )
+        .toList();
+  }
+
   Future<TextModel?> load_third_party_infos() async {
     if (youtube_attachment == null &&
         images == null &&

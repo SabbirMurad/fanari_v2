@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/model/text.dart';
@@ -12,8 +13,7 @@ part 'conversation.g.dart';
 
 @Riverpod(keepAlive: true)
 class ConversationNotifier extends _$ConversationNotifier {
-  int offset = 0;
-  int limit = 10;
+  static const int _texts_per_page = 20;
 
   @override
   FutureOr<List<ConversationModel>> build() async {
@@ -30,12 +30,121 @@ class ConversationNotifier extends _$ConversationNotifier {
       return null;
     }
 
-    return ConversationModel.fromJsonList(response.data);
+    final my_id = await LocalStorage.user_id.get();
+    return ConversationModel.fromJsonList(response.data, my_id: my_id!);
   }
 
   Future<void> reload() async {
     state = const AsyncValue.loading();
     state = AsyncValue.data(await _load() ?? []);
+  }
+
+  // ── Load texts for a conversation ──────────────────────────────────────────
+
+  Future<void> load_initial_texts(String conversation_id) async {
+    final conversations = state.value;
+    if (conversations == null) return;
+
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1) return;
+
+    // Already loaded
+    if (conversations[index].initial_text_loaded) return;
+
+    // Mark as loading
+    conversations[index] = conversations[index].copyWith(texts_loading: true);
+    state = AsyncValue.data([...conversations]);
+
+    final my_id = await LocalStorage.user_id.get();
+    final response = await utils.CustomHttp.get(
+      endpoint: '/conversation/texts',
+      queries: {
+        'conversation_id': conversation_id,
+        'limit': _texts_per_page,
+        'offset': 0,
+      },
+    );
+
+    if (!response.ok || my_id == null) {
+      printLine('Failed to load texts for conversation $conversation_id');
+      final current = state.value ?? [];
+      final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+      if (idx != -1) {
+        current[idx] = current[idx].copyWith(texts_loading: false);
+        state = AsyncValue.data([...current]);
+      }
+      return;
+    }
+
+    final texts = TextModel.fromJsonList(response.data as List, my_id: my_id);
+
+    final current = state.value ?? [];
+    final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+    if (idx == -1) return;
+
+    current[idx] = current[idx].copyWith(
+      texts: texts,
+      initial_text_loaded: true,
+      texts_loading: false,
+      has_more_texts: texts.length >= _texts_per_page,
+    );
+    state = AsyncValue.data([...current]);
+  }
+
+  Future<void> load_more_texts(String conversation_id) async {
+    final conversations = state.value;
+    if (conversations == null) return;
+
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1) return;
+
+    final conv = conversations[index];
+    if (conv.texts_loading || !conv.has_more_texts) return;
+
+    // Mark as loading
+    conversations[index] = conv.copyWith(texts_loading: true);
+    state = AsyncValue.data([...conversations]);
+
+    final my_id = await LocalStorage.user_id.get();
+    final response = await utils.CustomHttp.get(
+      endpoint: '/conversation/texts',
+      queries: {
+        'conversation_id': conversation_id,
+        'limit': _texts_per_page,
+        'offset': conv.texts.length,
+      },
+    );
+
+    if (!response.ok || my_id == null) {
+      printLine('Failed to load more texts for conversation $conversation_id');
+      final current = state.value ?? [];
+      final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+      if (idx != -1) {
+        current[idx] = current[idx].copyWith(texts_loading: false);
+        state = AsyncValue.data([...current]);
+      }
+      return;
+    }
+
+    final older_texts = TextModel.fromJsonList(
+      response.data as List,
+      my_id: my_id,
+    );
+
+    final current = state.value ?? [];
+    final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+    if (idx == -1) return;
+
+    current[idx] = current[idx].copyWith(
+      texts: [...current[idx].texts, ...older_texts],
+      texts_loading: false,
+      has_more_texts: older_texts.length >= _texts_per_page,
+    );
+    state = AsyncValue.data([...current]);
   }
 
   // ── Create conversation ────────────────────────────────────────────────────
@@ -66,7 +175,8 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     if (!response.ok) return null;
 
-    final conv = ConversationModel.fromJson(response.data);
+    final user_id = await LocalStorage.user_id.get();
+    final conv = ConversationModel.fromJson(response.data, my_id: user_id!);
     state = AsyncValue.data([conv, ...state.value!]);
     return conv.core.uuid;
   }
@@ -109,7 +219,8 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     if (!response.ok) return null;
 
-    final conv = ConversationModel.fromJson(response.data);
+    final user_id = await LocalStorage.user_id.get();
+    final conv = ConversationModel.fromJson(response.data, my_id: user_id!);
     state = AsyncValue.data([conv, ...state.value!]);
     return conv.core.uuid;
   }
@@ -142,7 +253,10 @@ class ConversationNotifier extends _$ConversationNotifier {
         new_texts = [message, ...conv.texts];
       }
 
-      return conv.copyWith(texts: new_texts);
+      return conv.copyWith(
+        texts: new_texts,
+        last_text: is_temp ? conv.last_text : message,
+      );
     }).toList();
 
     state = AsyncValue.data(updated);

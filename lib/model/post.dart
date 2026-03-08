@@ -51,9 +51,15 @@ class PostCore {
           : null,
       poll: json['poll'] != null ? PollModel.fromJson(json['poll']) : null,
       created_at: json['created_at'],
-      images: (json['images'] as List).map((i) => ImageModel.fromJson(i)).toList(),
-      videos: (json['videos'] as List).map((v) => VideoModel.fromJson(v)).toList(),
-      mentions: (json['mentions'] as List).map((m) => MentionModel.fromJson(m)).toList(),
+      images: (json['images'] as List).map((i) {
+        return ImageModel.fromJson(i);
+      }).toList(),
+      videos: (json['videos'] as List).map((v) {
+        return VideoModel.fromJson(v);
+      }).toList(),
+      mentions: (json['mentions'] as List).map((m) {
+        return MentionModel.fromJson(m);
+      }).toList(),
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
+import 'package:fanari_v2/widgets/image_video_carousel.dart';
 import 'package:fanari_v2/widgets/link_preview.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:fanari_v2/widgets/status_widget.dart';
@@ -450,49 +451,10 @@ class _TextItemWidgetState extends State<TextItemWidget> {
         ],
       );
     } else {
-      videoContent = Stack(
-        alignment: Alignment.center,
-        children: [
-          CachedNetworkImage(
-            imageUrl: video.thumbnail.webp_url,
-            width: videoWidth,
-            height: videoHeight,
-            fit: BoxFit.cover,
-            placeholder: (context, url) {
-              return SizedBox(
-                width: videoWidth,
-                height: videoHeight,
-                child: video.thumbnail.blur_hash.isNotEmpty
-                    ? BlurHash(
-                        hash: video.thumbnail.blur_hash,
-                        color: AppColors.secondary,
-                      )
-                    : Container(color: AppColors.secondary),
-              );
-            },
-            errorWidget: (context, url, error) {
-              return Container(
-                width: videoWidth,
-                height: videoHeight,
-                color: AppColors.secondary,
-                child: Icon(Icons.error_outline, color: AppColors.text),
-              );
-            },
-          ),
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: BoxDecoration(
-              color: Color(0xff181818).withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.play_arrow_rounded,
-              size: 32.w,
-              color: Colors.white,
-            ),
-          ),
-        ],
+      videoContent = CarouselSingleVideoItem(
+        width: videoWidth,
+        height: videoHeight,
+        item: CarouselItem(type: CarouselItemType.video, video: video),
       );
     }
 

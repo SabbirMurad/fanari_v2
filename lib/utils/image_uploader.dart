@@ -38,8 +38,6 @@ Future<List<String>?> upload_images({
     request.fields['temporary_$i'] = temporary.toString();
   }
 
-  printLine('Uploading ${images.length} image(s): ${request.fields}');
-
   final response = await request.send();
 
   if (response.statusCode == 200) {

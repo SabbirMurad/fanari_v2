@@ -138,6 +138,9 @@ class ConversationModel {
   bool typing;
   List<TextModel> texts;
   bool initial_text_loaded;
+  bool texts_loading;
+  bool has_more_texts;
+  TextModel? last_text;
 
   ConversationModel({
     required this.core,
@@ -147,9 +150,23 @@ class ConversationModel {
     this.texts = const [],
     this.typing = false,
     this.initial_text_loaded = false,
+    this.texts_loading = false,
+    this.has_more_texts = true,
+    this.last_text,
   });
 
-  factory ConversationModel.fromJson(Map<String, dynamic> json) {
+  factory ConversationModel.fromJson(
+    Map<String, dynamic> json, {
+    required String my_id,
+  }) {
+    TextModel? last_text;
+    if (json['last_text'] != null) {
+      last_text = TextModel.fromJson(
+        json['last_text'] as Map<String, dynamic>,
+        my_id: my_id,
+      );
+    }
+
     return ConversationModel(
       core: ConversationCore.fromJson(json['core']),
       common_metadata: ConversationCommonMetadata.fromJson(
@@ -161,6 +178,7 @@ class ConversationModel {
       single_metadata: json['single_metadata'] != null
           ? ConversationSingleMetadata.fromJson(json['single_metadata'])
           : null,
+      last_text: last_text,
     );
   }
 
@@ -172,6 +190,9 @@ class ConversationModel {
     List<TextModel>? texts,
     bool? typing,
     bool? initial_text_loaded,
+    bool? texts_loading,
+    bool? has_more_texts,
+    TextModel? last_text,
   }) {
     return ConversationModel(
       core: core ?? this.core,
@@ -181,10 +202,18 @@ class ConversationModel {
       texts: texts ?? this.texts,
       typing: typing ?? this.typing,
       initial_text_loaded: initial_text_loaded ?? this.initial_text_loaded,
+      texts_loading: texts_loading ?? this.texts_loading,
+      has_more_texts: has_more_texts ?? this.has_more_texts,
+      last_text: last_text ?? this.last_text,
     );
   }
 
-  static List<ConversationModel> fromJsonList(List<dynamic> json) {
-    return json.map((item) => ConversationModel.fromJson(item)).toList();
+  static List<ConversationModel> fromJsonList(
+    List<dynamic> json, {
+    required String my_id,
+  }) {
+    return json
+        .map((item) => ConversationModel.fromJson(item, my_id: my_id))
+        .toList();
   }
 }
