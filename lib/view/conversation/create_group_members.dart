@@ -4,7 +4,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/user_search.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
-import 'package:fanari_v2/view/chat/create_group_details.dart';
+import 'package:fanari_v2/view/conversation/create_group_details.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/input_field_v_one.dart';

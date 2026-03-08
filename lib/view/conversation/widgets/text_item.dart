@@ -4,7 +4,7 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/attachment.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
-import 'package:fanari_v2/view/chat/widgets/multiple_image_card.dart';
+import 'package:fanari_v2/view/conversation/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';

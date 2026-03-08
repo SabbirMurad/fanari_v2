@@ -3,24 +3,26 @@ import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
-import 'package:fanari_v2/view/chat/chat_texts.dart';
-import 'package:fanari_v2/view/chat/create_group_members.dart';
-import 'package:fanari_v2/view/chat/widgets/conversation_item.dart';
-import 'package:fanari_v2/view/chat/widgets/horizontal_options.dart';
+import 'package:fanari_v2/view/conversation/chat_texts.dart';
+import 'package:fanari_v2/view/conversation/create_group_members.dart';
+import 'package:fanari_v2/view/conversation/widgets/conversation_item.dart';
+import 'package:fanari_v2/view/conversation/widgets/horizontal_options.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
-class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+class ConversationListScreen extends ConsumerStatefulWidget {
+  const ConversationListScreen({super.key});
 
   @override
-  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ConversationListScreen> createState() =>
+      _ConversationListScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ConversationListScreenState
+    extends ConsumerState<ConversationListScreen> {
   Widget _searchWidget() {
     return GestureDetector(
       onTap: () {},

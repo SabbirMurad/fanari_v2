@@ -4,7 +4,7 @@ import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/provider/user.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
-import 'package:fanari_v2/view/chat/chat_texts.dart';
+import 'package:fanari_v2/view/conversation/chat_texts.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_uploader_v_one.dart';
 import 'package:flutter/material.dart';

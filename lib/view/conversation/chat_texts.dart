@@ -10,9 +10,10 @@ import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
-import 'package:fanari_v2/view/chat/widgets/text_item.dart';
+import 'package:fanari_v2/view/conversation/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/view/profile/profile.dart';
+import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,6 +68,22 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     CustomSocket.instance.leave_conversation();
 
     super.dispose();
+  }
+
+  Widget _textSkeleton({required bool isMe, required double width}) {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: ColorFadeBox(
+        width: width,
+        height: 40.h,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.r),
+          topRight: Radius.circular(16.r),
+          bottomLeft: isMe ? Radius.circular(16.r) : Radius.circular(4.r),
+          bottomRight: isMe ? Radius.circular(4.r) : Radius.circular(16.r),
+        ),
+      ),
+    );
   }
 
   Widget _header(ConversationModel model) {
@@ -225,82 +242,104 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     );
   }
 
-  List<Widget> _textWidgets(List<TextModel> texts) {
-    List<Widget> widgets = [];
-
-    String previousTextOwner = '';
-    int previousTextTime = 0;
-
-    for (var text in texts) {
-      bool showProfile = false;
-      bool differentProfile = false;
-      if (previousTextOwner != text.owner) {
-        showProfile = true;
-        differentProfile = true;
-      } else {
-        showProfile = false;
-        differentProfile = false;
-      }
-
-      previousTextOwner = text.owner;
-
-      bool addTimeDivider = false;
-
-      if (previousTextTime == 0 ||
-          previousTextTime + 1000 * 60 * 10 < text.created_at) {
-        addTimeDivider = true;
-        showProfile = true;
-      } else {
-        addTimeDivider = false;
-      }
-
-      previousTextTime = text.created_at;
-
-      if (addTimeDivider) {
-        widgets.add(SizedBox(height: 18.h));
-        widgets.add(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 20.w),
-              Expanded(
-                child: Container(
-                  height: 0.8,
-                  width: double.infinity,
-                  color: AppColors.border.withValues(alpha: .5),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Text(
-                utils.pretty_date(text.created_at),
-                style: TextStyle(
-                  color: AppColors.border.withValues(alpha: .5),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 11,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Container(
-                  height: .8,
-                  width: double.infinity,
-                  color: AppColors.border.withValues(alpha: .5),
-                ),
-              ),
-              SizedBox(width: 20.w),
-            ],
+  Widget _timeDivider(int created_at) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 18.h),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 20.w),
+          Expanded(
+            child: Container(
+              height: 0.8,
+              width: double.infinity,
+              color: AppColors.border.withValues(alpha: .5),
+            ),
           ),
-        );
-        widgets.add(SizedBox(height: 18.h));
-      } else if (differentProfile) {
-        widgets.add(SizedBox(height: 24.h));
-      } else {
-        widgets.add(SizedBox(height: 6.h));
-      }
+          SizedBox(width: 12.w),
+          Text(
+            utils.pretty_date(created_at),
+            style: TextStyle(
+              color: AppColors.border.withValues(alpha: .5),
+              fontWeight: FontWeight.w400,
+              fontSize: 11,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Container(
+              height: .8,
+              width: double.infinity,
+              color: AppColors.border.withValues(alpha: .5),
+            ),
+          ),
+          SizedBox(width: 20.w),
+        ],
+      ),
+    );
+  }
 
-      widgets.add(
+  static const int _shortGap = 1000 * 60 * 10; // 10 minutes between adjacent
+  static const int _maxGap = 1000 * 60 * 60; // 1 hour since last divider
+
+  /// Precomputes which indices should show a time divider. O(n) single pass.
+  /// The list is reversed (index 0 = newest), so we iterate from the oldest
+  /// (end of list) towards newest.
+  Set<int> _computeDividerIndices(List<TextModel> texts) {
+    final dividers = <int>{};
+    if (texts.isEmpty) return dividers;
+
+    // Oldest message (last index) always gets a divider
+    final lastIndex = texts.length - 1;
+    dividers.add(lastIndex);
+    int lastDividerTime = texts[lastIndex].created_at;
+
+    // Walk from oldest to newest (high index to low)
+    for (int i = lastIndex - 1; i >= 0; i--) {
+      final text = texts[i];
+      final prev = texts[i + 1];
+
+      final bool adjacentGap =
+          (text.created_at - prev.created_at).abs() > _shortGap;
+      final bool accumulatedGap =
+          (text.created_at - lastDividerTime).abs() > _maxGap;
+
+      if (adjacentGap || accumulatedGap) {
+        dividers.add(i);
+        lastDividerTime = text.created_at;
+      }
+    }
+
+    return dividers;
+  }
+
+  /// Builds a single text item at [index] in the reversed list.
+  /// Since the ListView is reversed, index 0 is the newest message.
+  /// The "previous" message chronologically is at index + 1.
+  Widget _buildTextItem(List<TextModel> texts, int index, Set<int> dividers) {
+    final text = texts[index];
+    final prev = index + 1 < texts.length ? texts[index + 1] : null;
+
+    final bool differentOwner = prev == null || prev.owner != text.owner;
+    final bool timeGap = dividers.contains(index);
+
+    final bool showProfile = differentOwner || timeGap;
+
+    Widget spacing;
+    if (timeGap) {
+      spacing = _timeDivider(text.created_at);
+    } else if (differentOwner) {
+      spacing = SizedBox(height: 24.h);
+    } else {
+      spacing = SizedBox(height: 6.h);
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        spacing,
         TextItemWidget(
           key: Key(text.uuid),
           onSelect: (id) {
@@ -328,20 +367,10 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           model: text,
           showProfile: showProfile,
           selected: _selectedTexts.contains(text.uuid),
-          // ownerImage: widget.model.image?.url,
-          // ownerName: widget.model.name,
-          onReply: () {
-            // setState(() {
-            //   _replyingTo = text.type == MessageType.Text
-            //       ? text.text!
-            //       : '%${text.type.name}%';
-            // });
-          },
+          onReply: () {},
         ),
-      );
-    }
-
-    return widgets;
+      ],
+    );
   }
 
   void _onMessageSend(CommentInputSubmitValue message) async {
@@ -484,6 +513,78 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     }
   }
 
+  Widget _buildTextList(ConversationModel conversation) {
+    final texts = conversation.texts;
+    final dividers = _computeDividerIndices(texts);
+
+    return ListView.builder(
+      padding: EdgeInsets.all(0),
+      reverse: true,
+      controller: _scrollController,
+      // +2 for top/bottom padding, +1 if loading more
+      itemCount: texts.length + 2 + (conversation.texts_loading ? 1 : 0),
+      itemBuilder: (context, index) {
+        // Bottom padding (index 0 in reversed list)
+        if (index == 0) return SizedBox(height: 72.h);
+
+        final textIndex = index - 1;
+
+        // Text items
+        if (textIndex < texts.length) {
+          return _buildTextItem(texts, textIndex, dividers);
+        }
+
+        // Loading skeleton at the top
+        if (conversation.texts_loading && textIndex == texts.length) {
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
+            child: Column(
+              children: [
+                _textSkeleton(isMe: true, width: 180.w),
+                SizedBox(height: 8.h),
+                _textSkeleton(isMe: false, width: 220.w),
+                SizedBox(height: 8.h),
+                _textSkeleton(isMe: true, width: 140.w),
+              ],
+            ),
+          );
+        }
+
+        // Top padding
+        return SizedBox(height: 124.h);
+      },
+    );
+  }
+
+  Widget _buildInitialLoading() {
+    return ListView(
+      padding: EdgeInsets.only(
+        top: 124.h,
+        bottom: 72.h,
+        left: 16.w,
+        right: 16.w,
+      ),
+      reverse: true,
+      children: [
+        _textSkeleton(isMe: true, width: 180.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: false, width: 220.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: true, width: 140.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: false, width: 200.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: true, width: 260.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: false, width: 160.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: true, width: 200.w),
+        SizedBox(height: 8.h),
+        _textSkeleton(isMe: false, width: 240.w),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final conversations = ref
@@ -515,35 +616,8 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
               width: double.infinity,
               height: double.infinity,
               child: target_conversation.initial_text_loaded
-                  ? ListView(
-                      padding: EdgeInsets.all(0),
-                      reverse: true,
-                      controller: _scrollController,
-                      children: [
-                        SizedBox(height: 72.h),
-                        ..._textWidgets(target_conversation.texts),
-                        if (target_conversation.texts_loading)
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            child: Center(
-                              child: SizedBox(
-                                width: 24.w,
-                                height: 24.w,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        SizedBox(height: 124.h),
-                      ],
-                    )
-                  : Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    ),
+                  ? _buildTextList(target_conversation)
+                  : _buildInitialLoading(),
             ),
             Align(
               alignment: Alignment.topCenter,

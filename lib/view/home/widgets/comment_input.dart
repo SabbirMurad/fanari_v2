@@ -88,8 +88,9 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   void initState() {
     super.initState();
 
-    _videoCompressSubscription =
-        VideoCompress.compressProgress$.subscribe((progress) {
+    _videoCompressSubscription = VideoCompress.compressProgress$.subscribe((
+      progress,
+    ) {
       setState(() => _videoCompressProgress = progress);
     });
 
@@ -171,7 +172,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
         _videoController = null;
         _videoThumbnail = null;
       });
-    } 
+    }
 
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() => _selectedImages.clear());
@@ -395,16 +396,18 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       return;
     }
 
-    _videoController = VideoPlayerController.file(
-      compressedVideo.file!,
-      closedCaptionFile: null,
-    )..initialize().then((_) {
-        setState(() {
-          _loadingVideo = false;
-          _videoCompressProgress = 0.0;
-          _selectedVideoPath = compressedVideo.file!.path;
-        });
-      });
+    _videoController =
+        VideoPlayerController.file(
+            compressedVideo.file!,
+            closedCaptionFile: null,
+          )
+          ..initialize().then((_) {
+            setState(() {
+              _loadingVideo = false;
+              _videoCompressProgress = 0.0;
+              _selectedVideoPath = compressedVideo.file!.path;
+            });
+          });
   }
 
   void _removeSelectedVideo() {
@@ -714,8 +717,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                     padding: const EdgeInsets.only(right: 12),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child:
-                          Image(image: FileImage(image.file), height: 112.h),
+                      child: Image(image: FileImage(image.file), height: 112.h),
                     ),
                   ),
                 ),
@@ -762,7 +764,8 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                               GestureDetector(
                                 onTap: () {
                                   setState(
-                                      () => _selectedImages.removeAt(index));
+                                    () => _selectedImages.removeAt(index),
+                                  );
                                 },
                                 child: Container(
                                   width: 24,
@@ -770,8 +773,9 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
                                   margin: EdgeInsets.only(top: 6, right: 6),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
-                                    color: Color(0xFF181818)
-                                        .withValues(alpha: .45),
+                                    color: Color(
+                                      0xFF181818,
+                                    ).withValues(alpha: .45),
                                   ),
                                   child: Center(
                                     child: Transform(
@@ -935,9 +939,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
         );
 
     final showVoiceRecorder =
-        !_hasInputText &&
-        _selectedImages.isEmpty &&
-        _selectedVideoPath == null;
+        !_hasInputText && _selectedImages.isEmpty && _selectedVideoPath == null;
 
     return Container(
       width: double.infinity,

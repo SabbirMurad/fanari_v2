@@ -1,7 +1,7 @@
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/view/auth/sign_in.dart';
 import 'package:fanari_v2/view/auth/sign_up.dart';
-import 'package:fanari_v2/view/chat/chat_screen.dart';
+import 'package:fanari_v2/view/conversation/conversation_list.dart';
 import 'package:fanari_v2/view/home_navigator.dart';
 import 'package:fanari_v2/view/landing.dart';
 import 'package:fanari_v2/view/profile/profile.dart';
@@ -59,7 +59,6 @@ class AppRoutes {
         path: landing,
         builder: (context, state) {
           return const LandingScreen();
-          // return const HomeNavigator(selectedPage: 0);
         },
       ),
       //! Auth
@@ -84,9 +83,9 @@ class AppRoutes {
       //! Home
       GoRoute(
         path: feed,
-        // redirect: (context, state) async {
-        //   return !(await isSingedIn()) ? sign_in : null;
-        // },
+        redirect: (context, state) async {
+          return !(await isSingedIn()) ? sign_in : null;
+        },
         builder: (context, state) {
           return const HomeNavigator(selectedPage: 0);
         },
@@ -113,11 +112,11 @@ class AppRoutes {
       ),
       GoRoute(
         path: chats,
-        // redirect: (context, state) async {
-        //   return !(await isSingedIn()) ? sign_in : null;
-        // },
+        redirect: (context, state) async {
+          return !(await isSingedIn()) ? sign_in : null;
+        },
         builder: (context, state) {
-          return const ChatScreen();
+          return const ConversationListScreen();
         },
       ),
       // GoRoute(
