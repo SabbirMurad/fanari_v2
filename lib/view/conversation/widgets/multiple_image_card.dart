@@ -130,6 +130,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
                   .map((e) => CachedNetworkImageProvider(e.webp_url))
                   .toList(),
               preload_count: 2,
+              hero_tag: widget.images[0].uuid,
             );
           },
           child: Container(

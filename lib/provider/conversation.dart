@@ -235,8 +235,14 @@ class ConversationNotifier extends _$ConversationNotifier {
   }) async {
     final is_temp = message.uuid.startsWith('temp_');
 
-    final updated = state.value!.map((conv) {
-      if (conv.core.uuid != conversation_id) return conv;
+    ConversationModel? updated_conv;
+    final others = <ConversationModel>[];
+
+    for (final conv in state.value!) {
+      if (conv.core.uuid != conversation_id) {
+        others.add(conv);
+        continue;
+      }
 
       List<TextModel> new_texts;
 
@@ -255,13 +261,17 @@ class ConversationNotifier extends _$ConversationNotifier {
         new_texts = [message, ...conv.texts];
       }
 
-      return conv.copyWith(
+      updated_conv = conv.copyWith(
         texts: new_texts,
         last_text: is_temp ? conv.last_text : message,
+        core: conv.core.copyWith(last_message_at: message.created_at),
       );
-    }).toList();
+    }
 
-    state = AsyncValue.data(updated);
+    // Move the conversation to the top of the list
+    if (updated_conv != null) {
+      state = AsyncValue.data([updated_conv, ...others]);
+    }
 
     if (!is_temp) {
       Future.microtask(() async {
@@ -286,18 +296,19 @@ class ConversationNotifier extends _$ConversationNotifier {
   Timer? _typing_timer;
   String? _typing_conversation_id;
 
-  void update_typing(TypingEvent event) {
+  String? _my_user_id;
+
+  void update_typing(TypingEvent event) async {
+    _my_user_id ??= await LocalStorage.user_id.get();
+
+    // Ignore my own typing events
+    if (event.user_id == _my_user_id) return;
+
     final conversations = state.value ?? [];
 
     for (var i = 0; i < conversations.length; i++) {
       final conv = conversations[i];
       if (conv.core.uuid != event.conversation_id) continue;
-
-      final is_group = conv.core.type == ConversationType.Group;
-      final is_other_user =
-          !is_group && conv.single_metadata?.user_id == event.user_id;
-
-      if (!is_group && !is_other_user) break; // typing event is from myself
 
       if (_typing_conversation_id == event.conversation_id) {
         _typing_timer?.cancel();

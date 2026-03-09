@@ -11,6 +11,7 @@ class GalleryImageViewer extends StatefulWidget {
   final int? preload_count;
 
   final PageController page_controller;
+  final String? hero_tag;
 
   GalleryImageViewer({
     super.key,
@@ -18,6 +19,7 @@ class GalleryImageViewer extends StatefulWidget {
     this.initial_index = 0,
     this.show_counter = false,
     this.preload_count,
+    this.hero_tag,
   }) : page_controller = PageController(initialPage: initial_index);
 
   @override
@@ -84,10 +86,12 @@ class _GalleryImageViewerState extends State<GalleryImageViewer> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for (int i = _current_index + 1;
-                        i < widget.images.length &&
-                            i < _current_index + 1 + widget.preload_count!;
-                        i++)
+                    for (
+                      int i = _current_index + 1;
+                      i < widget.images.length &&
+                          i < _current_index + 1 + widget.preload_count!;
+                      i++
+                    )
                       SizedBox(
                         width: 5,
                         height: 5,
@@ -112,6 +116,7 @@ void open_image_viewer({
   int initial_index = 0,
   bool show_counter = false,
   int? preload_count,
+  String? hero_tag,
 }) {
   Navigator.of(context).push(
     MaterialPageRoute(
@@ -120,6 +125,7 @@ void open_image_viewer({
         initial_index: initial_index,
         show_counter: show_counter,
         preload_count: preload_count,
+        hero_tag: hero_tag,
       ),
     ),
   );

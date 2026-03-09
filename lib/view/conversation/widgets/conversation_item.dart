@@ -75,6 +75,11 @@ class ConversationItem extends ConsumerStatefulWidget {
 }
 
 class _ConversationItemState extends ConsumerState<ConversationItem> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   /// Returns the most recent text to display in the conversation preview.
   /// Prefers texts list (populated after opening conversation), falls back to last_text from API.
   TextModel? get _preview_text {
@@ -276,6 +281,9 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.black.withValues(alpha: 0.4),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Center(
                         child: CustomSvg(
@@ -460,9 +468,9 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                           ),
                           if (widget.model.common_metadata.is_favorite)
                             Icon(
-                              Icons.star_rate_rounded,
-                              size: 24.w,
-                              color: AppColors.primary,
+                              Icons.favorite_rounded,
+                              size: 20.w,
+                              color: Colors.red[400],
                             ),
                         ],
                       ),
@@ -478,7 +486,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                 width: double.infinity,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     if (widget.model.typing) ...[
                                       Text(

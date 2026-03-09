@@ -525,7 +525,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       itemCount: texts.length + 2 + (conversation.texts_loading ? 1 : 0),
       itemBuilder: (context, index) {
         // Bottom padding (index 0 in reversed list)
-        if (index == 0) return SizedBox(height: 72.h);
+        if (index == 0) return SizedBox(height: 96.h);
 
         final textIndex = index - 1;
 
