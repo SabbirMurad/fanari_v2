@@ -89,29 +89,12 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
 
   Color? _bgColor() {
     if (widget.selected) return AppColors.primary.withValues(alpha: 0.2);
-    final preview = _preview_text;
-    if (preview == null) return null;
-
-    if (preview.my_text) return null;
-
-    // TODO: Fix
-    // if (preview.seen_by.contains(widget.model.user_id))
     return null;
-
-    return AppColors.surface;
   }
 
   FontWeight _textWeight() {
-    final preview = _preview_text;
-    if (preview == null) return FontWeight.w400;
-
-    if (preview.my_text) return FontWeight.w400;
-
-    // TODO: Fix
-    // if (preview.seen_by.contains(widget.model.user_id))
+    if (widget.model.unread_count > 0) return FontWeight.w600;
     return FontWeight.w400;
-
-    return FontWeight.w600;
   }
 
   _openMoreOptions() {
@@ -413,7 +396,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
         color: _bgColor(),
         child: Container(
           width: 1.sw - 40.w,
-          padding: EdgeInsets.symmetric(vertical: 18.h),
+          padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
             border: widget.bottomBorder
                 ? Border(bottom: BorderSide(color: AppColors.secondary))
@@ -503,7 +486,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                     if (!widget.model.typing) ...[
                                       if (preview != null)
                                         _textIconWidget(preview),
-                                      _textWidget(preview),
+                                      Expanded(child: _textWidget(preview)),
                                     ],
                                   ],
                                 ),
@@ -530,6 +513,28 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                   color: AppColors.text.withValues(alpha: .8),
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            if (widget.model.unread_count > 0)
+                              Container(
+                                margin: EdgeInsets.only(left: 8.w),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: Text(
+                                  widget.model.unread_count > 99
+                                      ? '99+'
+                                      : widget.model.unread_count.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                           ],

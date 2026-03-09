@@ -91,7 +91,13 @@ class _ConversationListScreenState
     super.dispose();
   }
 
-  final List<String> _chatOptions = ["All", "Unread", "Group", "Favorites"];
+  final List<String> _chatOptions = [
+    "All",
+    "Unread",
+    "Group",
+    "Online",
+    "Favorites",
+  ];
 
   String _selectedOption = "All";
   bool _selectMode = false;
@@ -112,6 +118,14 @@ class _ConversationListScreenState
       case "Unread":
         return conversations
             .where((c) => c.texts.isNotEmpty && !c.texts.first.my_text)
+            .toList();
+      case "Online":
+        return conversations
+            .where(
+              (c) =>
+                  c.core.type == ConversationType.Single &&
+                  c.single_metadata!.online,
+            )
             .toList();
       default:
         return conversations;
@@ -210,6 +224,97 @@ class _ConversationListScreenState
     ];
   }
 
+  List<String> _onlineMembers = [
+    'Sabbir',
+    'Sabina',
+    'Sabit',
+    'Sabbir',
+    'Sabina',
+    'Sabit',
+  ];
+
+  Widget _onlineAvatar(String name) {
+    return Padding(
+      padding: EdgeInsets.only(right: 18.w),
+      child: Column(
+        spacing: 4.w,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.secondary,
+            ),
+            child: Center(
+              child: Text(
+                name[0].toUpperCase(),
+                style: TextStyle(
+                  color: AppColors.text,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            name,
+            style: TextStyle(color: AppColors.text, fontSize: 12.sp),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _addNewChat() {
+    return Container(
+      margin: EdgeInsets.only(right: 18.w),
+      child: Column(
+        spacing: 4.w,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.secondary),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.text.withValues(alpha: 0.3),
+                  ),
+                  color: AppColors.secondary,
+                ),
+                child: Icon(
+                  Icons.add_rounded,
+                  color: AppColors.text,
+                  size: 12.w,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'New Chat',
+            style: TextStyle(color: AppColors.text, fontSize: 12.sp),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final conversationsProvider = ref.watch(conversationNotifierProvider);
@@ -238,6 +343,20 @@ class _ConversationListScreenState
                         SafeArea(bottom: false, child: SizedBox(height: 12.h)),
                         _header(),
                         _searchWidget(),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              SizedBox(width: 20.w),
+                              _addNewChat(),
+                              ..._onlineMembers
+                                  .map((e) => _onlineAvatar(e))
+                                  .toList(),
+                              SizedBox(width: 20.w),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 24.h),
                         HorizontalOptions(
                           options: _chatOptions,
                           selectedOption: _selectedOption,

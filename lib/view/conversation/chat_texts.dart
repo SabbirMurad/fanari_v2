@@ -10,6 +10,8 @@ import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/model/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
+import 'package:fanari_v2/view/conversation/dm_profile_view.dart';
+import 'package:fanari_v2/view/conversation/group_info_view.dart';
 import 'package:fanari_v2/view/conversation/widgets/text_item.dart';
 import 'package:fanari_v2/view/home/widgets/comment_input.dart';
 import 'package:fanari_v2/view/profile/profile.dart';
@@ -40,11 +42,11 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
   void initState() {
     super.initState();
 
-    // Load initial texts for this conversation
+    // Load initial texts and mark conversation as read
     Future.microtask(() {
-      ref
-          .read(conversationNotifierProvider.notifier)
-          .load_initial_texts(widget.conversation_id);
+      final notifier = ref.read(conversationNotifierProvider.notifier);
+      notifier.load_initial_texts(widget.conversation_id);
+      notifier.mark_as_read(widget.conversation_id);
     });
 
     // Listen for scroll to load more (reverse list: top = older messages)
@@ -226,7 +228,78 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                if (model.core.type == ConversationType.Group) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return GroupInfoView(
+                          group: const GroupInfo(
+                            name: 'Design Team',
+                            description:
+                                'UI/UX team workspace for mockups and design reviews.',
+                            avatarInitials: 'DT',
+                            avatarColor: Color(0xFF27AE60),
+                            members: [
+                              GroupMember(
+                                name: 'Alice M.',
+                                avatarInitials: 'A',
+                                avatarColor: Color(0xFFE74C3C),
+                                role: MemberRole.admin,
+                                isOnline: true,
+                              ),
+                              GroupMember(
+                                name: 'Bob K.',
+                                avatarInitials: 'B',
+                                avatarColor: Color(0xFF1A6BFF),
+                                role: MemberRole.admin,
+                                isOnline: true,
+                              ),
+                              GroupMember(
+                                name: 'Carol T.',
+                                avatarInitials: 'C',
+                                avatarColor: Color(0xFF27AE60),
+                                role: MemberRole.member,
+                                isOnline: false,
+                              ),
+                              GroupMember(
+                                name: 'David R.',
+                                avatarInitials: 'D',
+                                avatarColor: Color(0xFFF39C12),
+                                role: MemberRole.member,
+                                isOnline: false,
+                              ),
+                              GroupMember(
+                                name: 'Eve S.',
+                                avatarInitials: 'E',
+                                avatarColor: Color(0xFF9B59B6),
+                                role: MemberRole.member,
+                                isOnline: true,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return DMProfileView(
+                          user: UserProfile(
+                            name: 'Alice M.',
+                            phone: '+1 555 0001',
+                            avatarInitials: 'A',
+                            avatarColor: const Color(0xFFE74C3C),
+                            isOnline: true,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+              },
               child: Container(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
@@ -560,7 +633,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     return ListView(
       padding: EdgeInsets.only(
         top: 124.h,
-        bottom: 72.h,
+        bottom: 96.h,
         left: 16.w,
         right: 16.w,
       ),

@@ -4,6 +4,7 @@ import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/model/text.dart';
+import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/socket/socket_events.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:fanari_v2/utils/print_helper.dart';
@@ -261,10 +262,17 @@ class ConversationNotifier extends _$ConversationNotifier {
         new_texts = [message, ...conv.texts];
       }
 
+      // Increment unread if the message is from someone else and
+      // the user is not currently viewing this conversation.
+      final is_viewing =
+          CustomSocket.instance.opened_conversation_id == conversation_id;
+      final increment_unread = !is_temp && !message.my_text && !is_viewing;
+
       updated_conv = conv.copyWith(
         texts: new_texts,
         last_text: is_temp ? conv.last_text : message,
         core: conv.core.copyWith(last_message_at: message.created_at),
+        unread_count: increment_unread ? conv.unread_count + 1 : conv.unread_count,
       );
     }
 
@@ -289,6 +297,28 @@ class ConversationNotifier extends _$ConversationNotifier {
         state = AsyncValue.data(refreshed);
       });
     }
+  }
+
+  // ── Mark as read ─────────────────────────────────────────────────────────
+
+  Future<void> mark_as_read(String conversation_id) async {
+    final conversations = state.value;
+    if (conversations == null) return;
+
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1 || conversations[index].unread_count == 0) return;
+
+    // Update locally immediately
+    conversations[index] = conversations[index].copyWith(unread_count: 0);
+    state = AsyncValue.data([...conversations]);
+
+    // Sync with server
+    await utils.CustomHttp.patch(
+      endpoint: '/conversation/read',
+      body: {'conversation_id': conversation_id},
+    );
   }
 
   // ── Typing indicator ───────────────────────────────────────────────────────

@@ -141,6 +141,7 @@ class ConversationModel {
   bool texts_loading;
   bool has_more_texts;
   TextModel? last_text;
+  int unread_count;
 
   ConversationModel({
     required this.core,
@@ -153,6 +154,7 @@ class ConversationModel {
     this.texts_loading = false,
     this.has_more_texts = true,
     this.last_text,
+    this.unread_count = 0,
   });
 
   factory ConversationModel.fromJson(
@@ -179,6 +181,7 @@ class ConversationModel {
           ? ConversationSingleMetadata.fromJson(json['single_metadata'])
           : null,
       last_text: last_text,
+      unread_count: json['unread_count'] as int? ?? 0,
     );
   }
 
@@ -193,6 +196,7 @@ class ConversationModel {
     bool? texts_loading,
     bool? has_more_texts,
     TextModel? last_text,
+    int? unread_count,
   }) {
     return ConversationModel(
       core: core ?? this.core,
@@ -205,6 +209,7 @@ class ConversationModel {
       texts_loading: texts_loading ?? this.texts_loading,
       has_more_texts: has_more_texts ?? this.has_more_texts,
       last_text: last_text ?? this.last_text,
+      unread_count: unread_count ?? this.unread_count,
     );
   }
 

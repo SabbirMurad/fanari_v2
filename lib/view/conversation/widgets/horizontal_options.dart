@@ -57,7 +57,7 @@ class _HorizontalOptionsState extends State<HorizontalOptions> {
                     color: _selectedOption == option
                         ? AppColors.primary
                         : AppColors.secondary,
-                    borderRadius: BorderRadius.circular(6.r),
+                    borderRadius: BorderRadius.circular(24.r),
                   ),
                   child: Center(
                     child: Text(
