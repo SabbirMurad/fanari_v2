@@ -58,12 +58,16 @@ class CustomSocket {
   final _text_controller = StreamController<IncomingTextEvent>.broadcast();
   final _typing_controller = StreamController<TypingEvent>.broadcast();
   final _presence_controller = StreamController<PresenceEvent>.broadcast();
+  final _message_seen_controller =
+      StreamController<MessageSeenEvent>.broadcast();
   final _call_signal_controller = StreamController<CallSignal>.broadcast();
   final _state_controller = StreamController<SocketState>.broadcast();
 
   Stream<IncomingTextEvent> get incoming_texts => _text_controller.stream;
   Stream<TypingEvent> get typing_events => _typing_controller.stream;
   Stream<PresenceEvent> get presence_events => _presence_controller.stream;
+  Stream<MessageSeenEvent> get message_seen_events =>
+      _message_seen_controller.stream;
   Stream<CallSignal> get call_signals => _call_signal_controller.stream;
 
   /// Emits the new [SocketState] every time the connection status changes.
@@ -183,6 +187,8 @@ class CustomSocket {
             is_online: false,
           ),
         );
+      case 'message_seen':
+        _handle_message_seen(envelope.payload);
       case 'call_signal':
         _handle_call_signal(envelope.payload);
       default:
@@ -234,6 +240,18 @@ class CustomSocket {
     }
   }
 
+  // ── Message seen ───────────────────────────────────────────────────────────
+
+  void _handle_message_seen(Map<String, dynamic> payload) {
+    _message_seen_controller.add(
+      MessageSeenEvent(
+        conversation_id: payload['conversation_id'] as String,
+        user_id: payload['user_id'] as String,
+        text_ids: List<String>.from(payload['text_ids'] as List),
+      ),
+    );
+  }
+
   // ── Typing ─────────────────────────────────────────────────────────────────
 
   void _handle_typing(Map<String, dynamic> payload) {
@@ -274,6 +292,21 @@ class CustomSocket {
 
   void send_text(SocketOutgoingText text) {
     _send(WsEnvelope(type: 'text', payload: text.to_json()));
+  }
+
+  void send_message_seen({
+    required String conversation_id,
+    required List<String> text_ids,
+  }) {
+    _send(
+      WsEnvelope(
+        type: 'message_seen',
+        payload: {
+          'conversation_id': conversation_id,
+          'text_ids': text_ids,
+        },
+      ),
+    );
   }
 
   void send_typing({

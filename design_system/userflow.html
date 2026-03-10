@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fanari V2 — Architecture & User Flow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #fff;
+      color: #000;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      border-bottom: 3px solid #000;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 48px;
+    }
+
+    /* ── Section Headers ── */
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 48px 0 24px;
+      padding: 8px 16px;
+      background: #000;
+      color: #fff;
+      display: inline-block;
+    }
+
+    /* ── Flow Diagram ── */
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 32px 0;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .flow-node {
+      border: 2px solid #000;
+      padding: 14px 24px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 140px;
+      position: relative;
+      background: #fff;
+      cursor: default;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .flow-node:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .flow-node.entry {
+      background: #000;
+      color: #fff;
+      border-radius: 50px;
+      padding: 14px 32px;
+    }
+
+    .flow-node.screen {
+      border-radius: 12px;
+    }
+
+    .flow-node.decision {
+      transform: rotate(0deg);
+      border-radius: 0;
+      background: #f5f5f5;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      padding: 28px 40px;
+      min-width: 160px;
+    }
+
+    .flow-node.decision:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .flow-node.tab {
+      border-radius: 8px;
+      border-width: 2px;
+      min-width: 120px;
+    }
+
+    .flow-node.widget {
+      border: 1px dashed #999;
+      border-radius: 6px;
+      font-weight: 400;
+      font-size: 12px;
+      min-width: 100px;
+      color: #444;
+    }
+
+    .flow-node.widget:hover {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .arrow-line {
+      width: 2px;
+      height: 32px;
+      background: #000;
+    }
+
+    .arrow-head {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #000;
+    }
+
+    .arrow-label {
+      font-size: 11px;
+      color: #888;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .horizontal-connector {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .h-line {
+      width: 32px;
+      height: 2px;
+      background: #000;
+    }
+
+    .h-arrow {
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid #000;
+    }
+
+    /* ── Branching Lines ── */
+    .branch-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .branch-line-h {
+      height: 2px;
+      background: #000;
+      position: relative;
+    }
+
+    .branch-drops {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .branch-drop {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Folder Tree ── */
+    .tree {
+      margin: 16px 0 16px 0;
+    }
+
+    .tree ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tree ul ul {
+      padding-left: 28px;
+      border-left: 2px solid #ddd;
+      margin-left: 8px;
+    }
+
+    .tree li {
+      padding: 4px 0;
+      position: relative;
+    }
+
+    .tree ul ul li::before {
+      content: '';
+      position: absolute;
+      left: -28px;
+      top: 14px;
+      width: 20px;
+      height: 2px;
+      background: #ddd;
+    }
+
+    .folder {
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.1s;
+      user-select: none;
+    }
+
+    .folder:hover {
+      background: #f0f0f0;
+    }
+
+    .folder::before {
+      content: '▸';
+      font-size: 12px;
+      transition: transform 0.2s;
+      display: inline-block;
+      width: 12px;
+    }
+
+    .folder.open::before {
+      transform: rotate(90deg);
+    }
+
+    .file {
+      font-weight: 400;
+      font-size: 13px;
+      color: #555;
+      padding: 2px 8px 2px 26px;
+      display: block;
+    }
+
+    .file-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-left: 8px;
+      color: #888;
+      vertical-align: middle;
+    }
+
+    /* ── Architecture Layer Diagram ── */
+    .layers {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 24px 0;
+      max-width: 720px;
+    }
+
+    .layer {
+      border: 2px solid #000;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .layer:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .layer-label {
+      font-weight: 700;
+      font-size: 14px;
+      min-width: 120px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .layer-desc {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .layer:hover .layer-desc {
+      color: #aaa;
+    }
+
+    .layer-items {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .layer-item {
+      font-size: 12px;
+      padding: 3px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .layer:hover .layer-item {
+      border-color: #555;
+      color: #ddd;
+    }
+
+    /* ── Route Table ── */
+    .route-table {
+      border-collapse: collapse;
+      margin: 16px 0;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .route-table th,
+    .route-table td {
+      border: 1px solid #ddd;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .route-table th {
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .route-table tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .route-table tr:hover td {
+      background: #f0f0f0;
+    }
+
+    .route-path {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border: 1px solid #000;
+      border-radius: 3px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .badge.auth {
+      background: #000;
+      color: #fff;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      body { padding: 20px; }
+      .flow-row { flex-direction: column; align-items: center; }
+      h1 { font-size: 24px; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { padding: 20px; }
+      .flow-node:hover { background: #fff; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fanari V2</h1>
+  <p class="subtitle">Architecture & User Flow — Flutter Social Media Platform</p>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 1: USER FLOW -->
+  <!-- ════════════════════════════════════════ -->
+
+  <div class="section-title">1. User Flow</div>
+
+  <div class="flow-container">
+
+    <!-- Entry -->
+    <div class="flow-node entry">App Launch</div>
+
+    <div class="flow-arrow">
+      <div class="arrow-line"></div>
+      <div class="arrow-head"></div>
+      <div class="arrow-label">main.dart → app.dart</div>
+    </div>
+
+    <!-- Landing -->
+    <div class="flow-node screen">Landing Screen</div>
+
+    <div class="flow-arrow">
+      <div class="arrow-line"></div>
+      <div class="arrow-head"></div>
+      <div class="arrow-label">check auth status</div>
+    </div>
+
+    <!-- Decision -->
+    <div class="flow-node decision">Signed In?</div>
+
+    <div class="flow-arrow">
+      <div class="arrow-line" style="height: 16px;"></div>
+    </div>
+
+    <!-- Branch -->
+    <div class="flow-row" style="gap: 80px;">
+
+      <!-- NO branch -->
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">NO</div>
+        <div class="flow-arrow"><div class="arrow-line" style="height: 16px;"></div><div class="arrow-head"></div></div>
+
+        <div class="flow-node screen">Sign In</div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" style="height: 16px;"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">new user?</div>
+        </div>
+
+        <div class="flow-node screen">Sign Up</div>
+      </div>
+
+      <!-- YES branch -->
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">YES</div>
+        <div class="flow-arrow"><div class="arrow-line" style="height: 16px;"></div><div class="arrow-head"></div></div>
+
+        <div class="flow-node screen" style="border-width: 3px; font-size: 16px;">Home Navigator</div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" style="height: 16px;"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">PageView with 4 tabs</div>
+        </div>
+
+        <!-- 4 Tabs -->
+        <div class="flow-row" style="gap: 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div class="flow-node tab" style="border-width: 3px;">Home Feed</div>
+            <div class="flow-node widget">PostWidget</div>
+            <div class="flow-node widget">CommentInput</div>
+            <div class="flow-node widget">Poll</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div class="flow-node tab">Search</div>
+            <div class="flow-node widget">UserSearch</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div class="flow-node tab">Market</div>
+            <div class="flow-node widget">ProductCard</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div class="flow-node tab">Settings</div>
+            <div class="flow-node widget">ProfileEdit</div>
+            <div class="flow-node widget">Notifications</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow" style="margin-top: 16px;">
+          <div class="arrow-line" style="height: 16px;"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">sub-screens (pushed via GoRouter)</div>
+        </div>
+
+        <!-- Sub screens -->
+        <div class="flow-row" style="gap: 16px; margin-top: 4px;">
+          <div class="flow-node screen">Post Details</div>
+          <div class="flow-node screen">Create Post</div>
+          <div class="flow-node screen">Profile</div>
+          <div class="flow-node screen">Chats</div>
+          <div class="flow-node screen">Profile Settings</div>
+        </div>
+
+        <div class="flow-arrow" style="margin-top: 16px;">
+          <div class="arrow-line" style="height: 16px;"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">chat sub-screens</div>
+        </div>
+
+        <div class="flow-row" style="gap: 16px; margin-top: 4px;">
+          <div class="flow-node screen">Chat Texts</div>
+          <div class="flow-node screen">DM Profile</div>
+          <div class="flow-node screen">Group Info</div>
+          <div class="flow-node screen">Create Group</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 2: ARCHITECTURE LAYERS -->
+  <!-- ════════════════════════════════════════ -->
+
+  <div class="section-title">2. Architecture Layers</div>
+
+  <div class="layers">
+    <div class="layer">
+      <div class="layer-label">Presentation</div>
+      <div class="layer-items">
+        <span class="layer-item">view/</span>
+        <span class="layer-item">widgets/</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-label">State</div>
+      <div class="layer-items">
+        <span class="layer-item">provider/ (Riverpod)</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-label">Business</div>
+      <div class="layer-items">
+        <span class="layer-item">service/</span>
+        <span class="layer-item">utils/</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-label">Data</div>
+      <div class="layer-items">
+        <span class="layer-item">model/</span>
+        <span class="layer-item">sqlite/</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-label">Network</div>
+      <div class="layer-items">
+        <span class="layer-item">socket/ (Socket.IO)</span>
+        <span class="layer-item">firebase/</span>
+        <span class="layer-item">custom_http</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-label">Config</div>
+      <div class="layer-items">
+        <span class="layer-item">constants/</span>
+        <span class="layer-item">routes.dart</span>
+        <span class="layer-item">theme.dart</span>
+        <span class="layer-item">env.dart</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 3: ROUTE MAP -->
+  <!-- ════════════════════════════════════════ -->
+
+  <div class="section-title">3. Route Map</div>
+
+  <table class="route-table">
+    <thead>
+      <tr>
+        <th>Path</th>
+        <th>Screen</th>
+        <th>Guard</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="route-path">/</td>
+        <td>LandingScreen</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/sign-in</td>
+        <td>SignInScreen</td>
+        <td><span class="badge">redirect if signed in</span></td>
+      </tr>
+      <tr>
+        <td class="route-path">/sign-up</td>
+        <td>SignUpScreen</td>
+        <td><span class="badge">redirect if signed in</span></td>
+      </tr>
+      <tr>
+        <td class="route-path">/feed</td>
+        <td>HomeNavigator (page 0)</td>
+        <td><span class="badge auth">AUTH</span></td>
+      </tr>
+      <tr>
+        <td class="route-path">/search</td>
+        <td>HomeNavigator (page 1)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/market</td>
+        <td>HomeNavigator (page 2)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/settings</td>
+        <td>HomeNavigator (page 3)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/profile/:userId</td>
+        <td>ProfileScreen</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/chats</td>
+        <td>ConversationListScreen</td>
+        <td><span class="badge auth">AUTH</span></td>
+      </tr>
+      <tr>
+        <td class="route-path">/profile-settings</td>
+        <td>ProfileSettingScreen</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="route-path">/notification-settings</td>
+        <td>NotificationSettingScreen</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 4: FOLDER TREE -->
+  <!-- ════════════════════════════════════════ -->
+
+  <div class="section-title">4. Folder Structure</div>
+
+  <div class="tree">
+    <ul>
+      <li>
+        <span class="folder open" onclick="toggleFolder(this)">lib/</span>
+        <ul>
+          <li><span class="file">main.dart <span class="file-tag">entry</span></span></li>
+          <li><span class="file">app.dart <span class="file-tag">app config</span></span></li>
+          <li><span class="file">routes.dart <span class="file-tag">GoRouter</span></span></li>
+          <li><span class="file">theme.dart <span class="file-tag">light & dark</span></span></li>
+          <li><span class="file">env.dart</span></li>
+          <li><span class="file">utils.dart</span></li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">constants/</span>
+            <ul style="display:none">
+              <li><span class="file">colors.dart <span class="file-tag">design tokens</span></span></li>
+              <li><span class="file">credential.dart</span></li>
+              <li><span class="file">local_storage.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">firebase/</span>
+            <ul style="display:none">
+              <li><span class="file">firebase_api.dart</span></li>
+              <li><span class="file">firebase_options.dart</span></li>
+              <li><span class="file">firebase_token.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">model/</span>
+            <ul style="display:none">
+              <li><span class="file">attachment.dart</span></li>
+              <li><span class="file">audio.dart</span></li>
+              <li><span class="file">author.dart</span></li>
+              <li><span class="file">comment.dart</span></li>
+              <li><span class="file">conversation.dart</span></li>
+              <li><span class="file">emoji.dart</span></li>
+              <li><span class="file">image.dart</span></li>
+              <li><span class="file">mention.dart</span></li>
+              <li><span class="file">nhentai.dart</span></li>
+              <li><span class="file">notification.dart</span></li>
+              <li><span class="file">outgoing_text.dart</span></li>
+              <li><span class="file">poll.dart</span></li>
+              <li><span class="file">post.dart</span></li>
+              <li><span class="file">prepared_image.dart</span></li>
+              <li><span class="file">product.dart</span></li>
+              <li><span class="file">text.dart</span></li>
+              <li><span class="file">user.dart</span></li>
+              <li><span class="file">user_search.dart</span></li>
+              <li><span class="file">video.dart</span></li>
+              <li><span class="file">youtube.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">provider/</span>
+            <ul style="display:none">
+              <li><span class="file">author.dart</span></li>
+              <li><span class="file">conversation.dart</span></li>
+              <li><span class="file">emoji.dart</span></li>
+              <li><span class="file">post.dart</span></li>
+              <li><span class="file">socket.dart</span></li>
+              <li><span class="file">user.dart</span></li>
+              <li><span class="file">*.g.dart <span class="file-tag">generated</span></span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">service/</span>
+            <ul style="display:none">
+              <li><span class="file">notification_service.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">socket/</span>
+            <ul style="display:none">
+              <li><span class="file">call_signal.dart</span></li>
+              <li><span class="file">socket.dart</span></li>
+              <li><span class="file">socket_events.dart</span></li>
+              <li><span class="file">ws_envelope.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">sqlite/</span>
+            <ul style="display:none">
+              <li><span class="file">sqlite.dart</span></li>
+              <li><span class="file">reflector.dart</span></li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">utils/</span>
+            <ul style="display:none">
+              <li><span class="file">audio_picker.dart</span></li>
+              <li><span class="file">check_for_internet.dart</span></li>
+              <li><span class="file">custom_http.dart</span></li>
+              <li><span class="file">custom_toast.dart</span></li>
+              <li><span class="file">ffmpeg.dart</span></li>
+              <li><span class="file">image_blur_hash.dart</span></li>
+              <li><span class="file">image_picker.dart</span></li>
+              <li><span class="file">image_uploader.dart</span></li>
+              <li><span class="file">image_viewer.dart</span></li>
+              <li><span class="file">number_magnitude.dart</span></li>
+              <li><span class="file">pretty_date.dart</span></li>
+              <li><span class="file">print_helper.dart</span></li>
+              <li><span class="file">report_widget.dart</span></li>
+              <li><span class="file">rich_text.dart</span></li>
+              <li><span class="file">short_name.dart</span></li>
+              <li><span class="file">simple_text_updater.dart</span></li>
+              <li><span class="file">validation.dart</span></li>
+              <li><span class="file">video_picker.dart</span></li>
+              <li><span class="file">video_uploader.dart</span></li>
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">data_types/</span>
+                <ul style="display:none">
+                  <li><span class="file">int.dart</span></li>
+                  <li><span class="file">string.dart</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder open" onclick="toggleFolder(this)">view/</span>
+            <ul>
+              <li><span class="file">landing.dart <span class="file-tag">splash</span></span></li>
+              <li><span class="file">home_navigator.dart <span class="file-tag">nav hub</span></span></li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">auth/</span>
+                <ul style="display:none">
+                  <li><span class="file">sign_in.dart</span></li>
+                  <li><span class="file">sign_up.dart</span></li>
+                  <li>
+                    <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+                    <ul style="display:none">
+                      <li><span class="file">input_message.dart</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">home/</span>
+                <ul style="display:none">
+                  <li><span class="file">home.dart <span class="file-tag">feed</span></span></li>
+                  <li><span class="file">post_details.dart</span></li>
+                  <li>
+                    <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+                    <ul style="display:none">
+                      <li><span class="file">comment.dart</span></li>
+                      <li><span class="file">comment_input.dart</span></li>
+                      <li><span class="file">comment_input_models.dart</span></li>
+                      <li><span class="file">poll.dart</span></li>
+                      <li><span class="file">post.dart</span></li>
+                      <li><span class="file">special_text_builders.dart</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">conversation/</span>
+                <ul style="display:none">
+                  <li><span class="file">conversation_list.dart</span></li>
+                  <li><span class="file">chat_texts.dart</span></li>
+                  <li><span class="file">create_group_details.dart</span></li>
+                  <li><span class="file">create_group_members.dart</span></li>
+                  <li><span class="file">dm_profile_view.dart</span></li>
+                  <li><span class="file">group_info_view.dart</span></li>
+                  <li>
+                    <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+                    <ul style="display:none">
+                      <li><span class="file">conversation_item.dart</span></li>
+                      <li><span class="file">horizontal_options.dart</span></li>
+                      <li><span class="file">multiple_image_card.dart</span></li>
+                      <li><span class="file">text_item.dart</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">create_post/</span>
+                <ul style="display:none">
+                  <li><span class="file">create_post.dart</span></li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">search/</span>
+                <ul style="display:none">
+                  <li><span class="file">search.dart</span></li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">market/</span>
+                <ul style="display:none">
+                  <li><span class="file">market.dart</span></li>
+                  <li>
+                    <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+                    <ul style="display:none">
+                      <li><span class="file">product_card.dart</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">profile/</span>
+                <ul style="display:none">
+                  <li><span class="file">profile.dart</span></li>
+                </ul>
+              </li>
+
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">settings/</span>
+                <ul style="display:none">
+                  <li><span class="file">settings.dart</span></li>
+                  <li><span class="file">notification_setting.dart</span></li>
+                  <li><span class="file">profile_settings.dart</span></li>
+                  <li>
+                    <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+                    <ul style="display:none">
+                      <li><span class="file">profile_edit_option.dart</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">widgets/</span>
+            <ul style="display:none">
+              <li><span class="file">audio_player.dart</span></li>
+              <li><span class="file">bottom_navigator.dart</span></li>
+              <li><span class="file">bouncing_three_dot.dart</span></li>
+              <li><span class="file">button_v_one.dart</span></li>
+              <li><span class="file">cross_fade_box.dart</span></li>
+              <li><span class="file">custom_dropdown.dart</span></li>
+              <li><span class="file">custom_skeleton.dart</span></li>
+              <li><span class="file">custom_svg.dart</span></li>
+              <li><span class="file">custom_switch.dart</span></li>
+              <li><span class="file">glass_container.dart</span></li>
+              <li><span class="file">google_map.dart</span></li>
+              <li><span class="file">heart_beat_animation.dart</span></li>
+              <li><span class="file">image_error_widget.dart</span></li>
+              <li><span class="file">image_placeholder.dart</span></li>
+              <li><span class="file">image_uploader_v_one.dart</span></li>
+              <li><span class="file">image_uploader_v_two.dart</span></li>
+              <li><span class="file">image_video_carousel.dart</span></li>
+              <li><span class="file">input_field_v_one.dart</span></li>
+              <li><span class="file">link_preview.dart</span></li>
+              <li><span class="file">named_avatar.dart</span></li>
+              <li><span class="file">nhentai.dart</span></li>
+              <li><span class="file">primary_button.dart</span></li>
+              <li><span class="file">secondary_app_bar.dart</span></li>
+              <li><span class="file">social_voice_recorder.dart</span></li>
+              <li><span class="file">status_widget.dart</span></li>
+              <li><span class="file">svg_handler.dart</span></li>
+              <li><span class="file">tav_option_v_one.dart</span></li>
+              <li><span class="file">video_player_widget.dart</span></li>
+              <li><span class="file">video_trimmer_view.dart</span></li>
+              <li><span class="file">youtube_attachment.dart</span></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <span class="folder" onclick="toggleFolder(this)">assets/</span>
+        <ul style="display:none">
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">fonts/</span>
+            <ul style="display:none">
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">archivo/</span>
+                <ul style="display:none">
+                  <li><span class="file">Archivo-Thin.ttf → Black.ttf <span class="file-tag">9 weights</span></span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">icons/</span>
+            <ul style="display:none">
+              <li><span class="file">60+ SVG icons</span></li>
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">bottom_nav/</span>
+                <ul style="display:none">
+                  <li><span class="file">home.svg, search.svg, market.svg + filled variants</span></li>
+                </ul>
+              </li>
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">post/</span>
+                <ul style="display:none">
+                  <li><span class="file">camera, event, gallery, poll, video .svg</span></li>
+                </ul>
+              </li>
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">settings/</span>
+                <ul style="display:none">
+                  <li><span class="file">language, lock, logout, notification, payment, user, visible .svg</span></li>
+                </ul>
+              </li>
+              <li>
+                <span class="folder" onclick="toggleFolder(this)">more_options/</span>
+                <ul style="display:none">
+                  <li><span class="file">bookmark, copy, delete, dislike, eye, favorite, follow, mute, share .svg</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">images/</span>
+            <ul style="display:none">
+              <li><span class="file">launcher_foreground.png</span></li>
+              <li><span class="file">launcher_logo.png</span></li>
+            </ul>
+          </li>
+          <li>
+            <span class="folder" onclick="toggleFolder(this)">audios/</span>
+            <ul style="display:none">
+              <li><span class="file">ui-click.mp3</span></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 5: WIDGET COMPONENT MAP -->
+  <!-- ════════════════════════════════════════ -->
+
+  <div class="section-title">5. Widget Component Map</div>
+
+  <div class="flow-container" style="align-items: flex-start; margin-left: 40px;">
+    <div class="flow-row" style="gap: 48px; align-items: flex-start; flex-wrap: wrap;">
+
+      <!-- Inputs -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Inputs</div>
+        <div class="flow-node widget">InputFieldVOne</div>
+        <div class="flow-node widget">CustomDropdown</div>
+        <div class="flow-node widget">CustomSwitch</div>
+        <div class="flow-node widget">SocialVoiceRecorder</div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Actions</div>
+        <div class="flow-node widget">PrimaryButton</div>
+        <div class="flow-node widget">ButtonVOne</div>
+        <div class="flow-node widget">TabOptionVOne</div>
+      </div>
+
+      <!-- Media -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Media</div>
+        <div class="flow-node widget">ImageVideoCarousel</div>
+        <div class="flow-node widget">VideoPlayerWidget</div>
+        <div class="flow-node widget">AudioPlayer</div>
+        <div class="flow-node widget">YoutubeAttachment</div>
+        <div class="flow-node widget">ImageUploaderV1/V2</div>
+      </div>
+
+      <!-- Display -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Display</div>
+        <div class="flow-node widget">NamedAvatar</div>
+        <div class="flow-node widget">StatusWidget</div>
+        <div class="flow-node widget">LinkPreview</div>
+        <div class="flow-node widget">CustomSvg</div>
+        <div class="flow-node widget">GlassContainer</div>
+      </div>
+
+      <!-- Feedback -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Feedback</div>
+        <div class="flow-node widget">CustomToast</div>
+        <div class="flow-node widget">BouncingThreeDot</div>
+        <div class="flow-node widget">HeartBeatAnimation</div>
+        <div class="flow-node widget">CrossFadeBox</div>
+        <div class="flow-node widget">CustomSkeleton</div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="flow-node screen" style="font-size: 12px; min-width: 100px;">Navigation</div>
+        <div class="flow-node widget">BottomNavigator</div>
+        <div class="flow-node widget">SecondaryAppBar</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function toggleFolder(el) {
+      el.classList.toggle('open');
+      const ul = el.nextElementSibling;
+      if (ul && ul.tagName === 'UL') {
+        ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>

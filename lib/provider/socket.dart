@@ -55,7 +55,7 @@ class SocketListener extends _$SocketListener {
       socket.incoming_texts.listen((event) {
         conv_notifier.add_message(
           conversation_id: event.text.conversation_id,
-          message: event.text,
+          message_input: event.text,
         );
       }),
     );
@@ -71,6 +71,13 @@ class SocketListener extends _$SocketListener {
     _subs.add(
       socket.presence_events.listen((event) {
         conv_notifier.update_online(event);
+      }),
+    );
+
+    // ── Message seen (read receipts) ──────────────────────────────────────────
+    _subs.add(
+      socket.message_seen_events.listen((event) {
+        conv_notifier.handle_message_seen(event);
       }),
     );
 

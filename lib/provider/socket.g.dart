@@ -25,7 +25,7 @@ final socketStateNotifierProvider =
     );
 
 typedef _$SocketStateNotifier = Notifier<SocketState>;
-String _$socketListenerHash() => r'cbc39cdf8b45ae4ff1312af230325f6987b7b496';
+String _$socketListenerHash() => r'7db8ebe2155f276b54e5aa76ccc339f3e56529f6';
 
 /// Wires the socket's event streams to the appropriate Riverpod notifiers.
 /// Keep this alive so the subscriptions are never cancelled while the app runs.

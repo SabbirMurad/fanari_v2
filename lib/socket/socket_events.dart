@@ -30,3 +30,16 @@ class IncomingTextEvent {
 
   const IncomingTextEvent({required this.text});
 }
+
+/// Emitted when texts in a conversation have been marked as read by a user.
+class MessageSeenEvent {
+  final String conversation_id;
+  final String user_id;
+  final List<String> text_ids;
+
+  const MessageSeenEvent({
+    required this.conversation_id,
+    required this.user_id,
+    required this.text_ids,
+  });
+}

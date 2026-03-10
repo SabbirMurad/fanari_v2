@@ -130,6 +130,25 @@ class TextModel {
     }).toList();
   }
 
+  TextModel copyWith({List<String>? seen_by}) {
+    return TextModel(
+      uuid: uuid,
+      owner: owner,
+      conversation_id: conversation_id,
+      text: text,
+      my_text: my_text,
+      images: images,
+      seen_by: seen_by ?? this.seen_by,
+      created_at: created_at,
+      video: video,
+      type: type,
+      attachment: attachment,
+      audio: audio,
+      youtube_attachment: youtube_attachment,
+      link_preview: link_preview,
+    );
+  }
+
   Future<TextModel?> load_third_party_infos() async {
     if (youtube_attachment == null &&
         images == null &&

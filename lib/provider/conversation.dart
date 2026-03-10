@@ -232,8 +232,9 @@ class ConversationNotifier extends _$ConversationNotifier {
 
   Future<void> add_message({
     required String conversation_id,
-    required TextModel message,
+    required TextModel message_input,
   }) async {
+    var message = message_input;
     final is_temp = message.uuid.startsWith('temp_');
 
     ConversationModel? updated_conv;
@@ -267,6 +268,27 @@ class ConversationNotifier extends _$ConversationNotifier {
       final is_viewing =
           CustomSocket.instance.opened_conversation_id == conversation_id;
       final increment_unread = !is_temp && !message.my_text && !is_viewing;
+
+      // If viewing, auto-mark the incoming message as read
+      if (is_viewing && !is_temp && !message.my_text) {
+        _my_user_id ??= await LocalStorage.user_id.get();
+        final my_id = _my_user_id!;
+        if (!message.seen_by.contains(my_id)) {
+          message = message.copyWith(seen_by: [...message.seen_by, my_id]);
+
+          // Update the message in new_texts too
+          final msg_index = new_texts.indexWhere((t) => t.uuid == message.uuid);
+          if (msg_index != -1) {
+            new_texts[msg_index] = message;
+          }
+
+          // Notify server
+          CustomSocket.instance.send_message_seen(
+            conversation_id: conversation_id,
+            text_ids: [message.uuid],
+          );
+        }
+      }
 
       updated_conv = conv.copyWith(
         texts: new_texts,
@@ -308,17 +330,65 @@ class ConversationNotifier extends _$ConversationNotifier {
     final index = conversations.indexWhere(
       (c) => c.core.uuid == conversation_id,
     );
-    if (index == -1 || conversations[index].unread_count == 0) return;
+    if (index == -1) return;
 
-    // Update locally immediately
-    conversations[index] = conversations[index].copyWith(unread_count: 0);
+    _my_user_id ??= await LocalStorage.user_id.get();
+    final my_id = _my_user_id!;
+
+    // Collect text UUIDs that the current user hasn't seen yet
+    final unseen_text_ids = conversations[index]
+        .texts
+        .where((t) => !t.my_text && !t.seen_by.contains(my_id))
+        .map((t) => t.uuid)
+        .toList();
+
+    if (unseen_text_ids.isEmpty) return;
+
+    // Update seen_by locally on each text
+    final updated_texts = conversations[index].texts.map((t) {
+      if (unseen_text_ids.contains(t.uuid)) {
+        return t.copyWith(seen_by: [...t.seen_by, my_id]);
+      }
+      return t;
+    }).toList();
+
+    conversations[index] = conversations[index].copyWith(
+      texts: updated_texts,
+      unread_count: 0,
+    );
     state = AsyncValue.data([...conversations]);
 
-    // Sync with server
-    await utils.CustomHttp.patch(
-      endpoint: '/conversation/read',
-      body: {'conversation_id': conversation_id},
+    // Notify other participants via socket
+    CustomSocket.instance.send_message_seen(
+      conversation_id: conversation_id,
+      text_ids: unseen_text_ids,
     );
+  }
+
+  /// Called when a remote user has seen messages in a conversation.
+  void handle_message_seen(MessageSeenEvent event) {
+    final conversations = state.value;
+    if (conversations == null) return;
+
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == event.conversation_id,
+    );
+    if (index == -1) return;
+
+    bool changed = false;
+    final updated_texts = conversations[index].texts.map((t) {
+      if (event.text_ids.contains(t.uuid) &&
+          !t.seen_by.contains(event.user_id)) {
+        changed = true;
+        return t.copyWith(seen_by: [...t.seen_by, event.user_id]);
+      }
+      return t;
+    }).toList();
+
+    if (!changed) return;
+
+    conversations[index] = conversations[index].copyWith(texts: updated_texts);
+    state = AsyncValue.data([...conversations]);
   }
 
   // ── Typing indicator ───────────────────────────────────────────────────────

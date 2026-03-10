@@ -66,7 +66,7 @@ class _HorizontalOptionsState extends State<HorizontalOptions> {
                         color: _selectedOption == option
                             ? Colors.white
                             : AppColors.text,
-                        fontSize: 13.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

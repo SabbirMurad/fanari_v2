@@ -496,7 +496,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           .read(conversationNotifierProvider.notifier)
           .add_message(
             conversation_id: widget.conversation_id,
-            message: temp_text,
+            message_input: temp_text,
           );
 
       final images = await utils.upload_images(
@@ -560,7 +560,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           .read(conversationNotifierProvider.notifier)
           .add_message(
             conversation_id: widget.conversation_id,
-            message: temp_text,
+            message_input: temp_text,
           );
 
       final video_id = await utils.upload_video(path: message.videoPath!);
