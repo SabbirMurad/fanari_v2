@@ -56,6 +56,13 @@ class ConversationGroupMetadata {
       image: image ?? this.image,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': this.name,
+      'image': this.image != null ? this.image!.toJson() : null,
+    };
+  }
 }
 
 class ConversationSingleMetadata {
@@ -102,6 +109,17 @@ class ConversationSingleMetadata {
       online: online ?? this.online,
       last_seen: last_seen ?? this.last_seen,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': this.user_id,
+      'first_name': this.first_name,
+      'last_name': this.last_name,
+      'image': this.image != null ? this.image!.toJson() : null,
+      'online': this.online,
+      'last_seen': this.last_seen,
+    };
   }
 }
 

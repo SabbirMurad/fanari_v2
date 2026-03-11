@@ -19,4 +19,13 @@ class AttachmentModel {
       size: json['size'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': this.uuid,
+      'name': this.name,
+      'size': this.size,
+      'type': this.type,
+    };
+  }
 }

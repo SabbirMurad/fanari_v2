@@ -130,6 +130,22 @@ class TextModel {
     }).toList();
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': this.uuid,
+      'conversation_id': this.conversation_id,
+      'owner': this.owner,
+      'type': this.type.name,
+      'text': this.text,
+      'images': this.images?.map((img) => img.toJson()).toList(),
+      'video': this.video != null ? this.video!.toJson() : null,
+      'audio': this.audio != null ? this.audio!.toJson() : null,
+      'attachment': this.attachment != null ? this.attachment!.toJson() : null,
+      'seen_by': this.seen_by,
+      'created_at': this.created_at,
+    };
+  }
+
   TextModel copyWith({List<String>? seen_by}) {
     return TextModel(
       uuid: uuid,

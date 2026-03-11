@@ -23,8 +23,18 @@ class VideoModel {
 
     return VideoModel(
       uuid: video_id,
-      video_url: '${AppCredentials.domain}/api/video/segment/$video_id/index.m3u8',
+      video_url:
+          '${AppCredentials.domain}/api/video/segment/$video_id/index.m3u8',
       thumbnail: ImageModel.fromJson(json),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': this.uuid,
+      'blur_hash': this.thumbnail.blur_hash,
+      'width': this.thumbnail.width,
+      'height': this.thumbnail.height,
+    };
   }
 }

@@ -72,6 +72,43 @@ class Sqlite {
       comment_count INTEGER NOT NULL
     )
     ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS conversation (
+      uuid              TEXT PRIMARY KEY,
+      type              TEXT NOT NULL,
+      last_message_at   INTEGER NOT NULL,
+      is_favorite       INTEGER NOT NULL DEFAULT 0,
+      is_muted          INTEGER NOT NULL DEFAULT 0,
+      unread_count      INTEGER NOT NULL DEFAULT 0,
+      single_metadata   TEXT,
+      group_metadata    TEXT,
+      last_text         TEXT,
+      updated_at        INTEGER NOT NULL
+    )
+    ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS text_message (
+      uuid              TEXT PRIMARY KEY,
+      conversation_id   TEXT NOT NULL,
+      owner             TEXT NOT NULL,
+      type              TEXT NOT NULL,
+      text              TEXT,
+      images            TEXT,
+      video             TEXT,
+      audio             TEXT,
+      attachment        TEXT,
+      seen_by           TEXT NOT NULL DEFAULT '[]',
+      created_at        INTEGER NOT NULL,
+      my_text           INTEGER NOT NULL DEFAULT 0
+    )
+    ''');
+
+    await db.execute('''
+    CREATE INDEX IF NOT EXISTS idx_text_message_conversation
+    ON text_message (conversation_id, created_at DESC)
+    ''');
   }
 
   Future<Database> getDataBase() async {

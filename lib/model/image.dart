@@ -44,4 +44,13 @@ class ImageModel {
   static List<ImageModel> fromJsonList(List<dynamic> json) {
     return json.map((item) => ImageModel.fromJson(item)).toList();
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': this.uuid,
+      'blur_hash': this.blur_hash,
+      'width': this.width,
+      'height': this.height,
+    };
+  }
 }

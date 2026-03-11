@@ -19,4 +19,13 @@ class AudioModel {
       type: json['type'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': this.uuid,
+      'duration': this.duration,
+      'size': this.size,
+      'type': this.type,
+    };
+  }
 }

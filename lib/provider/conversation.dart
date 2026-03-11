@@ -6,6 +6,7 @@ import 'package:fanari_v2/model/prepared_image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/socket/socket_events.dart';
+import 'package:fanari_v2/sqlite/conversation_cache.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,12 +17,53 @@ part 'conversation.g.dart';
 class ConversationNotifier extends _$ConversationNotifier {
   static const int _texts_per_page = 20;
 
+  final _cache = ConversationCache.instance;
+
   @override
   FutureOr<List<ConversationModel>> build() async {
+    // 1. Load from cache first for instant UI
+    final my_id = await LocalStorage.user_id.get();
+    if (my_id != null) {
+      final cached = await _cache.get_conversations();
+      if (cached.isNotEmpty) {
+        final cached_models = cached
+            .map((item) => ConversationModel.fromJson(item, my_id: my_id))
+            .toList();
+        state = AsyncValue.data(cached_models);
+
+        // 2. Refresh from API in background
+        _refresh_from_api(my_id);
+        return cached_models;
+      }
+    }
+
+    // No cache, load from API directly
     return await _load() ?? [];
   }
 
   // ── Loading ────────────────────────────────────────────────────────────────
+
+  Future<void> _refresh_from_api(String my_id) async {
+    final fresh = await _load();
+    if (fresh == null) return;
+
+    // Preserve runtime state (texts, typing, etc.) from current in-memory data
+    final current = state.value ?? [];
+    final current_map = {for (final c in current) c.core.uuid: c};
+
+    for (var i = 0; i < fresh.length; i++) {
+      final existing = current_map[fresh[i].core.uuid];
+      if (existing != null) {
+        fresh[i] = fresh[i].copyWith(
+          texts: existing.texts,
+          initial_text_loaded: existing.initial_text_loaded,
+          typing: existing.typing,
+        );
+      }
+    }
+
+    state = AsyncValue.data(fresh);
+  }
 
   Future<List<ConversationModel>?> _load() async {
     final response = await utils.CustomHttp.get(endpoint: '/conversation/list');
@@ -32,7 +74,26 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
 
     final my_id = await LocalStorage.user_id.get();
-    return ConversationModel.fromJsonList(response.data, my_id: my_id!);
+    final conversations = ConversationModel.fromJsonList(
+      response.data,
+      my_id: my_id!,
+    );
+
+    // Cache the API response
+    _cache_conversations(conversations);
+
+    return conversations;
+  }
+
+  /// Writes conversations to SQLite cache in background.
+  void _cache_conversations(List<ConversationModel> conversations) {
+    Future.microtask(() async {
+      try {
+        await _cache.save_conversations(conversations);
+      } catch (e) {
+        printLine('Failed to cache conversations: $e');
+      }
+    });
   }
 
   Future<void> reload() async {
@@ -54,11 +115,39 @@ class ConversationNotifier extends _$ConversationNotifier {
     // Already loaded
     if (conversations[index].initial_text_loaded) return;
 
-    // Mark as loading
-    conversations[index] = conversations[index].copyWith(texts_loading: true);
-    state = AsyncValue.data([...conversations]);
-
     final my_id = await LocalStorage.user_id.get();
+    if (my_id == null) return;
+
+    // 1. Load from cache first for instant display
+    final cached_texts = await _cache.get_texts(
+      conversation_id: conversation_id,
+      limit: _texts_per_page,
+      offset: 0,
+    );
+
+    if (cached_texts.isNotEmpty) {
+      final texts = cached_texts
+          .map((item) => TextModel.fromJson(item, my_id: my_id))
+          .toList();
+
+      final current = state.value ?? [];
+      final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+      if (idx != -1) {
+        current[idx] = current[idx].copyWith(
+          texts: texts,
+          initial_text_loaded: true,
+          texts_loading: true, // still loading from API
+          has_more_texts: texts.length >= _texts_per_page,
+        );
+        state = AsyncValue.data([...current]);
+      }
+    } else {
+      // No cache, show loading skeleton
+      conversations[index] = conversations[index].copyWith(texts_loading: true);
+      state = AsyncValue.data([...conversations]);
+    }
+
+    // 2. Fetch from API to get latest data
     final response = await utils.CustomHttp.get(
       endpoint: '/conversation/text/list',
       queries: {
@@ -68,13 +157,14 @@ class ConversationNotifier extends _$ConversationNotifier {
       },
     );
 
-    if (!response.ok || my_id == null) {
+    if (!response.ok) {
       printLine(
         'Failed to load texts for conversation $conversation_id, code: ${response.status_code}',
       );
       final current = state.value ?? [];
       final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
       if (idx != -1) {
+        // If we had cache, keep showing it; just stop loading
         current[idx] = current[idx].copyWith(texts_loading: false);
         state = AsyncValue.data([...current]);
       }
@@ -82,6 +172,9 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
 
     final texts = TextModel.fromJsonList(response.data as List, my_id: my_id);
+
+    // Cache the fresh texts
+    _cache_texts(texts);
 
     final current = state.value ?? [];
     final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
@@ -138,6 +231,9 @@ class ConversationNotifier extends _$ConversationNotifier {
       my_id: my_id,
     );
 
+    // Cache older texts
+    _cache_texts(older_texts);
+
     final current = state.value ?? [];
     final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
     if (idx == -1) return;
@@ -148,6 +244,17 @@ class ConversationNotifier extends _$ConversationNotifier {
       has_more_texts: older_texts.length >= _texts_per_page,
     );
     state = AsyncValue.data([...current]);
+  }
+
+  /// Writes texts to SQLite cache in background.
+  void _cache_texts(List<TextModel> texts) {
+    Future.microtask(() async {
+      try {
+        await _cache.save_texts(texts);
+      } catch (e) {
+        printLine('Failed to cache texts: $e');
+      }
+    });
   }
 
   // ── Create conversation ────────────────────────────────────────────────────
@@ -304,7 +411,19 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
 
     if (!is_temp) {
+      // Cache the message and update conversation
       Future.microtask(() async {
+        try {
+          await _cache.save_text(message);
+          await _cache.update_conversation(
+            uuid: conversation_id,
+            last_message_at: message.created_at,
+            last_text: message,
+          );
+        } catch (e) {
+          printLine('Failed to cache message: $e');
+        }
+
         final loaded = await message.load_third_party_infos();
         if (loaded == null) return;
 
@@ -363,6 +482,22 @@ class ConversationNotifier extends _$ConversationNotifier {
       conversation_id: conversation_id,
       text_ids: unseen_text_ids,
     );
+
+    // Update cache
+    Future.microtask(() async {
+      try {
+        await _cache.update_seen_by(
+          text_ids: unseen_text_ids,
+          user_id: my_id,
+        );
+        await _cache.update_conversation(
+          uuid: conversation_id,
+          unread_count: 0,
+        );
+      } catch (e) {
+        printLine('Failed to update read cache: $e');
+      }
+    });
   }
 
   /// Called when a remote user has seen messages in a conversation.
@@ -389,6 +524,18 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     conversations[index] = conversations[index].copyWith(texts: updated_texts);
     state = AsyncValue.data([...conversations]);
+
+    // Update cache
+    Future.microtask(() async {
+      try {
+        await _cache.update_seen_by(
+          text_ids: event.text_ids,
+          user_id: event.user_id,
+        );
+      } catch (e) {
+        printLine('Failed to update seen_by cache: $e');
+      }
+    });
   }
 
   // ── Typing indicator ───────────────────────────────────────────────────────
@@ -465,6 +612,11 @@ class ConversationNotifier extends _$ConversationNotifier {
     conversations[index].common_metadata.is_favorite = !was_favorite;
     state = AsyncValue.data([...conversations]);
 
+    _cache.update_conversation(
+      uuid: conversation_id,
+      is_favorite: !was_favorite,
+    );
+
     final response = await utils.CustomHttp.patch(
       endpoint: '/conversation/favorite',
       body: {'conversation_id': conversation_id},
@@ -473,6 +625,10 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (!response.ok) {
       conversations[index].common_metadata.is_favorite = was_favorite;
       state = AsyncValue.data([...conversations]);
+      _cache.update_conversation(
+        uuid: conversation_id,
+        is_favorite: was_favorite,
+      );
     }
   }
 
@@ -489,6 +645,11 @@ class ConversationNotifier extends _$ConversationNotifier {
     conversations[index].common_metadata.is_muted = !was_muted;
     state = AsyncValue.data([...conversations]);
 
+    _cache.update_conversation(
+      uuid: conversation_id,
+      is_muted: !was_muted,
+    );
+
     final response = await utils.CustomHttp.patch(
       endpoint: '/conversation/mute',
       body: {'conversation_id': conversation_id},
@@ -497,6 +658,10 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (!response.ok) {
       conversations[index].common_metadata.is_muted = was_muted;
       state = AsyncValue.data([...conversations]);
+      _cache.update_conversation(
+        uuid: conversation_id,
+        is_muted: was_muted,
+      );
     }
   }
 
