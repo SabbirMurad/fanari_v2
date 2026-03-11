@@ -169,30 +169,28 @@ class CustomSocket {
     final envelope = WsEnvelope.from_json(decoded);
 
     switch (envelope.type) {
-      case 'text':
+      case WsEnvelopeType.text:
         await _handle_incoming_text(envelope.payload);
-      case 'typing':
+      case WsEnvelopeType.typing:
         _handle_typing(envelope.payload);
-      case 'connect':
+      case WsEnvelopeType.connect:
         _presence_controller.add(
           PresenceEvent(
             user_id: envelope.payload['user_id'] as String,
             is_online: true,
           ),
         );
-      case 'disconnect':
+      case WsEnvelopeType.disconnect:
         _presence_controller.add(
           PresenceEvent(
             user_id: envelope.payload['user_id'] as String,
             is_online: false,
           ),
         );
-      case 'message_seen':
+      case WsEnvelopeType.message_seen:
         _handle_message_seen(envelope.payload);
-      case 'call_signal':
+      case WsEnvelopeType.call_signal:
         _handle_call_signal(envelope.payload);
-      default:
-        printLine('Unknown WS message type: ${envelope.type}');
     }
   }
 
@@ -285,13 +283,13 @@ class CustomSocket {
   }
 
   void _send_call_signal(Map<String, dynamic> payload) {
-    _send(WsEnvelope(type: 'call_signal', payload: payload));
+    _send(WsEnvelope(type: WsEnvelopeType.call_signal, payload: payload));
   }
 
   // ── Public send API ────────────────────────────────────────────────────────
 
   void send_text(SocketOutgoingText text) {
-    _send(WsEnvelope(type: 'text', payload: text.to_json()));
+    _send(WsEnvelope(type: WsEnvelopeType.text, payload: text.to_json()));
   }
 
   void send_message_seen({
@@ -300,7 +298,7 @@ class CustomSocket {
   }) {
     _send(
       WsEnvelope(
-        type: 'message_seen',
+        type: WsEnvelopeType.message_seen,
         payload: {
           'conversation_id': conversation_id,
           'text_ids': text_ids,
@@ -316,7 +314,7 @@ class CustomSocket {
   }) {
     _send(
       WsEnvelope(
-        type: 'typing',
+        type: WsEnvelopeType.typing,
         payload: {
           'conversation_id': conversation_id,
           'user_id': user_id,

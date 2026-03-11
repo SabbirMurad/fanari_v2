@@ -29,6 +29,7 @@ class TextItemWidget extends StatefulWidget {
   final Function()? onReply;
   final bool showProfile;
   final EdgeInsetsGeometry? margin;
+  final bool seen;
 
   const TextItemWidget({
     super.key,
@@ -40,6 +41,7 @@ class TextItemWidget extends StatefulWidget {
     this.onDeSelect,
     this.onReply,
     this.showProfile = true,
+    this.seen = false,
   });
 
   @override
@@ -547,10 +549,17 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                 ),
               ],
             ),
-            // if (widget.model.type == MessageType.Image &&
-            //     widget.model.images.length > 1)
-            //   _multipleImages(),
-            // _textTime(),
+            if (widget.model.my_text)
+              Padding(
+                padding: EdgeInsets.only(top: 4.h, right: 20.w),
+                child: Icon(
+                  Icons.done_all_rounded,
+                  size: 16.w,
+                  color: widget.seen
+                      ? AppColors.primary
+                      : AppColors.hintText,
+                ),
+              ),
           ],
         ),
       ),

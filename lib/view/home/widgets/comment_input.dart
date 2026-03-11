@@ -120,7 +120,9 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       setState(() => _hasInputText = true);
     }
 
-    _emitTyping();
+    if (!isEmpty) {
+      _emitTyping();
+    }
     _handleMentionDetection();
   }
 

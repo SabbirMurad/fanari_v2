@@ -88,7 +88,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
   }
 
   Color? _bgColor() {
-    if (widget.selected) return AppColors.primary.withValues(alpha: 0.2);
+    if (widget.selected) return AppColors.primary.withValues(alpha: 0.5);
     return null;
   }
 
@@ -395,8 +395,6 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         color: _bgColor(),
         child: Container(
-          width: 1.sw - 40.w,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
             border: widget.bottomBorder
                 ? Border(bottom: BorderSide(color: AppColors.secondary))
@@ -404,144 +402,210 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
           ),
           child: Row(
             children: [
-              _avatarWidget(),
-              SizedBox(width: 12.w),
               Container(
-                width: 1.sw - 40.w - 56.w - 12.w,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              width: double.infinity,
-                              child: Hero(
-                                tag:
-                                    'conversation_name_' +
-                                    widget.model.core.uuid,
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: Text(
-                                    widget.model.core.type ==
-                                            ConversationType.Group
-                                        ? widget.model.group_metadata!.name
-                                        : widget
-                                                  .model
-                                                  .single_metadata!
-                                                  .first_name +
-                                              ' ' +
-                                              widget
-                                                  .model
-                                                  .single_metadata!
-                                                  .last_name,
-                                    style: TextStyle(
-                                      color: AppColors.text,
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (widget.model.common_metadata.is_favorite)
-                            Icon(
-                              Icons.favorite_rounded,
-                              size: 20.w,
-                              color: Colors.red[400],
-                            ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 2.w),
-                    Builder(
-                      builder: (context) {
-                        final preview = _preview_text;
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Container(
+                width: 2.w,
+                height: 56.w,
+                decoration: BoxDecoration(
+                  color: widget.model.unread_count > 0
+                      ? AppColors.primary
+                      : Colors.transparent,
+                ),
+              ),
+              SizedBox(width: widget.model.unread_count > 0 ? 6.w : 8.w),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+
+                  child: Row(
+                    children: [
+                      _avatarWidget(),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
                                 width: double.infinity,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    if (widget.model.typing) ...[
-                                      Text(
-                                        'Typing',
-                                        style: TextStyle(
-                                          color: AppColors.primary,
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w600,
+                                    Expanded(
+                                      child: Container(
+                                        width: double.infinity,
+                                        child: Hero(
+                                          tag:
+                                              'conversation_name_' +
+                                              widget.model.core.uuid,
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Text(
+                                              widget.model.core.type ==
+                                                      ConversationType.Group
+                                                  ? widget
+                                                        .model
+                                                        .group_metadata!
+                                                        .name
+                                                  : widget
+                                                            .model
+                                                            .single_metadata!
+                                                            .first_name +
+                                                        ' ' +
+                                                        widget
+                                                            .model
+                                                            .single_metadata!
+                                                            .last_name,
+                                              style: TextStyle(
+                                                color: AppColors.text,
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(width: 6),
-                                      BouncingDots(dotSize: 3, gap: 4),
-                                    ],
-                                    if (!widget.model.typing) ...[
-                                      if (preview != null)
-                                        _textIconWidget(preview),
-                                      Expanded(child: _textWidget(preview)),
-                                    ],
+                                    ),
+                                    if (widget
+                                        .model
+                                        .common_metadata
+                                        .is_favorite)
+                                      Icon(
+                                        Icons.favorite_rounded,
+                                        size: 20.w,
+                                        color: Colors.red[400],
+                                      ),
                                   ],
                                 ),
                               ),
-                            ),
-                            if (preview != null)
-                              Container(
-                                margin: EdgeInsets.only(left: 6, right: 6),
-                                width: 6.w,
-                                height: 6.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.text.withValues(alpha: .8),
-                                ),
+                              SizedBox(height: 2.w),
+                              Builder(
+                                builder: (context) {
+                                  final preview = _preview_text;
+                                  return Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          width: double.infinity,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              if (widget.model.typing) ...[
+                                                Text(
+                                                  'Typing',
+                                                  style: TextStyle(
+                                                    color: AppColors.primary,
+                                                    fontSize: 13.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 6),
+                                                BouncingDots(
+                                                  dotSize: 3,
+                                                  gap: 4,
+                                                ),
+                                              ],
+                                              if (!widget.model.typing) ...[
+                                                if (preview != null &&
+                                                    preview.my_text)
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                      right: 6.w,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.done_all_rounded,
+                                                      size: 18.w,
+                                                      color:
+                                                          preview.seen_by.contains(
+                                                            widget
+                                                                .model
+                                                                .single_metadata!
+                                                                .user_id,
+                                                          )
+                                                          ? AppColors.primary
+                                                          : AppColors.hintText,
+                                                    ),
+                                                  ),
+                                                if (preview != null)
+                                                  _textIconWidget(preview),
+                                                Expanded(
+                                                  child: _textWidget(preview),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if (preview != null)
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                            left: 6,
+                                            right: 6,
+                                          ),
+                                          width: 6.w,
+                                          height: 6.w,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.text.withValues(
+                                              alpha: .8,
+                                            ),
+                                          ),
+                                        ),
+                                      if (preview != null)
+                                        Text(
+                                          utils.time_ago(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              preview.created_at,
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            color: AppColors.text.withValues(
+                                              alpha: .8,
+                                            ),
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      if (widget.model.unread_count > 0)
+                                        Container(
+                                          margin: EdgeInsets.only(left: 8.w),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 6.w,
+                                            vertical: 2.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(
+                                              10.r,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            widget.model.unread_count > 99
+                                                ? '99+'
+                                                : widget.model.unread_count
+                                                      .toString(),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
                               ),
-                            if (preview != null)
-                              Text(
-                                utils.time_ago(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                    preview.created_at,
-                                  ),
-                                ),
-                                style: TextStyle(
-                                  color: AppColors.text.withValues(alpha: .8),
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            if (widget.model.unread_count > 0)
-                              Container(
-                                margin: EdgeInsets.only(left: 8.w),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 6.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: Text(
-                                  widget.model.unread_count > 99
-                                      ? '99+'
-                                      : widget.model.unread_count.toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

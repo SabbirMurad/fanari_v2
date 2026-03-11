@@ -441,6 +441,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           showProfile: showProfile,
           selected: _selectedTexts.contains(text.uuid),
           onReply: () {},
+          seen: text.my_text && text.seen_by.isNotEmpty,
         ),
       ],
     );
