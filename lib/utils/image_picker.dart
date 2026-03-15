@@ -22,7 +22,6 @@ Future<Uint8List> compress_image(Uint8List bytes, int target_kb) async {
 // ── Single image ──────────────────────────────────────────────────────────────
 
 /// Picks a single image from [source] (camera or gallery) and optionally
-/// compresses it to ≤ 400 KB.
 Future<File?> pick_single_image({
   required BuildContext context,
   required ImageSource source,
@@ -79,7 +78,7 @@ Future<List<File>?> pick_images_from_gallery({
 // ── Crop ──────────────────────────────────────────────────────────────────────
 
 /// Opens the system crop UI for the image at [path] and returns the cropped bytes.
-Future<Uint8List?> crop_image(String path) async {
+Future<File?> crop_image(String path) async {
   final cropped = await ImageCropper().cropImage(
     sourcePath: path,
     uiSettings: [
@@ -98,7 +97,7 @@ Future<Uint8List?> crop_image(String path) async {
     ],
   );
 
-  return cropped != null ? await cropped.readAsBytes() : null;
+  return cropped != null ? await File(cropped.path) : null;
 }
 
 // ── Bottom-sheet picker ───────────────────────────────────────────────────────

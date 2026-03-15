@@ -19,6 +19,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:media_store_plus/media_store_plus.dart';
 
 class TextItemWidget extends StatefulWidget {
   final TextModel model;
@@ -226,10 +230,18 @@ class _TextItemWidgetState extends State<TextItemWidget> {
 
     final downloadBtn = GestureDetector(
       onTap: () async {
-        // _downloadImage(
-        //   widget.model.images.first.url,
-        //   '${DateTime.now().toString()}.jpg',
-        // );
+        final image = widget.model.images!.first;
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        if (image.local) {
+          utils.downloadImage(
+            context,
+            '',
+            fileName,
+            localBytes: image.local_bytes,
+          );
+        } else {
+          utils.downloadImage(context, image.original_url, fileName);
+        }
       },
       child: Container(
         width: 36.w,
@@ -555,9 +567,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                 child: Icon(
                   Icons.done_all_rounded,
                   size: 16.w,
-                  color: widget.seen
-                      ? AppColors.primary
-                      : AppColors.hintText,
+                  color: widget.seen ? AppColors.primary : AppColors.hintText,
                 ),
               ),
           ],
