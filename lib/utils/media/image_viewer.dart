@@ -1,4 +1,4 @@
-part of '../utils.dart';
+part of '../media.dart';
 
 // ── Gallery viewer widget ─────────────────────────────────────────────────────
 

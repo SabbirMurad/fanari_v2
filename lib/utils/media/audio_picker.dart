@@ -1,4 +1,4 @@
-part of '../utils.dart';
+part of '../media.dart';
 
 /// Opens the asset picker restricted to audio files.
 /// Returns up to [limit] (default 1) files, or null if the user cancelled.

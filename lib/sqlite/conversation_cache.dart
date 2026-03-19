@@ -30,8 +30,8 @@ class ConversationCache {
           conv.core.uuid,
           conv.core.type == ConversationType.Group ? 'Group' : 'Single',
           conv.core.last_message_at,
-          conv.common_metadata.is_favorite ? 1 : 0,
-          conv.common_metadata.is_muted ? 1 : 0,
+          conv.common_metadata.favorite ? 1 : 0,
+          conv.common_metadata.muted ? 1 : 0,
           conv.unread_count,
           conv.single_metadata != null
               ? jsonEncode(conv.single_metadata!.toJson())

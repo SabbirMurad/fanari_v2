@@ -16,6 +16,7 @@ import 'package:fanari_v2/widgets/video_player_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:fanari_v2/utils.dart' as utils;
 import 'package:extended_text_field/extended_text_field.dart';
 import 'package:image_picker/image_picker.dart';
@@ -317,7 +318,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   // ═══════════════════════════════════════════════════════════════════════
 
   Future<void> _handleGalleryTap() async {
-    final images = await utils.pick_images_from_gallery(context: context);
+    final images = await media_utils.pick_images_from_gallery(context: context);
     if (images == null) return;
 
     final prepared = PreparedImage.fromFiles(images);
@@ -334,7 +335,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   }
 
   Future<void> _handleCameraTap() async {
-    final image = await utils.pick_single_image(
+    final image = await media_utils.pick_single_image(
       context: context,
       source: ImageSource.camera,
     );
@@ -365,7 +366,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
       _loadingVideo = true;
     });
 
-    final videos = await utils.pick_videos_from_gallery(
+    final videos = await media_utils.pick_videos_from_gallery(
       context: context,
       limit: 1,
     );

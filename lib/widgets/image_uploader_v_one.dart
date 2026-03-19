@@ -1,11 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 
 class ImageUploaderVOne extends StatefulWidget {
   final double height;
@@ -44,7 +43,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
   ''';
 
   void selectImage(ImageSource source) async {
-    File? img = await utils.pick_single_image(
+    File? img = await media_utils.pick_single_image(
       context: context,
       source: source,
       // crop: false,
@@ -75,19 +74,19 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
                   onTap: () {
                     if (image != null || widget.currentImage != null) {
                       if (image != null) {
-                        utils.open_image_viewer(
+                        media_utils.open_image_viewer(
                           context: context,
                           images: [FileImage(image!)],
                         );
                       } else {
-                        utils.open_image_viewer(
+                        media_utils.open_image_viewer(
                           context: context,
                           images: [widget.currentImage!],
                         );
                       }
                     } else {
                       if (widget.enable) {
-                        utils.show_image_source_picker(context, selectImage);
+                        media_utils.show_image_source_picker(context, selectImage);
                       }
                     }
                   },
@@ -164,7 +163,7 @@ class _ImageUploaderVOneState extends State<ImageUploaderVOne> {
               child: GestureDetector(
                 onTap: () {
                   if (!widget.loading) {
-                    utils.show_image_source_picker(context, selectImage);
+                    media_utils.show_image_source_picker(context, selectImage);
                   }
                 },
                 child: Container(

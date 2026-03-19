@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/attachment.dart';
+import 'package:fanari_v2/model/media/attachment.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/conversation/widgets/multiple_image_card.dart';
 import 'package:fanari_v2/widgets/audio_player.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -17,12 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:http/http.dart' as http;
-import 'package:media_store_plus/media_store_plus.dart';
 
 class TextItemWidget extends StatefulWidget {
   final TextModel model;
@@ -233,14 +228,14 @@ class _TextItemWidgetState extends State<TextItemWidget> {
         final image = widget.model.images!.first;
         final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
         if (image.local) {
-          utils.downloadImage(
+          media_utils.downloadImage(
             context,
             '',
             fileName,
             localBytes: image.local_bytes,
           );
         } else {
-          utils.downloadImage(context, image.original_url, fileName);
+          media_utils.downloadImage(context, image.original_url, fileName);
         }
       },
       child: Container(
@@ -328,7 +323,7 @@ class _TextItemWidgetState extends State<TextItemWidget> {
 
           if (widget.model.images!.first.local) return;
 
-          utils.open_image_viewer(
+          media_utils.open_image_viewer(
             context: context,
             images: [widget.model.images!.first.provider],
           );

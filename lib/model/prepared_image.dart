@@ -5,7 +5,7 @@ import 'package:blurhash_ffi/blurhash_ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 
 class PreparedImageMeta {
   final int width;
@@ -38,7 +38,7 @@ class PreparedImage {
 
   Future<PreparedImageMeta> get_prepare_meta() async {
     final bytes = file.readAsBytesSync();
-    final compressed_bytes = await utils.compress_image(bytes, 400);
+    final compressed_bytes = await media_utils.compress_image(bytes, 400);
 
     final dir = await getTemporaryDirectory();
     final ext = file.path.split('.').last;

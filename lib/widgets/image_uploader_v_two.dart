@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 
 class ImageUploaderVTwo extends StatefulWidget {
   final ImageProvider defaultImage;
@@ -27,7 +27,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
   File? image;
 
   void selectImage(ImageSource source) async {
-    File? img = await utils.pick_single_image(
+    File? img = await media_utils.pick_single_image(
       context: context,
       source: source,
     );
@@ -61,7 +61,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
           alignment: const Alignment(0, -1),
           child: GestureDetector(
             onTap: () {
-              utils.open_image_viewer(context: context, images: [getImage()]);
+              media_utils.open_image_viewer(context: context, images: [getImage()]);
             },
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -82,7 +82,7 @@ class _ImageUploaderVTwoState extends State<ImageUploaderVTwo> {
             alignment: const Alignment(0.95, -0.9),
             child: GestureDetector(
               onTap: () {
-                utils.show_image_source_picker(context, selectImage);
+                media_utils.show_image_source_picker(context, selectImage);
               },
               child: CircleAvatar(
                 backgroundColor: const Color.fromRGBO(24, 24, 24, 0.2),

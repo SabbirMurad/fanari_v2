@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:fanari_v2/utils.dart' as utils;
 
 class CreatePostScreen extends ConsumerStatefulWidget {
@@ -588,9 +589,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   void _createPost() async {
     List<String> image_ids = [];
     if (_selectedImages.isNotEmpty) {
-      final ids = await utils.upload_images(
+      final ids = await media_utils.upload_images(
         images: _selectedImages,
-        used_at: utils.AssetUsedAt.Post,
+        used_at: media_utils.AssetUsedAt.Post,
       );
 
       if (ids == null) return;
@@ -599,7 +600,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     List<String> video_ids = [];
     if (_selectedVideoPath != null) {
-      final video_id = await utils.upload_video(path: _selectedVideoPath!);
+      final video_id = await media_utils.upload_video(path: _selectedVideoPath!);
 
       if (video_id == null) {
         printLine('Failed to upload video');
@@ -696,7 +697,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       _loadingVideo = true;
     });
 
-    final videos = await utils.pick_videos_from_gallery(
+    final videos = await media_utils.pick_videos_from_gallery(
       context: context,
       limit: 1,
     );
@@ -756,7 +757,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Future<void> _handleGalleryTap() async {
-    final images = await utils.pick_images_from_gallery(context: context);
+    final images = await media_utils.pick_images_from_gallery(context: context);
 
     if (images == null) return;
 

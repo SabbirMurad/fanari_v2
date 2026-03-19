@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:fanari_v2/widgets/image_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class MultipleImageCard extends StatefulWidget {
@@ -124,7 +124,7 @@ class _MultipleImageCardState extends State<MultipleImageCard> {
         if (widget.decoration == TextDirection.rtl) downloadBtn,
         GestureDetector(
           onTap: () {
-            utils.open_image_viewer(
+            media_utils.open_image_viewer(
               context: context,
               images: widget.images
                   .map((e) => CachedNetworkImageProvider(e.webp_url))

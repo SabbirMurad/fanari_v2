@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fanari_v2/model/attachment.dart';
+import 'package:fanari_v2/model/media/attachment.dart';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/text.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/video.dart';
 
 class SocketOutgoingText {
   final String conversation_id;

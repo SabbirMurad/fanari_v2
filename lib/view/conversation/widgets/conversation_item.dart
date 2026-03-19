@@ -2,7 +2,6 @@ import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/provider/conversation.dart';
-import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/bouncing_three_dot.dart';
 import 'package:fanari_v2/widgets/cross_fade_box.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -146,7 +145,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                         ),
                         _moreOptionItem(
                           icon: 'assets/icons/more_options/favorite.svg',
-                          text: widget.model.common_metadata.is_favorite
+                          text: widget.model.common_metadata.favorite
                               ? 'Unfavorite'
                               : 'Favorite',
                           onTap: () {
@@ -157,10 +156,10 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                         ),
                         _moreOptionItem(
                           icon: 'assets/icons/more_options/mute.svg',
-                          text: widget.model.common_metadata.is_muted
+                          text: widget.model.common_metadata.muted
                               ? 'Unmute'
                               : 'Mute',
-                          color: !widget.model.common_metadata.is_muted
+                          color: !widget.model.common_metadata.muted
                               ? Colors.red[400]
                               : null,
                           onTap: () {
@@ -250,14 +249,14 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                     image: widget.model.core.type == ConversationType.Group
                         ? widget.model.group_metadata!.image
                         : widget.model.single_metadata!.image,
-                    name: widget.model.common_metadata.is_muted
+                    name: widget.model.common_metadata.muted
                         ? ' '
                         : widget.model.core.type == ConversationType.Group
                         ? widget.model.group_metadata!.name
                         : widget.model.single_metadata!.first_name,
                     size: 56.w,
                   ),
-                  if (widget.model.common_metadata.is_muted)
+                  if (widget.model.common_metadata.muted)
                     Container(
                       width: 56.w,
                       height: 56.w,
@@ -471,7 +470,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                     if (widget
                                         .model
                                         .common_metadata
-                                        .is_favorite)
+                                        .favorite)
                                       Icon(
                                         Icons.favorite_rounded,
                                         size: 20.w,
@@ -495,9 +494,15 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
                                             children: [
-                                              if (widget.model.typing) ...[
+                                              if (widget
+                                                  .model
+                                                  .control
+                                                  .typing) ...[
                                                 Text(
-                                                  'Typing',
+                                                  widget.model.core.type ==
+                                                          ConversationType.Group
+                                                      ? '${widget.model.control.typing_name} is typing'
+                                                      : 'Typing',
                                                   style: TextStyle(
                                                     color: AppColors.primary,
                                                     fontSize: 13.sp,
@@ -510,7 +515,10 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                                   gap: 4,
                                                 ),
                                               ],
-                                              if (!widget.model.typing) ...[
+                                              if (!widget
+                                                  .model
+                                                  .control
+                                                  .typing) ...[
                                                 if (preview != null &&
                                                     preview.my_text)
                                                   Padding(

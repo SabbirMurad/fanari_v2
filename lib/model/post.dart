@@ -1,10 +1,10 @@
 import 'package:fanari_v2/constants/credential.dart';
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/nhentai.dart';
 import 'package:fanari_v2/model/poll.dart';
 import 'package:fanari_v2/model/user.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';

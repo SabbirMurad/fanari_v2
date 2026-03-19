@@ -1,4 +1,4 @@
-part of '../utils.dart';
+part of '../media.dart';
 
 enum AssetUsedAt { ProfilePic, CoverPic, Post, Comment, Chat, VideoThumbnail }
 

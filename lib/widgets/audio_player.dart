@@ -1,6 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/audio.dart';
+import 'package:fanari_v2/model/media/audio.dart';
 import 'package:flutter/material.dart';
 
 class SimpleAudioPlayer extends StatefulWidget {

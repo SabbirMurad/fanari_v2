@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
@@ -8,6 +7,7 @@ import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/socket/socket_events.dart';
 import 'package:fanari_v2/sqlite/conversation_cache.dart';
 import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -56,8 +56,10 @@ class ConversationNotifier extends _$ConversationNotifier {
       if (existing != null) {
         fresh[i] = fresh[i].copyWith(
           texts: existing.texts,
-          initial_text_loaded: existing.initial_text_loaded,
-          typing: existing.typing,
+          control: existing.control.copyWith(
+            initial_text_loaded: existing.control.initial_text_loaded,
+            typing: existing.control.typing,
+          ),
         );
       }
     }
@@ -113,7 +115,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (index == -1) return;
 
     // Already loaded
-    if (conversations[index].initial_text_loaded) return;
+    if (conversations[index].control.initial_text_loaded) return;
 
     final my_id = await LocalStorage.user_id.get();
     if (my_id == null) return;
@@ -135,15 +137,19 @@ class ConversationNotifier extends _$ConversationNotifier {
       if (idx != -1) {
         current[idx] = current[idx].copyWith(
           texts: texts,
-          initial_text_loaded: true,
-          texts_loading: true, // still loading from API
-          has_more_texts: texts.length >= _texts_per_page,
+          control: current[idx].control.copyWith(
+            initial_text_loaded: true,
+            texts_loading: true, // still loading from API
+            has_more_texts: texts.length >= _texts_per_page,
+          ),
         );
         state = AsyncValue.data([...current]);
       }
     } else {
       // No cache, show loading skeleton
-      conversations[index] = conversations[index].copyWith(texts_loading: true);
+      conversations[index] = conversations[index].copyWith(
+        control: conversations[index].control.copyWith(texts_loading: true),
+      );
       state = AsyncValue.data([...conversations]);
     }
 
@@ -165,7 +171,9 @@ class ConversationNotifier extends _$ConversationNotifier {
       final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
       if (idx != -1) {
         // If we had cache, keep showing it; just stop loading
-        current[idx] = current[idx].copyWith(texts_loading: false);
+        current[idx] = current[idx].copyWith(
+          control: current[idx].control.copyWith(texts_loading: false),
+        );
         state = AsyncValue.data([...current]);
       }
       return;
@@ -182,9 +190,11 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     current[idx] = current[idx].copyWith(
       texts: texts,
-      initial_text_loaded: true,
-      texts_loading: false,
-      has_more_texts: texts.length >= _texts_per_page,
+      control: current[idx].control.copyWith(
+        initial_text_loaded: true,
+        texts_loading: false,
+        has_more_texts: texts.length >= _texts_per_page,
+      ),
     );
     state = AsyncValue.data([...current]);
   }
@@ -199,10 +209,12 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (index == -1) return;
 
     final conv = conversations[index];
-    if (conv.texts_loading || !conv.has_more_texts) return;
+    if (conv.control.texts_loading || !conv.control.has_more_texts) return;
 
     // Mark as loading
-    conversations[index] = conv.copyWith(texts_loading: true);
+    conversations[index] = conv.copyWith(
+      control: conv.control.copyWith(texts_loading: true),
+    );
     state = AsyncValue.data([...conversations]);
 
     final my_id = await LocalStorage.user_id.get();
@@ -220,7 +232,9 @@ class ConversationNotifier extends _$ConversationNotifier {
       final current = state.value ?? [];
       final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
       if (idx != -1) {
-        current[idx] = current[idx].copyWith(texts_loading: false);
+        current[idx] = current[idx].copyWith(
+          control: current[idx].control.copyWith(texts_loading: false),
+        );
         state = AsyncValue.data([...current]);
       }
       return;
@@ -240,8 +254,10 @@ class ConversationNotifier extends _$ConversationNotifier {
 
     current[idx] = current[idx].copyWith(
       texts: [...current[idx].texts, ...older_texts],
-      texts_loading: false,
-      has_more_texts: older_texts.length >= _texts_per_page,
+      control: current[idx].control.copyWith(
+        texts_loading: false,
+        has_more_texts: older_texts.length >= _texts_per_page,
+      ),
     );
     state = AsyncValue.data([...current]);
   }
@@ -308,9 +324,9 @@ class ConversationNotifier extends _$ConversationNotifier {
     String? image_id;
 
     if (group_image != null) {
-      final image_ids = await utils.upload_images(
+      final image_ids = await media_utils.upload_images(
         images: [group_image],
-        used_at: utils.AssetUsedAt.Chat,
+        used_at: media_utils.AssetUsedAt.Chat,
       );
 
       if (image_ids == null) {
@@ -401,7 +417,9 @@ class ConversationNotifier extends _$ConversationNotifier {
         texts: new_texts,
         last_text: is_temp ? conv.last_text : message,
         core: conv.core.copyWith(last_message_at: message.created_at),
-        unread_count: increment_unread ? conv.unread_count + 1 : conv.unread_count,
+        unread_count: increment_unread
+            ? conv.unread_count + 1
+            : conv.unread_count,
       );
     }
 
@@ -455,8 +473,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     final my_id = _my_user_id!;
 
     // Collect text UUIDs that the current user hasn't seen yet
-    final unseen_text_ids = conversations[index]
-        .texts
+    final unseen_text_ids = conversations[index].texts
         .where((t) => !t.my_text && !t.seen_by.contains(my_id))
         .map((t) => t.uuid)
         .toList();
@@ -486,10 +503,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     // Update cache
     Future.microtask(() async {
       try {
-        await _cache.update_seen_by(
-          text_ids: unseen_text_ids,
-          user_id: my_id,
-        );
+        await _cache.update_seen_by(text_ids: unseen_text_ids, user_id: my_id);
         await _cache.update_conversation(
           uuid: conversation_id,
           unread_count: 0,
@@ -561,7 +575,8 @@ class ConversationNotifier extends _$ConversationNotifier {
         _typing_timer?.cancel();
       }
       _typing_conversation_id = event.conversation_id;
-      conversations[i].typing = true;
+      conversations[i].control.typing = true;
+      conversations[i].control.typing_name = event.name;
       break;
     }
 
@@ -571,7 +586,8 @@ class ConversationNotifier extends _$ConversationNotifier {
       final current = state.value ?? [];
       for (var i = 0; i < current.length; i++) {
         if (current[i].core.uuid == event.conversation_id) {
-          current[i].typing = false;
+          current[i].control.typing = false;
+          current[i].control.typing_name = null;
           break;
         }
       }
@@ -608,8 +624,8 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
     if (index == -1) return;
 
-    final was_favorite = conversations[index].common_metadata.is_favorite;
-    conversations[index].common_metadata.is_favorite = !was_favorite;
+    final was_favorite = conversations[index].common_metadata.favorite;
+    conversations[index].common_metadata.favorite = !was_favorite;
     state = AsyncValue.data([...conversations]);
 
     _cache.update_conversation(
@@ -623,7 +639,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
 
     if (!response.ok) {
-      conversations[index].common_metadata.is_favorite = was_favorite;
+      conversations[index].common_metadata.favorite = was_favorite;
       state = AsyncValue.data([...conversations]);
       _cache.update_conversation(
         uuid: conversation_id,
@@ -641,14 +657,11 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
     if (index == -1) return;
 
-    final was_muted = conversations[index].common_metadata.is_muted;
-    conversations[index].common_metadata.is_muted = !was_muted;
+    final was_muted = conversations[index].common_metadata.muted;
+    conversations[index].common_metadata.muted = !was_muted;
     state = AsyncValue.data([...conversations]);
 
-    _cache.update_conversation(
-      uuid: conversation_id,
-      is_muted: !was_muted,
-    );
+    _cache.update_conversation(uuid: conversation_id, is_muted: !was_muted);
 
     final response = await utils.CustomHttp.patch(
       endpoint: '/conversation/mute',
@@ -656,12 +669,9 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
 
     if (!response.ok) {
-      conversations[index].common_metadata.is_muted = was_muted;
+      conversations[index].common_metadata.muted = was_muted;
       state = AsyncValue.data([...conversations]);
-      _cache.update_conversation(
-        uuid: conversation_id,
-        is_muted: was_muted,
-      );
+      _cache.update_conversation(uuid: conversation_id, is_muted: was_muted);
     }
   }
 

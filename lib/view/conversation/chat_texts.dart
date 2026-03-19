@@ -1,14 +1,14 @@
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/outgoing_text.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/provider/author.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/view/conversation/dm_profile_view.dart';
 import 'package:fanari_v2/view/conversation/group_info_view.dart';
@@ -20,6 +20,7 @@ import 'package:fanari_v2/widgets/named_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:fanari_v2/utils.dart' as utils;
 
 class ChatTextsScreen extends ConsumerStatefulWidget {
@@ -500,9 +501,9 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             message_input: temp_text,
           );
 
-      final images = await utils.upload_images(
+      final images = await media_utils.upload_images(
         images: message.images!,
-        used_at: utils.AssetUsedAt.Chat,
+        used_at: media_utils.AssetUsedAt.Chat,
         temporary: false,
       );
 
@@ -564,7 +565,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             message_input: temp_text,
           );
 
-      final video_id = await utils.upload_video(path: message.videoPath!);
+      final video_id = await media_utils.upload_video(path: message.videoPath!);
 
       if (video_id == null) {
         printLine('Failed to upload video');
@@ -596,7 +597,8 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
       reverse: true,
       controller: _scrollController,
       // +2 for top/bottom padding, +1 if loading more
-      itemCount: texts.length + 2 + (conversation.texts_loading ? 1 : 0),
+      itemCount:
+          texts.length + 2 + (conversation.control.texts_loading ? 1 : 0),
       itemBuilder: (context, index) {
         // Bottom padding (index 0 in reversed list)
         if (index == 0) return SizedBox(height: 96.h);
@@ -609,7 +611,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
         }
 
         // Loading skeleton at the top
-        if (conversation.texts_loading && textIndex == texts.length) {
+        if (conversation.control.texts_loading && textIndex == texts.length) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
             child: Column(
@@ -689,7 +691,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              child: target_conversation.initial_text_loaded
+              child: target_conversation.control.initial_text_loaded
                   ? _buildTextList(target_conversation)
                   : _buildInitialLoading(),
             ),
@@ -700,7 +702,7 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: CommentInputWidget(
-                showTyping: target_conversation.typing,
+                showTyping: target_conversation.control.typing,
                 onSend: _onMessageSend,
                 onTyping: () {
                   if (myself == null) return;

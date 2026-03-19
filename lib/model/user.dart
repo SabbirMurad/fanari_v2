@@ -1,4 +1,4 @@
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 
 class UserCore {
   String uuid;

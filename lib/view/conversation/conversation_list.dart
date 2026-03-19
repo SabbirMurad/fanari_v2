@@ -113,7 +113,7 @@ class _ConversationListScreenState
             .toList();
       case "Favorites":
         return conversations
-            .where((c) => c.common_metadata.is_favorite)
+            .where((c) => c.common_metadata.favorite)
             .toList();
       case "Unread":
         return conversations

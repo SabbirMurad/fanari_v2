@@ -1,4 +1,4 @@
-part of '../utils.dart';
+part of '../media.dart';
 
 /// Uploads the video at [path], generates a thumbnail, uploads it, then
 /// returns the video's server-assigned ID.

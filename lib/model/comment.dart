@@ -1,5 +1,5 @@
 import 'package:fanari_v2/constants/credential.dart';
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/mention.dart';
 import 'package:fanari_v2/model/user.dart';
 import 'package:fanari_v2/model/youtube.dart';

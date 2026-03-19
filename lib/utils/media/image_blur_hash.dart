@@ -1,4 +1,4 @@
-part of '../utils.dart';
+part of '../media.dart';
 
 /// Generates a BlurHash string for [image_provider] in a background isolate.
 Future<String> generate_blur_hash(ImageProvider image_provider) {

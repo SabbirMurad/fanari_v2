@@ -1,6 +1,6 @@
 import 'package:fanari_v2/constants/colors.dart';
-import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/image.dart';
+import 'package:fanari_v2/model/media/video.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 import 'package:fanari_v2/widgets/image_error_widget.dart';
 import 'package:fanari_v2/widgets/image_placeholder.dart';

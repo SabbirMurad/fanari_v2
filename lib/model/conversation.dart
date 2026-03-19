@@ -1,4 +1,4 @@
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/text.dart';
 
 enum ConversationType { Single, Group }
@@ -124,25 +124,57 @@ class ConversationSingleMetadata {
 }
 
 class ConversationCommonMetadata {
-  bool is_favorite;
-  bool is_muted;
+  bool favorite;
+  bool muted;
 
   ConversationCommonMetadata({
-    required this.is_favorite,
-    required this.is_muted,
+    required this.favorite,
+    required this.muted,
   });
 
   factory ConversationCommonMetadata.fromJson(Map<String, dynamic> json) {
     return ConversationCommonMetadata(
-      is_favorite: json['is_favorite'],
-      is_muted: json['is_muted'],
+      favorite: json['is_favorite'],
+      muted: json['is_muted'],
     );
   }
 
-  ConversationCommonMetadata copyWith({bool? is_favorite, bool? is_muted}) {
+  ConversationCommonMetadata copyWith({bool? favorite, bool? muted}) {
     return ConversationCommonMetadata(
-      is_favorite: is_favorite ?? this.is_favorite,
-      is_muted: is_muted ?? this.is_muted,
+      favorite: favorite ?? this.favorite,
+      muted: muted ?? this.muted,
+    );
+  }
+}
+
+class ConversationControlModel {
+  bool typing;
+  String? typing_name;
+  bool initial_text_loaded;
+  bool texts_loading;
+  bool has_more_texts;
+
+  ConversationControlModel({
+    this.typing = false,
+    this.initial_text_loaded = false,
+    this.texts_loading = false,
+    this.has_more_texts = true,
+    this.typing_name,
+  });
+
+  ConversationControlModel copyWith({
+    bool? typing,
+    String? typing_name,
+    bool? initial_text_loaded,
+    bool? texts_loading,
+    bool? has_more_texts,
+  }) {
+    return ConversationControlModel(
+      typing: typing ?? this.typing,
+      typing_name: typing_name ?? this.typing_name,
+      initial_text_loaded: initial_text_loaded ?? this.initial_text_loaded,
+      texts_loading: texts_loading ?? this.texts_loading,
+      has_more_texts: has_more_texts ?? this.has_more_texts,
     );
   }
 }
@@ -152,25 +184,19 @@ class ConversationModel {
   final ConversationGroupMetadata? group_metadata;
   final ConversationSingleMetadata? single_metadata;
   final ConversationCommonMetadata common_metadata;
+  final ConversationControlModel control;
 
-  bool typing;
   List<TextModel> texts;
-  bool initial_text_loaded;
-  bool texts_loading;
-  bool has_more_texts;
   TextModel? last_text;
   int unread_count;
 
   ConversationModel({
     required this.core,
     required this.common_metadata,
+    required this.control,
     this.group_metadata,
     this.single_metadata,
     this.texts = const [],
-    this.typing = false,
-    this.initial_text_loaded = false,
-    this.texts_loading = false,
-    this.has_more_texts = true,
     this.last_text,
     this.unread_count = 0,
   });
@@ -192,6 +218,7 @@ class ConversationModel {
       common_metadata: ConversationCommonMetadata.fromJson(
         json['common_metadata'],
       ),
+      control: ConversationControlModel(),
       group_metadata: json['group_metadata'] != null
           ? ConversationGroupMetadata.fromJson(json['group_metadata'])
           : null,
@@ -206,26 +233,20 @@ class ConversationModel {
   ConversationModel copyWith({
     ConversationCore? core,
     ConversationCommonMetadata? common_metadata,
+    ConversationControlModel? control,
     ConversationGroupMetadata? group_metadata,
     ConversationSingleMetadata? single_metadata,
     List<TextModel>? texts,
-    bool? typing,
-    bool? initial_text_loaded,
-    bool? texts_loading,
-    bool? has_more_texts,
     TextModel? last_text,
     int? unread_count,
   }) {
     return ConversationModel(
       core: core ?? this.core,
+      control: control ?? this.control,
       common_metadata: common_metadata ?? this.common_metadata,
       group_metadata: group_metadata ?? this.group_metadata,
       single_metadata: single_metadata ?? this.single_metadata,
       texts: texts ?? this.texts,
-      typing: typing ?? this.typing,
-      initial_text_loaded: initial_text_loaded ?? this.initial_text_loaded,
-      texts_loading: texts_loading ?? this.texts_loading,
-      has_more_texts: has_more_texts ?? this.has_more_texts,
       last_text: last_text ?? this.last_text,
       unread_count: unread_count ?? this.unread_count,
     );

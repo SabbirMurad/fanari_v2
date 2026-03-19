@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:fanari_v2/constants/credential.dart';
 import 'package:fanari_v2/constants/local_storage.dart';
-import 'package:fanari_v2/model/image.dart';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/outgoing_text.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/video.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/socket/call_signal.dart';
 import 'package:fanari_v2/socket/socket_events.dart';

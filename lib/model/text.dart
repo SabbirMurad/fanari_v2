@@ -1,7 +1,7 @@
-import 'package:fanari_v2/model/attachment.dart';
-import 'package:fanari_v2/model/audio.dart';
-import 'package:fanari_v2/model/image.dart';
-import 'package:fanari_v2/model/video.dart';
+import 'package:fanari_v2/model/media/attachment.dart';
+import 'package:fanari_v2/model/media/audio.dart';
+import 'package:fanari_v2/model/media/image.dart';
+import 'package:fanari_v2/model/media/video.dart';
 import 'package:fanari_v2/model/youtube.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';

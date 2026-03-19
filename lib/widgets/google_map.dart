@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:fanari_v2/utils.dart' as utils;
+import 'package:fanari_v2/utils/media.dart' as media_utils;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fanari_v2/utils/print_helper.dart';
 // import 'package:fanari_v2/widgets/custom_glass_wrapper.dart';
@@ -556,7 +556,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                             return _photoWidget(
                               photo: photo,
                               onTap: () {
-                                utils.open_image_viewer(
+                                media_utils.open_image_viewer(
                                   context: context,
                                   initial_index: index,
                                   images: [
