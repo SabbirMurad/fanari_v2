@@ -17,25 +17,25 @@ part 'conversation.g.dart';
 class ConversationNotifier extends _$ConversationNotifier {
   static const int _texts_per_page = 20;
 
-  final _cache = ConversationCache.instance;
+  // final _cache = ConversationCache.instance;
 
   @override
   FutureOr<List<ConversationModel>> build() async {
     // 1. Load from cache first for instant UI
-    final my_id = await LocalStorage.user_id.get();
-    if (my_id != null) {
-      final cached = await _cache.get_conversations();
-      if (cached.isNotEmpty) {
-        final cached_models = cached
-            .map((item) => ConversationModel.fromJson(item, my_id: my_id))
-            .toList();
-        state = AsyncValue.data(cached_models);
+    // final my_id = await LocalStorage.user_id.get();
+    // if (my_id != null) {
+    //   final cached = await _cache.get_conversations();
+    //   if (cached.isNotEmpty) {
+    //     final cached_models = cached
+    //         .map((item) => ConversationModel.fromJson(item, my_id: my_id))
+    //         .toList();
+    //     state = AsyncValue.data(cached_models);
 
-        // 2. Refresh from API in background
-        _refresh_from_api(my_id);
-        return cached_models;
-      }
-    }
+    //     // 2. Refresh from API in background
+    //     _refresh_from_api(my_id);
+    //     return cached_models;
+    //   }
+    // }
 
     // No cache, load from API directly
     return await _load() ?? [];
@@ -91,7 +91,7 @@ class ConversationNotifier extends _$ConversationNotifier {
   void _cache_conversations(List<ConversationModel> conversations) {
     Future.microtask(() async {
       try {
-        await _cache.save_conversations(conversations);
+        // await _cache.save_conversations(conversations);
       } catch (e) {
         printLine('Failed to cache conversations: $e');
       }
@@ -121,37 +121,37 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (my_id == null) return;
 
     // 1. Load from cache first for instant display
-    final cached_texts = await _cache.get_texts(
-      conversation_id: conversation_id,
-      limit: _texts_per_page,
-      offset: 0,
-    );
+    // final cached_texts = await _cache.get_texts(
+    //   conversation_id: conversation_id,
+    //   limit: _texts_per_page,
+    //   offset: 0,
+    // );
 
-    if (cached_texts.isNotEmpty) {
-      final texts = cached_texts
-          .map((item) => TextModel.fromJson(item, my_id: my_id))
-          .toList();
+    // if (cached_texts.isNotEmpty) {
+    //   final texts = cached_texts
+    //       .map((item) => TextModel.fromJson(item, my_id: my_id))
+    //       .toList();
 
-      final current = state.value ?? [];
-      final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
-      if (idx != -1) {
-        current[idx] = current[idx].copyWith(
-          texts: texts,
-          control: current[idx].control.copyWith(
-            initial_text_loaded: true,
-            texts_loading: true, // still loading from API
-            has_more_texts: texts.length >= _texts_per_page,
-          ),
-        );
-        state = AsyncValue.data([...current]);
-      }
-    } else {
-      // No cache, show loading skeleton
-      conversations[index] = conversations[index].copyWith(
-        control: conversations[index].control.copyWith(texts_loading: true),
-      );
-      state = AsyncValue.data([...conversations]);
-    }
+    //   final current = state.value ?? [];
+    //   final idx = current.indexWhere((c) => c.core.uuid == conversation_id);
+    //   if (idx != -1) {
+    //     current[idx] = current[idx].copyWith(
+    //       texts: texts,
+    //       control: current[idx].control.copyWith(
+    //         initial_text_loaded: true,
+    //         texts_loading: true, // still loading from API
+    //         has_more_texts: texts.length >= _texts_per_page,
+    //       ),
+    //     );
+    //     state = AsyncValue.data([...current]);
+    //   }
+    // } else {
+    //   // No cache, show loading skeleton
+    //   conversations[index] = conversations[index].copyWith(
+    //     control: conversations[index].control.copyWith(texts_loading: true),
+    //   );
+    //   state = AsyncValue.data([...conversations]);
+    // }
 
     // 2. Fetch from API to get latest data
     final response = await utils.CustomHttp.get(
@@ -266,7 +266,7 @@ class ConversationNotifier extends _$ConversationNotifier {
   void _cache_texts(List<TextModel> texts) {
     Future.microtask(() async {
       try {
-        await _cache.save_texts(texts);
+        // await _cache.save_texts(texts);
       } catch (e) {
         printLine('Failed to cache texts: $e');
       }
@@ -431,16 +431,16 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (!is_temp) {
       // Cache the message and update conversation
       Future.microtask(() async {
-        try {
-          await _cache.save_text(message);
-          await _cache.update_conversation(
-            uuid: conversation_id,
-            last_message_at: message.created_at,
-            last_text: message,
-          );
-        } catch (e) {
-          printLine('Failed to cache message: $e');
-        }
+        // try {
+        //   await _cache.save_text(message);
+        //   await _cache.update_conversation(
+        //     uuid: conversation_id,
+        //     last_message_at: message.created_at,
+        //     last_text: message,
+        //   );
+        // } catch (e) {
+        //   printLine('Failed to cache message: $e');
+        // }
 
         final loaded = await message.load_third_party_infos();
         if (loaded == null) return;
@@ -501,17 +501,17 @@ class ConversationNotifier extends _$ConversationNotifier {
     );
 
     // Update cache
-    Future.microtask(() async {
-      try {
-        await _cache.update_seen_by(text_ids: unseen_text_ids, user_id: my_id);
-        await _cache.update_conversation(
-          uuid: conversation_id,
-          unread_count: 0,
-        );
-      } catch (e) {
-        printLine('Failed to update read cache: $e');
-      }
-    });
+    // Future.microtask(() async {
+    //   try {
+    //     await _cache.update_seen_by(text_ids: unseen_text_ids, user_id: my_id);
+    //     await _cache.update_conversation(
+    //       uuid: conversation_id,
+    //       unread_count: 0,
+    //     );
+    //   } catch (e) {
+    //     printLine('Failed to update read cache: $e');
+    //   }
+    // });
   }
 
   /// Called when a remote user has seen messages in a conversation.
@@ -540,16 +540,16 @@ class ConversationNotifier extends _$ConversationNotifier {
     state = AsyncValue.data([...conversations]);
 
     // Update cache
-    Future.microtask(() async {
-      try {
-        await _cache.update_seen_by(
-          text_ids: event.text_ids,
-          user_id: event.user_id,
-        );
-      } catch (e) {
-        printLine('Failed to update seen_by cache: $e');
-      }
-    });
+    // Future.microtask(() async {
+    //   try {
+    //     await _cache.update_seen_by(
+    //       text_ids: event.text_ids,
+    //       user_id: event.user_id,
+    //     );
+    //   } catch (e) {
+    //     printLine('Failed to update seen_by cache: $e');
+    //   }
+    // });
   }
 
   // ── Typing indicator ───────────────────────────────────────────────────────
@@ -615,6 +615,42 @@ class ConversationNotifier extends _$ConversationNotifier {
     state = AsyncValue.data(conversations);
   }
 
+  // ── Block ─────────────────────────────────────────────────────────────
+
+  Future<void> toggle_block({
+    required String conversation_id,
+    required String user_id,
+  }) async {
+    final conversations = state.value ?? [];
+    final index = conversations.indexWhere(
+      (c) => c.core.uuid == conversation_id,
+    );
+    if (index == -1) return;
+
+    final was_blocked = conversations[index].single_metadata!.is_blocked;
+    conversations[index].single_metadata!.is_blocked = !was_blocked;
+    state = AsyncValue.data([...conversations]);
+
+    // _cache.update_conversation(
+    //   uuid: conversation_id,
+    //   is_blocked: !was_blocked,
+    // );
+
+    final response = await utils.CustomHttp.post(
+      endpoint: '/conversation/block',
+      body: {'user_id': user_id},
+    );
+
+    if (!response.ok) {
+      conversations[index].single_metadata!.is_blocked = was_blocked;
+      state = AsyncValue.data([...conversations]);
+      // _cache.update_conversation(
+      //   uuid: conversation_id,
+      //   is_blocked: was_blocked,
+      // );
+    }
+  }
+
   // ── Favorite ─────────────────────────────────────────────────────────────
 
   Future<void> toggle_favorite(String conversation_id) async {
@@ -628,10 +664,10 @@ class ConversationNotifier extends _$ConversationNotifier {
     conversations[index].common_metadata.favorite = !was_favorite;
     state = AsyncValue.data([...conversations]);
 
-    _cache.update_conversation(
-      uuid: conversation_id,
-      is_favorite: !was_favorite,
-    );
+    // _cache.update_conversation(
+    //   uuid: conversation_id,
+    //   is_favorite: !was_favorite,
+    // );
 
     final response = await utils.CustomHttp.patch(
       endpoint: '/conversation/favorite',
@@ -641,10 +677,10 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (!response.ok) {
       conversations[index].common_metadata.favorite = was_favorite;
       state = AsyncValue.data([...conversations]);
-      _cache.update_conversation(
-        uuid: conversation_id,
-        is_favorite: was_favorite,
-      );
+      // _cache.update_conversation(
+      //   uuid: conversation_id,
+      //   is_favorite: was_favorite,
+      // );
     }
   }
 
@@ -661,7 +697,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     conversations[index].common_metadata.muted = !was_muted;
     state = AsyncValue.data([...conversations]);
 
-    _cache.update_conversation(uuid: conversation_id, is_muted: !was_muted);
+    // _cache.update_conversation(uuid: conversation_id, is_muted: !was_muted);
 
     final response = await utils.CustomHttp.patch(
       endpoint: '/conversation/mute',
@@ -671,7 +707,7 @@ class ConversationNotifier extends _$ConversationNotifier {
     if (!response.ok) {
       conversations[index].common_metadata.muted = was_muted;
       state = AsyncValue.data([...conversations]);
-      _cache.update_conversation(uuid: conversation_id, is_muted: was_muted);
+      // _cache.update_conversation(uuid: conversation_id, is_muted: was_muted);
     }
   }
 

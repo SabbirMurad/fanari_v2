@@ -174,13 +174,31 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                           color: Colors.red[400],
                           onTap: () {},
                         ),
-                        _moreOptionItem(
-                          icon: 'assets/icons/more_options/not_allowed.svg',
-                          text: 'Block Sabbir',
-                          onTap: () {},
-                          color: Colors.red[400],
-                          padding: EdgeInsets.only(top: 14.h),
-                        ),
+                        if (widget.model.core.type == ConversationType.Group)
+                          _moreOptionItem(
+                            icon: 'assets/icons/more_options/logout.svg',
+                            text: 'Leave ${widget.model.group_metadata!.name}',
+                            onTap: () {},
+                            color: Colors.red[400],
+                            padding: EdgeInsets.only(top: 14.h),
+                          ),
+                        if (widget.model.core.type == ConversationType.Single)
+                          _moreOptionItem(
+                            icon: 'assets/icons/more_options/not_allowed.svg',
+                            text:
+                                'Block ${widget.model.single_metadata!.first_name}',
+                            onTap: () {
+                              ref
+                                  .read(conversationNotifierProvider.notifier)
+                                  .toggle_block(
+                                    conversation_id: widget.model.core.uuid,
+                                    user_id:
+                                        widget.model.single_metadata!.user_id,
+                                  );
+                            },
+                            color: Colors.red[400],
+                            padding: EdgeInsets.only(top: 14.h),
+                          ),
                       ],
                     ),
                   ),
@@ -249,14 +267,20 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                     image: widget.model.core.type == ConversationType.Group
                         ? widget.model.group_metadata!.image
                         : widget.model.single_metadata!.image,
-                    name: widget.model.common_metadata.muted
+                    name:
+                        widget.model.common_metadata.muted ||
+                            (widget.model.core.type ==
+                                    ConversationType.Single &&
+                                widget.model.single_metadata!.is_blocked)
                         ? ' '
                         : widget.model.core.type == ConversationType.Group
                         ? widget.model.group_metadata!.name
                         : widget.model.single_metadata!.first_name,
                     size: 56.w,
                   ),
-                  if (widget.model.common_metadata.muted)
+                  if (widget.model.common_metadata.muted ||
+                      (widget.model.core.type == ConversationType.Single &&
+                          widget.model.single_metadata!.is_blocked))
                     Container(
                       width: 56.w,
                       height: 56.w,
@@ -268,11 +292,18 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                         ),
                       ),
                       child: Center(
-                        child: CustomSvg(
-                          'assets/icons/more_options/mute.svg',
-                          width: 24.w,
-                          height: 24.w,
-                        ),
+                        child: widget.model.common_metadata.muted
+                            ? CustomSvg(
+                                'assets/icons/more_options/mute.svg',
+                                width: 24.w,
+                                height: 24.w,
+                              )
+                            : CustomSvg(
+                                'assets/icons/more_options/not_allowed.svg',
+                                width: 24.w,
+                                height: 24.w,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                 ],
@@ -368,6 +399,103 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
         fit: BoxFit.fitWidth,
         color: AppColors.text,
       ),
+    );
+  }
+
+  Widget _previewBuilder() {
+    return Builder(
+      builder: (context) {
+        final preview = _preview_text;
+        return Row(
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (widget.model.control.typing) ...[
+                      Text(
+                        widget.model.core.type == ConversationType.Group
+                            ? '${widget.model.control.typing_name} is typing'
+                            : 'Typing',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      BouncingDots(dotSize: 3, gap: 4),
+                    ],
+                    if (!widget.model.control.typing) ...[
+                      if (preview != null &&
+                          preview.my_text &&
+                          widget.model.core.type == ConversationType.Single)
+                        Padding(
+                          padding: EdgeInsets.only(right: 6.w),
+                          child: Icon(
+                            Icons.done_all_rounded,
+                            size: 18.w,
+                            color:
+                                preview.seen_by.contains(
+                                  widget.model.single_metadata!.user_id,
+                                )
+                                ? AppColors.primary
+                                : AppColors.hintText,
+                          ),
+                        ),
+                      if (preview != null) _textIconWidget(preview),
+                      Expanded(child: _textWidget(preview)),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            if (preview != null)
+              Container(
+                margin: EdgeInsets.only(left: 6, right: 6),
+                width: 6.w,
+                height: 6.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.text.withValues(alpha: .8),
+                ),
+              ),
+            if (preview != null)
+              Text(
+                utils.time_ago(
+                  DateTime.fromMillisecondsSinceEpoch(preview.created_at),
+                ),
+                style: TextStyle(
+                  color: AppColors.text.withValues(alpha: .8),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            if (widget.model.unread_count > 0)
+              Container(
+                margin: EdgeInsets.only(left: 8.w),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  widget.model.unread_count > 99
+                      ? '99+'
+                      : widget.model.unread_count.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -467,10 +595,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                         ),
                                       ),
                                     ),
-                                    if (widget
-                                        .model
-                                        .common_metadata
-                                        .favorite)
+                                    if (widget.model.common_metadata.favorite)
                                       Icon(
                                         Icons.favorite_rounded,
                                         size: 20.w,
@@ -480,134 +605,7 @@ class _ConversationItemState extends ConsumerState<ConversationItem> {
                                 ),
                               ),
                               SizedBox(height: 2.w),
-                              Builder(
-                                builder: (context) {
-                                  final preview = _preview_text;
-                                  return Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          width: double.infinity,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              if (widget
-                                                  .model
-                                                  .control
-                                                  .typing) ...[
-                                                Text(
-                                                  widget.model.core.type ==
-                                                          ConversationType.Group
-                                                      ? '${widget.model.control.typing_name} is typing'
-                                                      : 'Typing',
-                                                  style: TextStyle(
-                                                    color: AppColors.primary,
-                                                    fontSize: 13.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 6),
-                                                BouncingDots(
-                                                  dotSize: 3,
-                                                  gap: 4,
-                                                ),
-                                              ],
-                                              if (!widget
-                                                  .model
-                                                  .control
-                                                  .typing) ...[
-                                                if (preview != null &&
-                                                    preview.my_text)
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                      right: 6.w,
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.done_all_rounded,
-                                                      size: 18.w,
-                                                      color:
-                                                          preview.seen_by.contains(
-                                                            widget
-                                                                .model
-                                                                .single_metadata!
-                                                                .user_id,
-                                                          )
-                                                          ? AppColors.primary
-                                                          : AppColors.hintText,
-                                                    ),
-                                                  ),
-                                                if (preview != null)
-                                                  _textIconWidget(preview),
-                                                Expanded(
-                                                  child: _textWidget(preview),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      if (preview != null)
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                            left: 6,
-                                            right: 6,
-                                          ),
-                                          width: 6.w,
-                                          height: 6.w,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: AppColors.text.withValues(
-                                              alpha: .8,
-                                            ),
-                                          ),
-                                        ),
-                                      if (preview != null)
-                                        Text(
-                                          utils.time_ago(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              preview.created_at,
-                                            ),
-                                          ),
-                                          style: TextStyle(
-                                            color: AppColors.text.withValues(
-                                              alpha: .8,
-                                            ),
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      if (widget.model.unread_count > 0)
-                                        Container(
-                                          margin: EdgeInsets.only(left: 8.w),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 6.w,
-                                            vertical: 2.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(
-                                              10.r,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            widget.model.unread_count > 99
-                                                ? '99+'
-                                                : widget.model.unread_count
-                                                      .toString(),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 11.sp,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
+                              _previewBuilder(),
                             ],
                           ),
                         ),

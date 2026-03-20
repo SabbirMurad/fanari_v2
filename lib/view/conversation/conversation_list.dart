@@ -97,6 +97,9 @@ class _ConversationListScreenState
     "Group",
     "Online",
     "Favorites",
+    "Muted",
+    "Blocked",
+    "Blocked by",
   ];
 
   String _selectedOption = "All";
@@ -112,9 +115,7 @@ class _ConversationListScreenState
             .where((c) => c.core.type == ConversationType.Group)
             .toList();
       case "Favorites":
-        return conversations
-            .where((c) => c.common_metadata.favorite)
-            .toList();
+        return conversations.where((c) => c.common_metadata.favorite).toList();
       case "Unread":
         return conversations
             .where((c) => c.texts.isNotEmpty && !c.texts.first.my_text)
@@ -125,6 +126,24 @@ class _ConversationListScreenState
               (c) =>
                   c.core.type == ConversationType.Single &&
                   c.single_metadata!.online,
+            )
+            .toList();
+      case "Muted":
+        return conversations.where((c) => c.common_metadata!.muted).toList();
+      case "Blocked":
+        return conversations
+            .where(
+              (c) =>
+                  c.core.type == ConversationType.Single &&
+                  c.single_metadata!.is_blocked,
+            )
+            .toList();
+      case "Blocked by":
+        return conversations
+            .where(
+              (c) =>
+                  c.core.type == ConversationType.Single &&
+                  c.single_metadata!.am_blocked,
             )
             .toList();
       default:

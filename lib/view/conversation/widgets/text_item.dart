@@ -172,10 +172,10 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                   ? AppColors.primary
                   : AppColors.secondary,
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.r),
-                topRight: Radius.circular(10.r),
-                bottomLeft: Radius.circular(widget.model.my_text ? 10.r : 4.r),
-                bottomRight: Radius.circular(widget.model.my_text ? 4.r : 10.r),
+                topLeft: Radius.circular(12.r),
+                topRight: Radius.circular(12.r),
+                bottomLeft: Radius.circular(widget.model.my_text ? 12.r : 4.r),
+                bottomRight: Radius.circular(widget.model.my_text ? 4.r : 12.r),
               ),
             ),
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),

@@ -85,6 +85,7 @@ class ConversationCache {
   Future<void> update_conversation({
     required String uuid,
     bool? is_favorite,
+    bool? is_blocked,
     bool? is_muted,
     int? unread_count,
     int? last_message_at,
@@ -94,6 +95,7 @@ class ConversationCache {
       'updated_at': DateTime.now().millisecondsSinceEpoch,
     };
 
+    if (is_blocked != null) data['is_blocked'] = is_blocked ? 1 : 0;
     if (is_favorite != null) data['is_favorite'] = is_favorite ? 1 : 0;
     if (is_muted != null) data['is_muted'] = is_muted ? 1 : 0;
     if (unread_count != null) data['unread_count'] = unread_count;

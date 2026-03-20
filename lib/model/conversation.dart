@@ -72,6 +72,8 @@ class ConversationSingleMetadata {
   final ImageModel? image;
   bool online;
   int last_seen;
+  bool is_blocked;
+  bool am_blocked;
 
   ConversationSingleMetadata({
     required this.user_id,
@@ -80,6 +82,8 @@ class ConversationSingleMetadata {
     required this.image,
     required this.online,
     required this.last_seen,
+    required this.is_blocked,
+    required this.am_blocked,
   });
 
   factory ConversationSingleMetadata.fromJson(Map<String, dynamic> json) {
@@ -90,6 +94,8 @@ class ConversationSingleMetadata {
       image: json['image'] != null ? ImageModel.fromJson(json['image']) : null,
       online: json['online'],
       last_seen: json['last_seen'],
+      is_blocked: json['is_blocked'],
+      am_blocked: json['am_blocked'],
     );
   }
 
@@ -100,6 +106,8 @@ class ConversationSingleMetadata {
     ImageModel? image,
     bool? online,
     int? last_seen,
+    bool? is_blocked,
+    bool? am_blocked,
   }) {
     return ConversationSingleMetadata(
       user_id: user_id ?? this.user_id,
@@ -108,6 +116,8 @@ class ConversationSingleMetadata {
       image: image ?? this.image,
       online: online ?? this.online,
       last_seen: last_seen ?? this.last_seen,
+      is_blocked: is_blocked ?? this.is_blocked,
+      am_blocked: am_blocked ?? this.am_blocked,
     );
   }
 
@@ -119,6 +129,8 @@ class ConversationSingleMetadata {
       'image': this.image != null ? this.image!.toJson() : null,
       'online': this.online,
       'last_seen': this.last_seen,
+      'is_blocked': this.is_blocked,
+      'am_blocked': this.am_blocked,
     };
   }
 }

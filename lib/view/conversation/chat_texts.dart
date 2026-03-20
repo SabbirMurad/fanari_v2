@@ -701,19 +701,65 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: CommentInputWidget(
-                showTyping: target_conversation.control.typing,
-                onSend: _onMessageSend,
-                onTyping: () {
-                  if (myself == null) return;
+              child:
+                  (target_conversation.core.type == ConversationType.Group ||
+                      (!target_conversation.single_metadata!.is_blocked &&
+                          !target_conversation.single_metadata!.am_blocked))
+                  ? CommentInputWidget(
+                      show_typing: target_conversation.control.typing,
+                      typing_name: target_conversation.control.typing_name,
+                      onSend: _onMessageSend,
+                      onTyping: () {
+                        if (myself == null) return;
 
-                  CustomSocket.instance.send_typing(
-                    conversation_id: widget.conversation_id,
-                    user_id: myself.core.uuid,
-                    name: myself.profile.first_name,
-                  );
-                },
-              ),
+                        CustomSocket.instance.send_typing(
+                          conversation_id: widget.conversation_id,
+                          user_id: myself.core.uuid,
+                          name: myself.profile.first_name,
+                        );
+                      },
+                    )
+                  : Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color.fromRGBO(24, 24, 24, 0.1),
+                            Color.fromRGBO(24, 24, 24, 0.95),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Cant send messages here.',
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              target_conversation.single_metadata!.am_blocked
+                                  ? 'You have blocked this user. Request unblock to send messages.'
+                                  : 'You have blocked this user. Unblock to send messages.',
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                          ],
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),

@@ -29,14 +29,16 @@ class CommentInputWidget extends ConsumerStatefulWidget {
   final void Function(CommentInputSubmitValue)? onSend;
   final void Function()? onTyping;
   final CommentInputColorTheme colorTheme;
-  final bool showTyping;
+  final bool show_typing;
+  final String? typing_name;
 
   const CommentInputWidget({
     super.key,
     this.colorTheme = const CommentInputColorTheme(),
     this.onSend,
     this.onTyping,
-    this.showTyping = false,
+    this.show_typing = false,
+    this.typing_name = null,
   });
 
   @override
@@ -913,7 +915,9 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'Typing',
+            widget.typing_name == null
+                ? "Typing"
+                : "${widget.typing_name} is typing",
             style: TextStyle(
               color: AppColors.primary,
               fontSize: 13.sp,
@@ -955,7 +959,7 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.showTyping) _buildTypingIndicator(),
+              if (widget.show_typing) _buildTypingIndicator(),
               _buildImageContainer(),
               if (_loadingVideo && _videoThumbnail != null)
                 _buildVideoProcessing(),
