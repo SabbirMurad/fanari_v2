@@ -389,10 +389,40 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
     return dividers;
   }
 
+  String _get_profile_name(ConversationModel conversation, TextModel text) {
+    if (text.my_text) return ' ';
+    if (conversation.core.type == ConversationType.Single) {
+      return conversation.single_metadata!.first_name;
+    }
+
+    //TODO: now showing group name, need to find participant by owner id
+    final participant_name = conversation.group_metadata?.name;
+    return participant_name ?? 'Unknown';
+  }
+
+  ImageModel? _get_profile_image(
+    ConversationModel conversation,
+    TextModel text,
+  ) {
+    if (text.my_text) return null;
+    if (conversation.core.type == ConversationType.Single) {
+      return conversation.single_metadata!.image;
+    }
+
+    //TODO: now showing group image, need to find participant by owner id
+    final participant_image = conversation.group_metadata?.image;
+    return participant_image;
+  }
+
   /// Builds a single text item at [index] in the reversed list.
   /// Since the ListView is reversed, index 0 is the newest message.
   /// The "previous" message chronologically is at index + 1.
-  Widget _buildTextItem(List<TextModel> texts, int index, Set<int> dividers) {
+  Widget _buildTextItem({
+    required List<TextModel> texts,
+    required int index,
+    required Set<int> dividers,
+    required ConversationModel conversation,
+  }) {
     final text = texts[index];
     final prev = index + 1 < texts.length ? texts[index + 1] : null;
 
@@ -440,6 +470,8 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
           selectMode: _selectMode,
           model: text,
           showProfile: showProfile,
+          profile_name: _get_profile_name(conversation, text), // ✅
+          profile_image: _get_profile_image(conversation, text), // ✅
           selected: _selectedTexts.contains(text.uuid),
           onReply: () {},
           seen: text.my_text && text.seen_by.isNotEmpty,
@@ -607,7 +639,12 @@ class _ChatTextsScreenState extends ConsumerState<ChatTextsScreen> {
 
         // Text items
         if (textIndex < texts.length) {
-          return _buildTextItem(texts, textIndex, dividers);
+          return _buildTextItem(
+            texts: texts,
+            index: textIndex,
+            dividers: dividers,
+            conversation: conversation,
+          );
         }
 
         // Loading skeleton at the top

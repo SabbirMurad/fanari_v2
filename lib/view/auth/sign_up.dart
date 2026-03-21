@@ -672,12 +672,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           },
         ),
         SizedBox(height: 24.h),
-        Text(
-          'Change email address?',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-            fontSize: 13.sp,
+        GestureDetector(
+          onTap: () {
+            _goToPreviousPage();
+          },
+          child: Text(
+            'Change email address?',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13.sp,
+            ),
           ),
         ),
         SizedBox(height: 56.h),

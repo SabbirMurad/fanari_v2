@@ -7,6 +7,7 @@ import 'package:fanari_v2/widgets/input_field_v_one.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fanari_v2/utils.dart' as utils;
 
 class CreateGroupDetails extends ConsumerStatefulWidget {
   final List<String> members;
@@ -25,6 +26,11 @@ class _CreateGroupDetailsState extends ConsumerState<CreateGroupDetails> {
 
   void _createGroup() async {
     if (_creatingGroup) return;
+
+    if (_nameController.text.trim().isEmpty) {
+      utils.show_custom_toast(text: 'Please enter group name.');
+      return;
+    }
 
     setState(() {
       _creatingGroup = true;

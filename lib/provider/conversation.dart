@@ -275,36 +275,62 @@ class ConversationNotifier extends _$ConversationNotifier {
 
   // ── Create conversation ────────────────────────────────────────────────────
 
+  final Set<String> _creating_single = {};
+
   Future<String?> create_single_conversation({
     required String target_user,
   }) async {
-    var existing = state.value;
+    // Guard against concurrent calls for the same user
+    if (_creating_single.contains(target_user)) return null;
+    _creating_single.add(target_user);
 
-    if (existing == null) {
-      final loaded = await _load();
-      if (loaded == null) return null;
-      state = AsyncValue.data(loaded);
-      existing = loaded;
-    }
+    try {
+      var existing = state.value;
 
-    for (final conv in existing) {
-      if (conv.core.type == ConversationType.Group) continue;
-      if (conv.single_metadata?.user_id == target_user) {
-        return conv.core.uuid;
+      if (existing == null) {
+        final loaded = await _load();
+        if (loaded == null) return null;
+        state = AsyncValue.data(loaded);
+        existing = loaded;
       }
-    }
 
-    final response = await utils.CustomHttp.post(
-      endpoint: '/conversation/single',
-      body: {'other_user': target_user},
+      for (final conv in existing) {
+        if (conv.core.type == ConversationType.Group) continue;
+        if (conv.single_metadata?.user_id == target_user) {
+          return conv.core.uuid;
+        }
+      }
+
+      final response = await utils.CustomHttp.post(
+        endpoint: '/conversation/single',
+        body: {'other_user': target_user},
+      );
+
+      if (!response.ok) return null;
+
+      final user_id = await LocalStorage.user_id.get();
+      final conv = ConversationModel.fromJson(response.data, my_id: user_id!);
+      state = AsyncValue.data([conv, ...state.value!]);
+      return conv.core.uuid;
+    } finally {
+      _creating_single.remove(target_user); // always release the lock
+    }
+  }
+
+  Future<void> add_new_conversation(String conversation_id) async {
+    // Don't add if already exists
+    final existing = state.value ?? [];
+    if (existing.any((c) => c.core.uuid == conversation_id)) return;
+
+    final response = await utils.CustomHttp.get(
+      endpoint: '/conversation/single/${conversation_id}',
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) return;
 
-    final user_id = await LocalStorage.user_id.get();
-    final conv = ConversationModel.fromJson(response.data, my_id: user_id!);
-    state = AsyncValue.data([conv, ...state.value!]);
-    return conv.core.uuid;
+    final my_id = await LocalStorage.user_id.get();
+    final conv = ConversationModel.fromJson(response.data, my_id: my_id!);
+    state = AsyncValue.data([conv, ...existing]);
   }
 
   Future<String?> create_group_conversation({

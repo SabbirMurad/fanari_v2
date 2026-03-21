@@ -7,6 +7,7 @@ enum WsEnvelopeType {
   disconnect,
   call_signal,
   message_seen,
+  new_conversation,
 }
 
 class WsEnvelope {
@@ -21,6 +22,7 @@ class WsEnvelope {
       'typing' => WsEnvelopeType.typing,
       'connect' => WsEnvelopeType.connect,
       'disconnect' => WsEnvelopeType.disconnect,
+      'new_conversation' => WsEnvelopeType.new_conversation,
       'call_signal' => WsEnvelopeType.call_signal,
       'message_seen' => WsEnvelopeType.message_seen,
       _ => throw Exception('Unknown WS envelope type: ${json['type']}'),

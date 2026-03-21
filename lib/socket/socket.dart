@@ -60,12 +60,16 @@ class CustomSocket {
   final _presence_controller = StreamController<PresenceEvent>.broadcast();
   final _message_seen_controller =
       StreamController<MessageSeenEvent>.broadcast();
+  final _new_conversation_controller = StreamController<String>.broadcast();
+
   final _call_signal_controller = StreamController<CallSignal>.broadcast();
   final _state_controller = StreamController<SocketState>.broadcast();
 
   Stream<IncomingTextEvent> get incoming_texts => _text_controller.stream;
   Stream<TypingEvent> get typing_events => _typing_controller.stream;
   Stream<PresenceEvent> get presence_events => _presence_controller.stream;
+  Stream<String> get new_conversation_events =>
+      _new_conversation_controller.stream;
   Stream<MessageSeenEvent> get message_seen_events =>
       _message_seen_controller.stream;
   Stream<CallSignal> get call_signals => _call_signal_controller.stream;
@@ -187,6 +191,8 @@ class CustomSocket {
             is_online: false,
           ),
         );
+      case WsEnvelopeType.new_conversation:
+        _new_conversation_controller.add(envelope.payload['conversation_id']);
       case WsEnvelopeType.message_seen:
         _handle_message_seen(envelope.payload);
       case WsEnvelopeType.call_signal:
@@ -299,10 +305,7 @@ class CustomSocket {
     _send(
       WsEnvelope(
         type: WsEnvelopeType.message_seen,
-        payload: {
-          'conversation_id': conversation_id,
-          'text_ids': text_ids,
-        },
+        payload: {'conversation_id': conversation_id, 'text_ids': text_ids},
       ),
     );
   }

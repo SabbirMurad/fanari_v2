@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fanari_v2/model/media/image.dart';
 import 'package:fanari_v2/model/text.dart';
 import 'package:fanari_v2/constants/colors.dart';
 import 'package:fanari_v2/model/media/attachment.dart';
@@ -27,6 +28,8 @@ class TextItemWidget extends StatefulWidget {
   final Function(String)? onDeSelect;
   final Function()? onReply;
   final bool showProfile;
+  final String profile_name;
+  final ImageModel? profile_image;
   final EdgeInsetsGeometry? margin;
   final bool seen;
 
@@ -37,6 +40,8 @@ class TextItemWidget extends StatefulWidget {
     this.selected = false,
     this.onSelect,
     this.margin,
+    required this.profile_name,
+    this.profile_image,
     this.onDeSelect,
     this.onReply,
     this.showProfile = true,
@@ -528,7 +533,8 @@ class _TextItemWidgetState extends State<TextItemWidget> {
                     margin: EdgeInsets.only(left: 8),
                     child: NamedAvatar(
                       loading: false,
-                      name: 'Sabbir',
+                      name: widget.profile_name,
+                      image: widget.profile_image,
                       size: 36.w,
                     ),
                   ),
