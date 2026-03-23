@@ -1,3 +1,4 @@
+import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/text.dart';
 
 /// Emitted when a remote user starts typing in a conversation.
@@ -42,4 +43,24 @@ class MessageSeenEvent {
     required this.user_id,
     required this.text_ids,
   });
+}
+
+/// Emitted when a new conversation is created.
+class NewConversationEvent {
+  final String conversation_id;
+  final ConversationType type;
+
+  const NewConversationEvent({
+    required this.conversation_id,
+    required this.type,
+  });
+
+  factory NewConversationEvent.fromJson(Map<String, dynamic> json) {
+    return NewConversationEvent(
+      conversation_id: json['conversation_id'],
+      type: json['type'] == 'Group'
+          ? ConversationType.Group
+          : ConversationType.Single,
+    );
+  }
 }

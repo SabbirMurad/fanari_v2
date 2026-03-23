@@ -908,11 +908,17 @@ class _CommentInputWidgetState extends ConsumerState<CommentInputWidget> {
   }
 
   Widget _buildTypingIndicator() {
-    return Padding(
-      padding: EdgeInsets.only(left: 20.w, bottom: 12.w),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.w),
+      margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 12.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             widget.typing_name == null

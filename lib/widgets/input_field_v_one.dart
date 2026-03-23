@@ -102,7 +102,9 @@ class _InputFieldVOneState extends State<InputFieldVOne> {
                     borderSide: BorderSide(color: AppColors.text, width: 1),
                   ),
               labelStyle: TextStyle(color: AppColors.text, fontSize: 16.sp),
-              hintStyle: widget.hintStyle,
+              hintStyle:
+                  widget.hintStyle ??
+                  TextStyle(color: AppColors.text, fontSize: 16.sp),
             ),
             style: TextStyle(color: AppColors.text, fontSize: 16.sp),
           ),

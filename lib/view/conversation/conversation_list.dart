@@ -4,7 +4,8 @@ import 'package:fanari_v2/provider/conversation.dart';
 import 'package:fanari_v2/routes.dart';
 import 'package:fanari_v2/socket/socket.dart';
 import 'package:fanari_v2/view/conversation/chat_texts.dart';
-import 'package:fanari_v2/view/conversation/create_group_members.dart';
+import 'package:fanari_v2/view/conversation/group/create_group_members.dart';
+import 'package:fanari_v2/view/conversation/single/create_single_search.dart';
 import 'package:fanari_v2/view/conversation/widgets/conversation_item.dart';
 import 'package:fanari_v2/view/conversation/widgets/horizontal_options.dart';
 import 'package:fanari_v2/widgets/custom_svg.dart';
@@ -334,6 +335,8 @@ class _ConversationListScreenState
     );
   }
 
+  bool _plusOptionOpen = false;
+
   @override
   Widget build(BuildContext context) {
     final conversationsProvider = ref.watch(conversationNotifierProvider);
@@ -362,20 +365,20 @@ class _ConversationListScreenState
                         SafeArea(bottom: false, child: SizedBox(height: 12.h)),
                         _header(),
                         _searchWidget(),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              SizedBox(width: 20.w),
-                              _addNewChat(),
-                              ..._onlineMembers
-                                  .map((e) => _onlineAvatar(e))
-                                  .toList(),
-                              SizedBox(width: 20.w),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 24.h),
+                        // SingleChildScrollView(
+                        //   scrollDirection: Axis.horizontal,
+                        //   child: Row(
+                        //     children: [
+                        //       SizedBox(width: 20.w),
+                        //       _addNewChat(),
+                        //       ..._onlineMembers
+                        //           .map((e) => _onlineAvatar(e))
+                        //           .toList(),
+                        //       SizedBox(width: 20.w),
+                        //     ],
+                        //   ),
+                        // ),
+                        // SizedBox(height: 24.h),
                         HorizontalOptions(
                           options: _chatOptions,
                           selectedOption: _selectedOption,
@@ -462,37 +465,163 @@ class _ConversationListScreenState
               top: false,
               child: Align(
                 alignment: Alignment.bottomRight,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return CreateGroupMembers();
+                child: Container(
+                  margin: EdgeInsets.only(right: 24.w, bottom: 20.w),
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 272),
+                        height: _plusOptionOpen ? 48.w * 3 + (18.w * 2) : 0,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return CreateSingleSearch();
+                                      },
+                                    ),
+                                  );
+                                },
+                                behavior: HitTestBehavior.translucent,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Start new conversation',
+                                      style: TextStyle(
+                                        color: AppColors.text,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Color(0xff242424),
+                                            blurRadius: 20.w,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(
+                                          24.r,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: CustomSvg(
+                                          'assets/icons/user_plus.svg',
+                                          color: AppColors.text,
+                                          width: 24.w,
+                                          height: 24.w,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 18.w),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return CreateGroupMembers();
+                                      },
+                                    ),
+                                  );
+                                },
+                                behavior: HitTestBehavior.translucent,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Create new group',
+                                      style: TextStyle(
+                                        color: AppColors.text,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Color(0xff242424),
+                                            blurRadius: 20.w,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(
+                                          24.r,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: CustomSvg(
+                                          'assets/icons/multiple_user.svg',
+                                          color: AppColors.text,
+                                          width: 24.w,
+                                          height: 24.w,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _plusOptionOpen = !_plusOptionOpen;
+                          });
                         },
+                        child: AnimatedContainer(
+                          duration: Duration(milliseconds: 272),
+                          width: 48.w,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            color: _plusOptionOpen
+                                ? AppColors.secondary
+                                : AppColors.primary,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(24.r),
+                              topRight: Radius.circular(24.r),
+                              bottomLeft: Radius.circular(24.r),
+                              bottomRight: Radius.circular(6.r),
+                            ),
+                          ),
+                          child: Center(
+                            child: _plusOptionOpen
+                                ? Icon(
+                                    Icons.close,
+                                    color: AppColors.text,
+                                    size: 20.w,
+                                  )
+                                : CustomSvg(
+                                    'assets/icons/chat_add.svg',
+                                    color: AppColors.text,
+                                    width: 24.w,
+                                    height: 24.w,
+                                  ),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  child: Container(
-                    width: 48.w,
-                    height: 48.w,
-                    margin: EdgeInsets.only(right: 24.w, bottom: 20.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24.r),
-                        topRight: Radius.circular(24.r),
-                        bottomLeft: Radius.circular(24.r),
-                        bottomRight: Radius.circular(6.r),
-                      ),
-                    ),
-                    child: Center(
-                      child: CustomSvg(
-                        'assets/icons/chat_add.svg',
-                        color: AppColors.text,
-                        width: 24.w,
-                        height: 24.w,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:fanari_v2/constants/local_storage.dart';
 import 'package:fanari_v2/model/conversation.dart';
 import 'package:fanari_v2/model/prepared_image.dart';
@@ -317,16 +318,20 @@ class ConversationNotifier extends _$ConversationNotifier {
     }
   }
 
-  Future<void> add_new_conversation(String conversation_id) async {
+  Future<void> add_new_conversation(NewConversationEvent event) async {
     // Don't add if already exists
     final existing = state.value ?? [];
-    if (existing.any((c) => c.core.uuid == conversation_id)) return;
+    if (existing.any((c) => c.core.uuid == event.conversation_id)) return;
 
     final response = await utils.CustomHttp.get(
-      endpoint: '/conversation/single/${conversation_id}',
+      endpoint:
+          '/conversation/${event.type == ConversationType.Group ? 'group' : 'single'}/${event.conversation_id}',
     );
 
-    if (!response.ok) return;
+    if (!response.ok) {
+      printLine('Failed to get conversation ${event.conversation_id}');
+      return;
+    }
 
     final my_id = await LocalStorage.user_id.get();
     final conv = ConversationModel.fromJson(response.data, my_id: my_id!);

@@ -83,8 +83,8 @@ class SocketListener extends _$SocketListener {
 
     // ── New conversation ──────────────────────────────────────────────────────
     _subs.add(
-      socket.new_conversation_events.listen((conversation_id) {
-        conv_notifier.add_new_conversation(conversation_id);
+      socket.new_conversation_events.listen((new_conversation) {
+        conv_notifier.add_new_conversation(new_conversation);
       }),
     );
 
