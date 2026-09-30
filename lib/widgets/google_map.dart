@@ -298,9 +298,9 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           height: height,
           padding: padding ?? EdgeInsets.zero,
           decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             border: Border.all(
-              color: AppColors.white.withValues(alpha: 0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1.w,
             ),
             borderRadius: borderRadius ?? BorderRadius.circular(20.r),
@@ -337,7 +337,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                 height: 36.w,
                 child: Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: AppColors.text,
+                  color: Color(0xFFF9F9F9),
                   size: 14.w,
                 ),
               ),
@@ -367,13 +367,13 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                       _searchIcon(),
                       width: 20.w,
                       height: 20.w,
-                      color: AppColors.text.withValues(alpha: 0.6),
+                      color: Color(0xFFF9F9F9).withValues(alpha: 0.6),
                     ),
                     SizedBox(width: 12.w),
                     Text(
                       'Search ...',
                       style: TextStyle(
-                        color: AppColors.text.withValues(alpha: 0.6),
+                        color: Color(0xFFF9F9F9).withValues(alpha: 0.6),
                         fontSize: 14.sp,
                       ),
                     ),
@@ -907,7 +907,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               onTap: () {
                 _removeHistoryItem(item);
               },
-              child: Icon(Icons.close, color: AppColors.hintText, size: 20.w),
+              child: Icon(Icons.close, color: Color(0xFF707070), size: 20.w),
             ),
           ],
         ),
@@ -1008,7 +1008,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               ),
               child: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: AppColors.text,
+                color: Color(0xFFF9F9F9),
                 size: 14.w,
               ),
             ),
@@ -1029,7 +1029,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                     _searchIcon(),
                     width: 20.w,
                     height: 20.w,
-                    color: AppColors.text.withValues(alpha: 0.6),
+                    color: Color(0xFFF9F9F9).withValues(alpha: 0.6),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
@@ -1039,10 +1039,13 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                       },
                       controller: _searchController,
                       focusNode: _searchFocusNode,
-                      style: TextStyle(color: AppColors.text, fontSize: 14.sp),
+                      style: TextStyle(
+                        color: Color(0xFFF9F9F9),
+                        fontSize: 14.sp,
+                      ),
                       decoration: InputDecoration(
                         hintStyle: TextStyle(
-                          color: AppColors.text.withValues(alpha: 0.6),
+                          color: Color(0xFFF9F9F9).withValues(alpha: 0.6),
                           fontSize: 13.sp,
                         ),
                         isDense: true,
@@ -1067,7 +1070,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
               ),
-              child: Icon(Icons.close, color: AppColors.text, size: 14.w),
+              child: Icon(Icons.close, color: Color(0xFFF9F9F9), size: 14.w),
             ),
           ),
         ],
@@ -1151,7 +1154,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: AppColors.surface,
+        color: Color(0xFF181818),
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: SingleChildScrollView(
           child: Column(
@@ -1173,7 +1176,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                       Text(
                         'History',
                         style: TextStyle(
-                          color: AppColors.text,
+                          color: Color(0xFFF9F9F9),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                         ),

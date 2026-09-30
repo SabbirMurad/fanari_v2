@@ -32,6 +32,7 @@ class CustomHttp {
     bool show_floating_error = true,
     bool add_api_prefix = true,
     bool need_auth = true,
+    int version = 1,
     Map<String, String>? headers,
     Map<String, dynamic>? queries,
   }) async {
@@ -56,7 +57,7 @@ class CustomHttp {
         );
       }
 
-      final prefix = add_api_prefix ? '/api' : '';
+      final prefix = add_api_prefix ? '/api/v$version' : '';
       final url = _build_url(
         '${AppCredentials.domain}$prefix$endpoint',
         queries,
@@ -78,6 +79,7 @@ class CustomHttp {
   static Future<CustomHttpResult> post({
     required String endpoint,
     bool add_api_prefix = true,
+    int version = 1,
     Map<String, String>? headers,
     dynamic body,
     bool show_floating_error = true,
@@ -88,6 +90,7 @@ class CustomHttp {
       method: _HttpMethod.post,
       endpoint: endpoint,
       add_api_prefix: add_api_prefix,
+      version: version,
       headers: headers,
       body: body,
       show_floating_error: show_floating_error,
@@ -99,6 +102,7 @@ class CustomHttp {
   static Future<CustomHttpResult> put({
     required String endpoint,
     required bool add_api_prefix,
+    int version = 1,
     Map<String, String>? headers,
     dynamic body,
     bool show_floating_error = true,
@@ -109,6 +113,7 @@ class CustomHttp {
       method: _HttpMethod.put,
       endpoint: endpoint,
       add_api_prefix: add_api_prefix,
+      version: version,
       headers: headers,
       body: body,
       show_floating_error: show_floating_error,
@@ -120,6 +125,7 @@ class CustomHttp {
   static Future<CustomHttpResult> patch({
     required String endpoint,
     bool add_api_prefix = true,
+    int version = 1,
     Map<String, String>? headers,
     dynamic body,
     bool show_floating_error = true,
@@ -130,6 +136,7 @@ class CustomHttp {
       method: _HttpMethod.patch,
       endpoint: endpoint,
       add_api_prefix: add_api_prefix,
+      version: version,
       headers: headers,
       body: body,
       show_floating_error: show_floating_error,
@@ -144,6 +151,7 @@ class CustomHttp {
     required _HttpMethod method,
     required String endpoint,
     required bool add_api_prefix,
+    int version = 1,
     Map<String, String>? headers,
     dynamic body,
     required bool show_floating_error,
@@ -171,7 +179,7 @@ class CustomHttp {
         );
       }
 
-      final prefix = add_api_prefix ? '/api' : '';
+      final prefix = add_api_prefix ? '/api/v$version' : '';
       final url = _build_url(
         '${AppCredentials.domain}$prefix$endpoint',
         queries,
